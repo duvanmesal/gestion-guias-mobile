@@ -1,0 +1,7 @@
+{
+  "name": "gestion-guias-mobile-1",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
