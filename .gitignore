@@ -12,6 +12,7 @@
 /dist
 
 # misc
+.env
 .DS_Store
 .env.local
 .env.development.local
@@ -29,3 +30,5 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
+
+gestion-guias-mobile-1.zip
