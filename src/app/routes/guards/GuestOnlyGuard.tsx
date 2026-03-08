@@ -2,21 +2,23 @@ import React from "react";
 import { Redirect } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
+import { resolveAppEntry } from "../access";
 
-interface AuthGuardProps {
+interface GuestOnlyGuardProps {
   children: React.ReactNode;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
+const GuestOnlyGuard: React.FC<GuestOnlyGuardProps> = ({ children }) => {
   const status = useSessionStore((s) => s.status);
+  const user = useSessionStore((s) => s.user);
 
   if (status === "loading") return <LoadingScreen />;
 
-  if (status !== "authed") {
-    return <Redirect to="/login" />;
+  if (status === "guest") {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Redirect to={resolveAppEntry({ status, user })} />;
 };
 
-export default AuthGuard;
+export default GuestOnlyGuard;

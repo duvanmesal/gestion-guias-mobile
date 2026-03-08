@@ -19,6 +19,13 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+export interface LogoutAllRequest {
+  verification: {
+    method: "password";
+    password: string;
+  };
+}
+
 export function login(payload: LoginRequest): Promise<ApiResult<LoginResponse>> {
   return request<LoginResponse>("/auth/login", {
     method: "POST",
@@ -42,9 +49,10 @@ export function logout(): Promise<ApiResult<void>> {
   });
 }
 
-export function logoutAll(): Promise<ApiResult<void>> {
+export function logoutAll(payload: LogoutAllRequest): Promise<ApiResult<void>> {
   return authRequest<void>("/auth/logout-all", {
     method: "POST",
+    body: payload,
     headers: { ...PLATFORM_HEADER },
   });
 }
@@ -81,7 +89,6 @@ export function changePassword(
   return authRequest<{ message: string }>("/auth/change-password", {
     method: "POST",
     body: payload,
-    headers: {
-      ...PLATFORM_HEADER },
+    headers: { ...PLATFORM_HEADER },
   });
 }

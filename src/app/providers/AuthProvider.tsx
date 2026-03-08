@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSessionStore } from "../../core/auth/sessionStore";
 import { tokenService } from "../../core/auth/tokenService";
 import { refreshAccessToken } from "../../core/http/refresh";
+import { expireSessionAndRedirect } from "../../core/auth/sessionLifecycle";
 import * as userApi from "../../features/users/data/users.api";
 import { mapUserMeToSessionUser } from "../../features/users/data/users.mappers";
 import LoadingScreen from "../../ui/components/LoadingScreen";
@@ -19,18 +20,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         const rt = await tokenService.getRefreshToken();
 
         if (!rt) {
-          if (!cancelled) useSessionStore.getState().setGuest();
+          if (!cancelled) {
+            useSessionStore.getState().setGuest();
+          }
           return;
         }
 
         const newAccessToken = await refreshAccessToken();
 
         if (!newAccessToken) {
-          await tokenService.clearRefreshToken();
-          useSessionStore.getState().hardLogout();
-
           if (!cancelled) {
-            useSessionStore.getState().setGuest();
+            await expireSessionAndRedirect();
           }
           return;
         }
@@ -38,11 +38,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         const meRes = await userApi.getMe();
 
         if (!meRes.ok) {
-          await tokenService.clearRefreshToken();
-          useSessionStore.getState().hardLogout();
-
           if (!cancelled) {
-            useSessionStore.getState().setGuest();
+            await expireSessionAndRedirect();
           }
           return;
         }
@@ -56,11 +53,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           accessToken: newAccessToken,
         });
       } catch {
-        await tokenService.clearRefreshToken();
-        useSessionStore.getState().hardLogout();
-
         if (!cancelled) {
-          useSessionStore.getState().setGuest();
+          await expireSessionAndRedirect();
         }
       }
     };

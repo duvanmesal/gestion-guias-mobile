@@ -1,3 +1,4 @@
+import React from "react";
 import { Redirect, Route } from "react-router-dom";
 import { IonRouterOutlet } from "@ionic/react";
 import { useSessionStore } from "../../core/auth/sessionStore";
@@ -6,80 +7,52 @@ import LoginPage from "../../features/auth/pages/LoginPage";
 import VerifyEmailPage from "../../features/auth/pages/VerifyEmailPage";
 import OnboardingPage from "../../features/users/pages/OnboardingPage";
 import ProfilePage from "../../features/users/pages/ProfilePage";
-import LoadingScreen from "../../ui/components/LoadingScreen";
 
-const ProtectedRoute: React.FC<{
-  path: string;
-  exact?: boolean;
-  children: React.ReactNode;
-}> = ({ path, exact, children }) => {
-  const status = useSessionStore((s) => s.status);
-
-  return (
-    <Route
-      path={path}
-      exact={exact}
-      render={({ location }) => {
-        if (status === "loading") return <LoadingScreen />;
-        if (status !== "authed") {
-          return <Redirect to={{ pathname: "/login", state: { from: location } }} />;
-        }
-        return <>{children}</>;
-      }}
-    />
-  );
-};
+import GuestOnlyGuard from "./guards/GuestOnlyGuard";
+import VerifyEmailGuard from "./guards/VerifyEmailGuard";
+import OnboardingGuard from "./guards/OnboardingGuard";
+import AppReadyGuard from "./guards/AppReadyGuard";
+import { resolveAppEntry } from "./access";
 
 const AppRoutes: React.FC = () => {
   const status = useSessionStore((s) => s.status);
   const user = useSessionStore((s) => s.user);
 
-  const emailVerified = !!user?.emailVerifiedAt;
-  const profileStatus = user?.profileStatus;
+  const entry = resolveAppEntry({ status, user });
 
   return (
     <IonRouterOutlet>
       <Route path="/login" exact>
-        {status === "authed" ? <Redirect to="/" /> : <LoginPage />}
+        <GuestOnlyGuard>
+          <LoginPage />
+        </GuestOnlyGuard>
       </Route>
 
-      <ProtectedRoute path="/verify-email" exact>
-        {emailVerified ? (
-          profileStatus === "INCOMPLETE" ? <Redirect to="/onboarding" /> : <Redirect to="/" />
-        ) : (
+      <Route path="/verify-email" exact>
+        <VerifyEmailGuard>
           <VerifyEmailPage />
-        )}
-      </ProtectedRoute>
+        </VerifyEmailGuard>
+      </Route>
 
-      <ProtectedRoute path="/onboarding" exact>
-        {!emailVerified ? (
-          <Redirect to="/verify-email" />
-        ) : profileStatus === "COMPLETE" ? (
-          <Redirect to="/" />
-        ) : (
+      <Route path="/onboarding" exact>
+        <OnboardingGuard>
           <OnboardingPage />
-        )}
-      </ProtectedRoute>
+        </OnboardingGuard>
+      </Route>
 
-      <ProtectedRoute path="/profile" exact>
-        {!emailVerified ? (
-          <Redirect to="/verify-email" />
-        ) : profileStatus === "INCOMPLETE" ? (
-          <Redirect to="/onboarding" />
-        ) : (
+      <Route path="/profile" exact>
+        <AppReadyGuard>
           <ProfilePage />
-        )}
-      </ProtectedRoute>
+        </AppReadyGuard>
+      </Route>
 
-      <ProtectedRoute path="/" exact>
-        {!emailVerified ? (
-          <Redirect to="/verify-email" />
-        ) : profileStatus === "INCOMPLETE" ? (
-          <Redirect to="/onboarding" />
-        ) : (
-          <Redirect to="/profile" />
-        )}
-      </ProtectedRoute>
+      <Route path="/" exact>
+        <Redirect to={entry} />
+      </Route>
+
+      <Route>
+        <Redirect to={entry} />
+      </Route>
     </IonRouterOutlet>
   );
 };

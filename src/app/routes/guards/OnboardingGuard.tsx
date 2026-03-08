@@ -1,5 +1,8 @@
+import React from "react";
 import { Redirect } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
+import LoadingScreen from "../../../ui/components/LoadingScreen";
+import { getAccessRedirect } from "../access";
 
 interface OnboardingGuardProps {
   children: React.ReactNode;
@@ -7,10 +10,16 @@ interface OnboardingGuardProps {
 
 const OnboardingGuard: React.FC<OnboardingGuardProps> = ({ children }) => {
   const status = useSessionStore((s) => s.status);
-  const profileStatus = useSessionStore((s) => s.user?.profileStatus);
+  const user = useSessionStore((s) => s.user);
 
-  if (status !== "authed") return <>{children}</>;
-  if (profileStatus === "INCOMPLETE") return <Redirect to="/onboarding" />;
+  if (status === "loading") return <LoadingScreen />;
+
+  const redirectTo = getAccessRedirect("/onboarding", { status, user });
+
+  if (redirectTo) {
+    return <Redirect to={redirectTo} />;
+  }
+
   return <>{children}</>;
 };
 

@@ -2,12 +2,18 @@ import { IonPage, IonContent, IonHeader, IonToolbar, IonTitle } from "@ionic/rea
 import { useHistory } from "react-router-dom";
 import { useLogin } from "../hooks/useLogin";
 import LoginForm from "../components/LoginForm";
+import { useSessionStore } from "../../../core/auth/sessionStore";
 
 const LoginPage: React.FC = () => {
   const history = useHistory();
   const login = useLogin();
 
+  const authNotice = useSessionStore((s) => s.authNotice);
+  const clearAuthNotice = useSessionStore((s) => s.clearAuthNotice);
+
   const handleSubmit = (values: { email: string; password: string }) => {
+    clearAuthNotice();
+
     login.mutate(values, {
       onSuccess: ({ emailVerified, profileStatus }) => {
         if (!emailVerified) {
@@ -39,6 +45,7 @@ const LoginPage: React.FC = () => {
             onSubmit={handleSubmit}
             isLoading={login.isPending}
             error={login.error?.message ?? null}
+            notice={authNotice}
           />
         </div>
       </IonContent>

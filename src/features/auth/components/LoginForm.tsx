@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IonInput, IonButton, IonText, IonItem, IonList } from "@ionic/react";
+import type { AuthNotice } from "../../../core/auth/types";
 
 const schema = z.object({
   email: z.string().email("Email is required"),
@@ -14,9 +15,15 @@ interface LoginFormProps {
   onSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   error?: string | null;
+  notice?: AuthNotice | null;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => {
+const LoginForm: React.FC<LoginFormProps> = ({
+  onSubmit,
+  isLoading,
+  error,
+  notice,
+}) => {
   const {
     handleSubmit,
     setValue,
@@ -25,6 +32,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
+
+  const noticeColor =
+    notice?.kind === "success"
+      ? "success"
+      : notice?.kind === "warning"
+      ? "warning"
+      : notice?.kind === "danger"
+      ? "danger"
+      : "medium";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -59,6 +75,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
           </IonText>
         )}
       </IonList>
+
+      {notice && !error && (
+        <IonText color={noticeColor}>
+          <p style={{ textAlign: "center", fontSize: 14 }}>{notice.message}</p>
+        </IonText>
+      )}
 
       {error && (
         <IonText color="danger">

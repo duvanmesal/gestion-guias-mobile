@@ -1,6 +1,9 @@
+import React from "react";
 import { Redirect } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import type { Role } from "../../../core/auth/types";
+import LoadingScreen from "../../../ui/components/LoadingScreen";
+import { canAccessRole, resolveAppEntry } from "../access";
 
 interface RoleGuardProps {
   allowed: Role[];
@@ -9,10 +12,16 @@ interface RoleGuardProps {
 
 const RoleGuard: React.FC<RoleGuardProps> = ({ allowed, children }) => {
   const status = useSessionStore((s) => s.status);
-  const role = useSessionStore((s) => s.user?.role);
+  const user = useSessionStore((s) => s.user);
 
-  if (status !== "authed") return <Redirect to="/login" />;
-  if (!role || !allowed.includes(role)) return <Redirect to="/" />;
+  if (status === "loading") return <LoadingScreen />;
+
+  const snapshot = { status, user };
+
+  if (!canAccessRole(snapshot, allowed)) {
+    return <Redirect to={resolveAppEntry(snapshot)} />;
+  }
+
   return <>{children}</>;
 };
 

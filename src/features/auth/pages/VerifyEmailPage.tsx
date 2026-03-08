@@ -94,7 +94,7 @@ const VerifyEmailPage: React.FC = () => {
         return;
       }
 
-      history.replace("/");
+      history.replace("/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al verificar email");
     } finally {
@@ -124,7 +124,9 @@ const VerifyEmailPage: React.FC = () => {
                   inputmode="numeric"
                   maxlength={6}
                   value={code}
-                  onIonInput={(e) => setCode((e.detail.value ?? "").replace(/\D/g, "").slice(0, 6))}
+                  onIonInput={(e) =>
+                    setCode((e.detail.value ?? "").replace(/\D/g, "").slice(0, 6))
+                  }
                   placeholder="123456"
                 />
               </IonItem>

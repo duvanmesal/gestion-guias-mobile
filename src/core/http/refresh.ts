@@ -25,7 +25,10 @@ export async function refreshAccessToken(): Promise<string | null> {
     const { accessToken, refreshToken } = res.data.tokens;
 
     useSessionStore.getState().setAccessToken(accessToken);
-    if (refreshToken) await tokenService.setRefreshToken(refreshToken);
+
+    if (refreshToken) {
+      await tokenService.setRefreshToken(refreshToken);
+    }
 
     return accessToken;
   })();

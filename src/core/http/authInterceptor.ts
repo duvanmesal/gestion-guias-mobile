@@ -1,7 +1,20 @@
 import { useSessionStore } from "../auth/sessionStore";
+import { expireSessionAndRedirect } from "../auth/sessionLifecycle";
 import { refreshAccessToken } from "./refresh";
 import { request } from "./apiClient";
 import type { ApiRequestOptions, ApiResult } from "./types";
+
+let forcedLogoutInFlight: Promise<void> | null = null;
+
+async function runForcedLogoutOnce(): Promise<void> {
+  if (!forcedLogoutInFlight) {
+    forcedLogoutInFlight = expireSessionAndRedirect().finally(() => {
+      forcedLogoutInFlight = null;
+    });
+  }
+
+  await forcedLogoutInFlight;
+}
 
 export async function authRequest<T>(
   path: string,
@@ -16,15 +29,38 @@ export async function authRequest<T>(
 
   if (res.ok) return res;
 
-  // si no es 401, no hay retry
   if (res.error.status !== 401) return res;
 
-  // 401 -> intenta refresh una vez
   const newToken = await refreshAccessToken();
-  if (!newToken) return res;
+
+  if (!newToken) {
+    await runForcedLogoutOnce();
+    return {
+      ok: false,
+      error: {
+        status: 401,
+        code: "SESSION_EXPIRED",
+        message: "Tu sesión expiró. Inicia sesión nuevamente.",
+      },
+    };
+  }
 
   const retryHeaders: Record<string, string> = { ...(opts.headers ?? {}) };
   retryHeaders.Authorization = `Bearer ${newToken}`;
 
-  return request<T>(path, { ...opts, headers: retryHeaders });
+  const retryRes = await request<T>(path, { ...opts, headers: retryHeaders });
+
+  if (!retryRes.ok && retryRes.error.status === 401) {
+    await runForcedLogoutOnce();
+    return {
+      ok: false,
+      error: {
+        status: 401,
+        code: "SESSION_EXPIRED",
+        message: "Tu sesión expiró. Inicia sesión nuevamente.",
+      },
+    };
+  }
+
+  return retryRes;
 }
