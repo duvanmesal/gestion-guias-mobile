@@ -1,6 +1,10 @@
-import type { Role, ProfileStatus } from "../../../core/auth/types";
+import type {
+  Role,
+  ProfileStatus,
+  UserDocumentType,
+} from "../../../core/auth/types";
 
-export type DocumentType = "CC" | "CE" | "PASSPORT" | "TI";
+export type DocumentType = UserDocumentType;
 
 export interface UpdateProfileRequest {
   nombres: string;
@@ -23,12 +27,18 @@ export interface GuideLookupItem {
 export interface UserMeResponse {
   id: string;
   nombre?: string;
+  nombres?: string;
   apellido?: string;
+  apellidos?: string;
   email?: string;
   telefono?: string | null;
   documento?: string | null;
-  role: Role;
+  documentType?: UserDocumentType | null;
+  documentNumber?: string | null;
+  rol?: Role;
+  role?: Role;
   profileStatus: ProfileStatus;
+  profileCompletedAt?: string | null;
   emailVerifiedAt?: string | null;
   activo?: boolean;
 }

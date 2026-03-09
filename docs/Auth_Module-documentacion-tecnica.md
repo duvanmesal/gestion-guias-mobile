@@ -2,87 +2,153 @@
 
 ## 1. Objetivo
 
-El módulo **Auth** en la app móvil tiene como responsabilidad gestionar el ciclo completo de autenticación, autorización básica de acceso y continuidad de sesión del usuario.
+El módulo **Auth** en la app móvil es responsable de controlar el **ciclo de autenticación y sesión** del usuario de extremo a extremo.
 
-Este módulo no solo cubre el **inicio de sesión**, sino también todo el recorrido posterior:
+Su función no se limita al login. Auth también gobierna:
 
-* Login con credenciales + `deviceId`
-* Persistencia segura del **refreshToken**
-* Manejo del **accessToken** en memoria usando Zustand
-* Recuperación de sesión al iniciar la app
-* Renovación automática del access token
-* Consumo de endpoints protegidos mediante interceptor
-* Verificación de email por código
-* Redirección a onboarding si el perfil está incompleto
-* Protección de rutas según estado real de sesión
-* Logout manual
-* Logout global en todos los dispositivos
-* Manejo de sesión expirada o no recuperable
-* Limpieza coherente de estado local, storage seguro y cache
+* el arranque de sesión al abrir la app
+* la recuperación de sesión usando refresh token
+* la renovación automática del access token
+* la verificación de email dentro del flujo mobile
+* la resolución del estado funcional del usuario para navegación
+* la protección de rutas según la etapa real de acceso
+* el cierre de sesión local y global
+* la expiración controlada de sesión
+* la limpieza coherente del estado autenticado, storage y cache
 
-En términos funcionales, el módulo asegura que el usuario:
+En términos de negocio, Auth garantiza que el usuario:
 
-* entre solo cuando corresponde,
-* vea la pantalla correcta según su estado,
-* no acceda manualmente a rutas inválidas,
-* y salga de forma limpia cuando su sesión termina.
+* entre solo cuando realmente corresponde
+* pase por verificación antes de acceder a módulos internos
+* no quede “medio autenticado” con estado inconsistente
+* no navegue manualmente a rutas que no le corresponden
+* salga de forma limpia y controlada cuando la sesión termina o expira
 
 ---
 
 ## 2. Alcance del módulo
 
-El módulo Auth Mobile cubre estas decisiones de negocio y técnicas:
+## 2.1 Qué sí pertenece a Auth
 
-### 2.1 Entrada a sesión
+El módulo Auth Mobile cubre estas responsabilidades:
 
-* autenticación con email + contraseña
-* identificación del dispositivo mediante `deviceId`
-* almacenamiento del refresh token
-* resolución de estado inicial del usuario autenticado
+### Entrada a sesión
 
-### 2.2 Continuidad de sesión
+* login con email + contraseña
+* identificación del cliente por `deviceId`
+* envío de `X-Client-Platform: MOBILE`
+* lectura y persistencia del refresh token
+* guardado del access token solo en memoria
+* carga del usuario autenticado para poblar el store global
 
-* lectura del refresh token al iniciar la app
-* obtención de nuevo access token vía `/auth/refresh`
-* consulta de `/users/me` para hidratar el store de sesión
-* reintento automático si un endpoint protegido responde `401`
+### Continuidad de sesión
 
-### 2.3 Estado funcional del usuario
+* bootstrap al abrir la app
+* refresh automático del access token
+* reintento de requests protegidas cuando ocurre `401`
+* invalidación de sesión no recuperable
 
-* usuario deslogueado
+### Estado funcional del acceso
+
+* usuario guest
 * usuario autenticado pero no verificado
-* usuario verificado pero con perfil incompleto
-* usuario listo para entrar al módulo interno real
+* usuario verificado con perfil aún incompleto
+* usuario listo para módulos internos
 
-### 2.4 Salida de sesión
+### Control de acceso y navegación
+
+* resolución de etapa de autenticación
+* redirección al entry correcto
+* guards por etapa
+* restricción por rol una vez el usuario está “ready”
+
+### Salida de sesión
 
 * logout de la sesión actual
 * logout de todas las sesiones
-* cierre forzado por expiración o invalidez del refresh token
-* limpieza de memoria, storage y cache
+* expiración forzada de sesión
+* limpieza de store, refresh token y React Query cache
+* mensajes visibles para UX mediante `authNotice`
 
 ---
 
-## 3. Estructura de archivos (paths reales)
+## 2.2 Qué no pertenece a Auth
 
-## 3.1 Providers
+Estos elementos **no forman parte del módulo Auth**, aunque se integren con él:
+
+* edición del perfil del usuario
+* onboarding de datos personales
+* pantalla de cuenta / perfil
+* catálogo de guías
+* actualización de `documentType`, `documentNumber`, teléfono, etc.
+
+Esos comportamientos pertenecen al **módulo Users**.
+
+Auth solo consume el resultado de esos procesos para decidir si el usuario puede o no avanzar.
+
+---
+
+## 3. Límite funcional entre Auth y Users
+
+La separación correcta queda así:
+
+### Auth es dueño de:
+
+* identidad
+* sesión
+* tokens
+* refresh
+* verify email
+* guards
+* routing por etapa
+* logout / logout-all / session-expired
+
+### Users es dueño de:
+
+* `GET /users/me` como fuente de verdad del usuario operativo
+* `PATCH /users/me/profile`
+* onboarding
+* cuenta / perfil
+* datos personales y completitud de perfil
+
+### Punto de integración clave
+
+Auth depende de `GET /users/me` para:
+
+* hidratar la sesión después del login
+* restaurar la sesión después del bootstrap
+* refrescar el usuario después de verificar email
+* decidir si el usuario está en etapa `unverified`, `onboarding` o `ready`
+
+---
+
+## 4. Estructura de archivos del módulo Auth
+
+## 4.1 Providers usados por Auth
 
 * `src/app/providers/AppProviders.tsx`
 * `src/app/providers/AuthProvider.tsx`
 * `src/app/providers/QueryProvider.tsx`
 
-## 3.2 Estado de sesión
+---
 
-* `src/core/auth/sessionStore.ts`
+## 4.2 Núcleo de sesión
+
 * `src/core/auth/types.ts`
+* `src/core/auth/sessionStore.ts`
 * `src/core/auth/tokenService.ts`
+* `src/core/auth/sessionLifecycle.ts`
 
-## 3.3 Persistencia segura
+---
+
+## 4.3 Persistencia segura
 
 * `src/core/storage/secureVault.ts`
 * `src/core/storage/keys.ts`
 
-## 3.4 HTTP Core
+---
+
+## 4.4 HTTP core usado por Auth
 
 * `src/core/http/apiClient.ts`
 * `src/core/http/types.ts`
@@ -92,14 +158,22 @@ El módulo Auth Mobile cubre estas decisiones de negocio y técnicas:
 * `src/core/http/errorNormalizer.ts`
 * `src/core/http/getErrorMessage.ts`
 
-## 3.5 Routing y guards
+---
+
+## 4.5 Routing y control de acceso
 
 * `src/app/routes/index.tsx`
+* `src/app/routes/access.ts`
+* `src/app/routes/guards/AppReadyGuard.tsx`
 * `src/app/routes/guards/AuthGuard.tsx`
+* `src/app/routes/guards/GuestOnlyGuard.tsx`
 * `src/app/routes/guards/OnboardingGuard.tsx`
+* `src/app/routes/guards/VerifyEmailGuard.tsx`
 * `src/app/routes/guards/RoleGuard.tsx`
 
-## 3.6 Feature Auth
+---
+
+## 4.6 Feature Auth
 
 * `src/features/auth/data/auth.api.ts`
 * `src/features/auth/data/auth.keys.ts`
@@ -111,93 +185,119 @@ El módulo Auth Mobile cubre estas decisiones de negocio y técnicas:
 * `src/features/auth/components/LoginForm.tsx`
 * `src/features/auth/types/auth.types.ts`
 
-## 3.7 Feature Users relacionada con el flujo Auth
+---
+
+## 4.7 Integraciones externas consumidas por Auth
+
+Aunque pertenecen a Users, Auth se integra con:
 
 * `src/features/users/data/users.api.ts`
-* `src/features/users/data/users.keys.ts`
 * `src/features/users/data/users.mappers.ts`
-* `src/features/users/hooks/useMe.ts`
-* `src/features/users/hooks/useUpdateProfile.ts`
-* `src/features/users/pages/OnboardingPage.tsx`
-* `src/features/users/pages/ProfilePage.tsx`
-* `src/features/users/components/OnboardingForm.tsx`
-* `src/features/users/components/ProfileCard.tsx`
-* `src/features/users/types/users.types.ts`
 
-## 3.8 UI base usada por Auth
+Concretamente para:
+
+* `getMe()`
+* `mapUserMeToSessionUser()`
+
+---
+
+## 4.8 UI base usada por Auth
 
 * `src/ui/components/LoadingScreen.tsx`
 * `src/ui/components/ErrorState.tsx`
 
 ---
 
-## 4. Arquitectura general del módulo
+## 5. Arquitectura general del módulo
 
-La arquitectura del módulo sigue una separación por responsabilidades:
+La arquitectura sigue una separación clara por responsabilidad.
 
-### 4.1 `pages`
+## 5.1 `pages`
 
-Representan pantallas completas y resuelven navegación.
+Representan pantallas completas del flujo de acceso.
 
 Ejemplos:
 
 * `LoginPage.tsx`
 * `VerifyEmailPage.tsx`
-* `OnboardingPage.tsx`
-* `ProfilePage.tsx`
 
-### 4.2 `components`
+---
+
+## 5.2 `components`
 
 Encapsulan UI reutilizable y lógica visual local.
 
-Ejemplos:
+Ejemplo:
 
 * `LoginForm.tsx`
-* `ProfileCard.tsx`
-* `OnboardingForm.tsx`
 
-### 4.3 `hooks`
+---
 
-Orquestan casos de uso del front usando React Query o lógica de integración.
+## 5.3 `hooks`
+
+Orquestan casos de uso del front.
 
 Ejemplos:
 
 * `useLogin()`
 * `useChangePassword()`
-* `useUpdateProfile()`
-* `useMe()`
-
-### 4.4 `data/*.api.ts`
-
-Define las funciones de acceso HTTP al backend.
-
-Ejemplos:
-
-* `auth.api.ts`
-* `users.api.ts`
-
-### 4.5 `mappers`
-
-Transforman DTOs del backend a estructuras internas del front.
-
-Ejemplos:
-
-* `mapMeToSessionUser`
-* `mapUserMeToSessionUser`
-
-### 4.6 `core/auth`
-
-Concentra el modelo global de sesión, token management y store.
-
-### 4.7 `core/http`
-
-Resuelve cliente HTTP, normalización de errores, envelope, interceptor y refresh.
 
 ---
 
-## 5. Modelo de estado de sesión
+## 5.4 `data/*.api.ts`
 
-## 5.1 `SessionStatus`
+Define funciones HTTP del módulo Auth.
+
+Ejemplos:
+
+* `login()`
+* `refresh()`
+* `logout()`
+* `logoutAll()`
+* `requestEmailVerification()`
+* `confirmEmailVerification()`
+* `changePassword()`
+
+---
+
+## 5.5 `mappers`
+
+Transforman DTOs del backend a estructuras internas del store.
+
+Ejemplo:
+
+* `mapMeToSessionUser()`
+
+---
+
+## 5.6 `core/auth`
+
+Concentra:
+
+* tipos de sesión
+* store global
+* token service
+* lifecycle de sesión
+* expiración controlada
+
+---
+
+## 5.7 `core/http`
+
+Resuelve:
+
+* request base
+* envelope unwrap
+* normalización de errores
+* refresh
+* retry protegido
+* forced logout si la sesión ya no es recuperable
+
+---
+
+## 6. Modelo de estado de sesión
+
+## 6.1 `SessionStatus`
 
 En `src/core/auth/types.ts`:
 
@@ -207,13 +307,38 @@ export type SessionStatus = "loading" | "guest" | "authed";
 
 ### Significado
 
-* `loading`: la app aún está resolviendo si existe una sesión recuperable
+* `loading`: la app aún está resolviendo si existe o no una sesión restaurable
 * `guest`: no hay sesión válida
-* `authed`: hay sesión autenticada en memoria
+* `authed`: existe sesión autenticada en memoria
 
 ---
 
-## 5.2 `SessionUser`
+## 6.2 `AuthNotice`
+
+El módulo Auth ahora incluye una señal de UX global para comunicar eventos de sesión.
+
+```ts
+export type AuthNoticeKind = "info" | "success" | "warning" | "danger";
+
+export interface AuthNotice {
+  kind: AuthNoticeKind;
+  message: string;
+}
+```
+
+### Propósito
+
+Permite mostrar mensajes consistentes al usuario desde el login o desde pantallas del flujo de acceso, por ejemplo:
+
+* sesión cerrada correctamente
+* sesión cerrada en todos los dispositivos
+* sesión expirada
+
+---
+
+## 6.3 `SessionUser`
+
+Actualmente el store conserva una versión resumida del usuario autenticado:
 
 ```ts
 export interface SessionUser {
@@ -227,33 +352,30 @@ export interface SessionUser {
 }
 ```
 
-### Propiedades relevantes para navegación
+### Campos funcionales más importantes
 
 * `emailVerifiedAt`
 
-  * si existe, el usuario se considera verificado
-  * si es `null`, debe pasar por verificación de email
-
+  * si es `null`, el usuario está autenticado pero no verificado
 * `profileStatus`
 
-  * `INCOMPLETE`: debe completar onboarding
-  * `COMPLETE`: ya puede entrar al módulo interno real
-
+  * si es `INCOMPLETE`, aún no puede entrar al módulo interno real
 * `role`
 
-  * habilita protecciones por rol usando `RoleGuard`
+  * permite restricciones por rol cuando el usuario ya está en etapa `ready`
 
 ---
 
-## 5.3 `SessionState`
+## 6.4 `SessionState`
 
-En `src/core/auth/types.ts` y `src/core/auth/sessionStore.ts`:
+El store global contiene:
 
 ### Estado
 
 * `status`
 * `user`
 * `accessToken`
+* `authNotice`
 
 ### Acciones
 
@@ -261,11 +383,13 @@ En `src/core/auth/types.ts` y `src/core/auth/sessionStore.ts`:
 * `setGuest()`
 * `setAuthedSession({ user, accessToken })`
 * `setAccessToken(token)`
+* `setAuthNotice(notice)`
+* `clearAuthNotice()`
 * `hardLogout()`
 
 ---
 
-## 5.4 Reglas de diseño del estado
+## 6.5 Reglas de diseño del estado
 
 ### Regla 1
 
@@ -277,30 +401,23 @@ El **refreshToken** vive persistido en storage seguro.
 
 ### Regla 3
 
-El store global representa la verdad actual de la sesión activa del cliente.
+El store representa la verdad actual de la sesión del cliente móvil.
 
 ### Regla 4
 
-La navegación nunca debe depender solo de “si hay token”, sino del binomio:
+La navegación no depende solo de “hay token”, sino de la etapa funcional real del usuario.
 
-* autenticación válida
-* estado funcional del usuario (`emailVerifiedAt`, `profileStatus`)
+### Regla 5
+
+Los mensajes transitorios del ciclo de sesión viajan por `authNotice`.
 
 ---
 
-## 6. Persistencia segura
+## 7. Persistencia segura
 
-## 6.1 `secureVault`
+## 7.1 `secureVault`
 
-En `src/core/storage/secureVault.ts` se usa `@capacitor/preferences`.
-
-Expone almacenamiento seguro y tolerante a fallo mediante `try/catch`.
-
-### Operaciones internas
-
-* `get(key)`
-* `set(key, value)`
-* `remove(key)`
+En `src/core/storage/secureVault.ts` se gestiona almacenamiento persistente del cliente.
 
 ### Datos persistidos
 
@@ -309,7 +426,7 @@ Expone almacenamiento seguro y tolerante a fallo mediante `try/catch`.
 
 ---
 
-## 6.2 Keys persistidas
+## 7.2 Keys persistidas
 
 En `src/core/storage/keys.ts`:
 
@@ -322,25 +439,26 @@ export const STORAGE_KEYS = {
 
 ---
 
-## 6.3 `deviceId`
+## 7.3 `deviceId`
 
 El `deviceId`:
 
-* se genera si no existe
+* se crea si no existe
 * se persiste localmente
 * se reutiliza entre logins del mismo dispositivo
-* sirve para que el backend identifique la sesión por dispositivo y plataforma
+* identifica la sesión móvil ante el backend
 
 ### Regla importante
 
 El `deviceId` **no se elimina al logout**.
-No representa autenticación, representa identidad del dispositivo.
+
+No representa autenticación. Representa identidad del dispositivo.
 
 ---
 
-## 6.4 `tokenService`
+## 7.4 `tokenService`
 
-En `src/core/auth/tokenService.ts` se expone una fachada simple:
+`src/core/auth/tokenService.ts` expone una fachada de uso simple:
 
 * `getRefreshToken()`
 * `setRefreshToken()`
@@ -350,13 +468,13 @@ En `src/core/auth/tokenService.ts` se expone una fachada simple:
 
 ### Propósito
 
-Evitar que el resto de la app acceda directamente a `secureVault` o al store.
+Evitar acceso directo del resto de la app a `secureVault` o al store.
 
 ---
 
-## 7. Contrato del backend y envelope HTTP
+## 8. Contrato HTTP y envelope del backend
 
-El backend responde con un envelope uniforme:
+El backend responde usando envelope uniforme.
 
 ```ts
 type ApiEnvelope<T> = {
@@ -373,95 +491,81 @@ type ApiEnvelope<T> = {
 
 ---
 
-## 7.1 Detección del envelope
+## 8.1 Detección del envelope
 
 En `src/core/http/apiEnvelope.ts`:
 
 * `ApiEnvelope<T>`
 * `isApiEnvelope(v)`
 
-Esto permite que la capa HTTP detecte si la respuesta vino envuelta en la estructura estándar del backend.
-
 ---
 
-## 7.2 Unwrap en `apiClient`
+## 8.2 `request<T>()` y unwrap
 
-En `src/core/http/apiClient.ts`:
+En `src/core/http/apiClient.ts`, el cliente HTTP:
 
-* si la respuesta viene envuelta, el cliente retorna solo `data`
-* si hay error envuelto, usa `json.error`
-* si la respuesta es vacía, maneja `204` o `content-length: 0`
-
-### Beneficio
-
-El front trabaja con:
-
-```ts
-ApiResult<T>
-```
-
-en lugar de tener que escribir:
-
-```ts
-res.data.data.tokens.accessToken
-```
-
----
-
-## 8. Capa HTTP y normalización de errores
-
-## 8.1 `request<T>()`
-
-En `src/core/http/apiClient.ts`, `request<T>()`:
-
-* construye URL usando `ENV.apiUrl`
-* aplica `Content-Type: application/json`
-* serializa body
-* parsea JSON
-* hace unwrap de envelope
-* normaliza errores de red y backend
+* construye URL
+* aplica headers
+* serializa body JSON
+* parsea respuesta
+* detecta envelope
+* desempaqueta `data`
+* normaliza errores
 * retorna `ApiResult<T>`
 
+Esto evita trabajar con estructuras anidadas innecesarias en cada llamada.
+
 ---
 
-## 8.2 `ApiResult<T>`
+## 8.3 `ApiResult<T>`
 
-La capa HTTP usa un resultado discriminado de forma segura:
+La capa HTTP trabaja con una unión discriminada segura:
 
 * `ok: true` con `data`
 * `ok: false` con `error`
 
-Esto evita acceder a propiedades inexistentes y permite control de flujo seguro.
+Esto fuerza a tratar errores de manera explícita.
 
 ---
 
-## 8.3 `normalizeError()`
+## 8.4 `normalizeError()`
 
-En `src/core/http/errorNormalizer.ts`:
-
-* convierte errores de red y objetos arbitrarios en un `ApiErrorNormalized`
-* asigna `status`, `code`, `message`, `details`
+`src/core/http/errorNormalizer.ts` convierte errores de red, backend y objetos arbitrarios a un formato homogéneo.
 
 ---
 
-## 8.4 `getErrorMessage()`
+## 8.5 `getErrorMessage()`
 
-En `src/core/http/getErrorMessage.ts`:
+`src/core/http/getErrorMessage.ts` extrae un mensaje usable desde distintos formatos de error.
 
-* extrae mensajes de `string`
-* `Error`
-* objetos con `message`
-* o usa un fallback
-
-### Beneficio
-
-La UI y los hooks pueden mostrar errores sin asumir una forma rígida del objeto.
+Esto permite que hooks y pages muestren mensajes estables sin asumir shapes frágiles.
 
 ---
 
-## 9. Tipos del módulo Auth
+## 9. Header de plataforma
 
-En `src/features/auth/types/auth.types.ts` se modelan las respuestas y requests del módulo.
+Todas las llamadas relevantes del módulo Auth usan:
+
+```ts
+{ "X-Client-Platform": "MOBILE" }
+```
+
+### Propósito
+
+Permitir que el backend adapte comportamiento según cliente.
+
+Esto es especialmente importante para:
+
+* sesiones por dispositivo
+* refresh mobile
+* verificación de email para mobile
+* logout contextual por plataforma
+
+---
+
+## 10. Tipos del módulo Auth
+
+En `src/features/auth/types/auth.types.ts` se definen los contratos del módulo.
 
 ### Principales tipos
 
@@ -478,7 +582,7 @@ En `src/features/auth/types/auth.types.ts` se modelan las respuestas y requests 
 
 ---
 
-## 9.1 `TokensDTO`
+## 10.1 `TokensDTO`
 
 ```ts
 export interface TokensDTO {
@@ -491,25 +595,29 @@ export interface TokensDTO {
 
 ### Regla clave
 
-Los tokens vienen en:
+Los tokens vienen dentro de:
 
-* `tokens.accessToken`
-* `tokens.refreshToken`
+* `data.tokens.accessToken`
+* `data.tokens.refreshToken`
 
 No vienen top-level.
 
-Ese detalle fue crítico para resolver errores previos de autenticación.
+---
+
+## 10.2 `MeUserDTO`
+
+El módulo Auth aún conserva un DTO resumido del usuario autenticado para `/auth/me`, aunque en el flujo móvil actual la fuente operativa real es `GET /users/me`.
 
 ---
 
-## 10. API functions del módulo Auth
+## 11. API functions del módulo Auth
 
 En `src/features/auth/data/auth.api.ts`:
 
 * `login(payload)` → `POST /auth/login`
 * `refresh(payload)` → `POST /auth/refresh`
 * `logout()` → `POST /auth/logout`
-* `logoutAll()` → `POST /auth/logout-all`
+* `logoutAll(payload)` → `POST /auth/logout-all`
 * `me()` → `GET /auth/me`
 * `requestEmailVerification(payload)` → `POST /auth/verify-email/request`
 * `confirmEmailVerification(payload)` → `POST /auth/verify-email/confirm`
@@ -517,230 +625,125 @@ En `src/features/auth/data/auth.api.ts`:
 
 ---
 
-## 10.1 Header de plataforma
-
-Todas las llamadas relevantes incluyen:
-
-```ts
-{ "X-Client-Platform": "MOBILE" }
-```
-
-### Propósito
-
-Permite al backend adaptar comportamiento por cliente.
-
-Ejemplos:
-
-* refresh token por body en mobile
-* sesiones por dispositivo
-* verificación de email específica para mobile
-* reglas distintas a web
-
----
-
-## 10.2 Diferencia entre `request()` y `authRequest()`
+## 11.1 `request()` vs `authRequest()`
 
 ### `request()`
 
-Se usa cuando no se necesita `Authorization`.
+Se usa cuando no se requiere `Authorization`.
 
 Ejemplos:
 
 * login
 * refresh
-* request email verification
-* confirm email verification
+* request verify email
+* confirm verify email
 
 ### `authRequest()`
 
-Se usa cuando el endpoint requiere usuario autenticado.
+Se usa cuando el endpoint requiere sesión autenticada.
 
 Ejemplos:
 
 * logout
 * logout-all
 * me
-* update profile
-* change password
-* get guides
+* change-password
 
 ---
 
-## 11. Login
+## 12. Login
 
-## 11.1 Objetivo funcional
+## 12.1 Objetivo funcional
 
 El login debe:
 
 * autenticar credenciales
+* asociar la sesión al dispositivo
 * obtener tokens
 * persistir refresh token
+* guardar access token en memoria
 * cargar usuario real desde backend
 * poblar el store global
-* devolver información mínima para decidir la navegación inmediata
+* devolver estado suficiente para decidir navegación inmediata
 
 ---
 
-## 11.2 `useLogin()`
+## 12.2 `useLogin()`
 
-En `src/features/auth/hooks/useLogin.ts`.
+`src/features/auth/hooks/useLogin.ts` implementa este flujo:
 
-### Flujo actual
-
-1. Obtiene `deviceId` desde `tokenService.getDeviceId()`
-2. Llama `/auth/login`
-3. Si falla, lanza error normalizado
-4. Lee `accessToken` y `refreshToken` desde `loginRes.data.tokens`
-5. Persiste `refreshToken`
-6. Guarda `accessToken` en memoria
-7. Llama `/users/me`
-8. Mapea respuesta a `SessionUser`
-9. Ejecuta `setAuthedSession({ user, accessToken })`
-10. Devuelve:
+1. obtiene `deviceId`
+2. llama `POST /auth/login`
+3. si falla, lanza error normalizado
+4. lee `accessToken` y `refreshToken` desde `loginRes.data.tokens`
+5. persiste `refreshToken`
+6. guarda `accessToken` en memoria
+7. llama `GET /users/me`
+8. mapea el usuario con `mapUserMeToSessionUser`
+9. ejecuta `setAuthedSession({ user, accessToken })`
+10. devuelve:
 
 * `profileStatus`
 * `emailVerified`
 
 ---
 
-## 11.3 ¿Por qué se llama luego `/users/me`?
+## 12.3 Por qué el login se hidrata con `GET /users/me`
 
-Aunque el login ya retorna un `user`, el flujo actual usa `/users/me` para:
+Aunque el backend puede devolver un usuario en el login, el flujo actual usa `/users/me` como fuente real de hidratación para:
 
-* obtener la versión más consistente del usuario autenticado
-* asegurar que el front trabaja con el shape real usado por el módulo Users
-* homogeneizar mapeo y navegación
+* usar el shape operativo del módulo Users
+* tener consistencia con bootstrap y verify-email
+* decidir navegación con la misma estructura de usuario en todos los casos
 
 ---
 
-## 11.4 Navegación después del login
+## 12.4 Navegación posterior al login
 
 En `LoginPage.tsx`:
 
 * si `emailVerified === false` → `/verify-email`
 * si `profileStatus === "INCOMPLETE"` → `/onboarding`
-* si todo está completo → `/`
+* si todo está listo → `/`
 
-Y luego el router decide el destino final protegido.
-
----
-
-## 12. Refresh de access token
-
-## 12.1 Objetivo
-
-Permitir que el usuario continúe usando la app sin volver a loguearse cada vez que expire el access token.
+Y luego el router resuelve la entrada final usando `resolveAppEntry()`.
 
 ---
 
-## 12.2 Implementación
+## 12.5 `authNotice` en login
 
-En `src/core/http/refresh.ts`:
+`LoginPage.tsx` consume:
 
-1. Lee refresh token desde `tokenService.getRefreshToken()`
-2. Si no existe, retorna `null`
-3. Llama `POST /auth/refresh` con body:
+* `authNotice`
+* `clearAuthNotice()`
 
-```json
-{
-  "refreshToken": "..."
-}
-```
-
-4. Si falla, retorna `null`
-5. Si funciona:
-
-   * actualiza `accessToken` en store
-   * si el backend rotó refresh token, persiste el nuevo
-6. retorna el nuevo `accessToken`
+Esto permite que el login muestre mensajes generados por logout o expiración previa de sesión.
 
 ---
 
-## 12.3 Mutex / in-flight
-
-La función usa:
-
-```ts
-let inFlight: Promise<string | null> | null = null;
-```
-
-### Objetivo
-
-Evitar múltiples refresh simultáneos.
-
-### Beneficio
-
-Si varias requests fallan al mismo tiempo con `401`, no se disparan varios refresh en paralelo como fuegos artificiales en una oficina, sino un solo refresh compartido.
-
----
-
-## 13. Interceptor de autenticación
+## 13. Bootstrap de sesión con `AuthProvider`
 
 ## 13.1 Objetivo
 
-`authRequest()` en `src/core/http/authInterceptor.ts` resuelve:
-
-* lectura del access token desde Zustand
-* inyección del header `Authorization`
-* detección de `401`
-* refresh automático una sola vez
-* retry de la request original
+Resolver el estado inicial real al abrir la app.
 
 ---
 
-## 13.2 Flujo del interceptor
-
-1. Lee `accessToken` desde `useSessionStore.getState()`
-2. Construye headers
-3. Ejecuta `request<T>()`
-4. Si `ok`, retorna el resultado
-5. Si el error no es `401`, retorna el error tal cual
-6. Si es `401`, intenta `refreshAccessToken()`
-7. Si el refresh devuelve token, reintenta la misma request una vez
-8. Si el refresh falla, retorna el error
-
----
-
-## 13.3 Regla importante
-
-El interceptor actual **no fuerza logout por sí mismo**.
-Solo intenta recuperar la sesión.
-
-Esto es correcto como base, pero el cierre de sesión por expiración debe quedar centralizado para que:
-
-* limpie store
-* limpie refresh token
-* limpie React Query cache
-* notifique al usuario
-* redirija a login
-
-Ese bloque forma parte de la evolución natural del módulo.
-
----
-
-## 14. Bootstrap de sesión (`AuthProvider`)
-
-## 14.1 Objetivo
-
-Resolver el estado inicial de la app cuando esta se abre en frío o recarga.
-
----
-
-## 14.2 Responsabilidad
+## 13.2 Responsabilidad
 
 `AuthProvider.tsx` decide si el usuario arranca como:
 
 * `guest`
 * `authed`
 
-y bloquea la UI con `LoadingScreen` mientras se determina.
+y mantiene `LoadingScreen` hasta resolverlo.
 
 ---
 
-## 14.3 Flujo actual
+## 13.3 Flujo actual
 
 1. `setLoading()`
-2. leer refresh token desde storage
+2. leer refresh token
 3. si no existe:
 
    * `setGuest()`
@@ -749,339 +752,462 @@ y bloquea la UI con `LoadingScreen` mientras se determina.
    * intentar `refreshAccessToken()`
 5. si refresh falla:
 
-   * limpiar refresh token
-   * `hardLogout()`
-   * `setGuest()`
+   * ejecutar `expireSessionAndRedirect()`
 6. si refresh funciona:
 
-   * llamar `/users/me`
-7. si `/users/me` falla:
+   * llamar `GET /users/me`
+7. si `getMe()` falla:
 
-   * limpiar refresh token
-   * `hardLogout()`
-   * `setGuest()`
-8. si `/users/me` funciona:
+   * ejecutar `expireSessionAndRedirect()`
+8. si `getMe()` funciona:
 
    * mapear usuario
    * `setAuthedSession({ user, accessToken })`
 
 ---
 
-## 14.4 Comportamiento visual
+## 13.4 Comportamiento visual
 
 Mientras `status === "loading"` se muestra:
 
 * `LoadingScreen`
 
-Esto evita flickers de navegación y evita que la app renderice pantallas protegidas antes de conocer el estado real.
+Esto evita render prematuro de rutas incorrectas o flickers de navegación.
 
 ---
 
-## 15. Verificación de email
+## 14. Refresh de access token
+
+## 14.1 Objetivo
+
+Mantener la continuidad de sesión sin pedir login frecuente.
+
+---
+
+## 14.2 Implementación
+
+En `src/core/http/refresh.ts`:
+
+1. lee refresh token desde `tokenService`
+2. si no existe, retorna `null`
+3. llama `POST /auth/refresh`
+4. si falla, retorna `null`
+5. si funciona:
+
+   * actualiza `accessToken` en store
+   * persiste nuevo `refreshToken` si hubo rotación
+6. retorna el nuevo access token
+
+---
+
+## 14.3 Mutex / `inFlight`
+
+La implementación usa:
+
+```ts
+let inFlight: Promise<string | null> | null = null;
+```
+
+### Objetivo
+
+Evitar múltiples refresh simultáneos cuando varias requests reciben `401` al mismo tiempo.
+
+---
+
+## 15. Interceptor de autenticación
 
 ## 15.1 Objetivo
 
-Impedir que un usuario autenticado sin email verificado acceda al módulo interno real.
+`authRequest()` resuelve:
+
+* inyección automática del `Authorization`
+* ejecución de request protegida
+* detección de `401`
+* refresh automático
+* retry una sola vez
+* cierre controlado de sesión cuando el refresh ya no sirve
 
 ---
 
-## 15.2 Pantalla involucrada
+## 15.2 Flujo del interceptor
+
+1. lee `accessToken` desde el store
+2. ejecuta la request protegida
+3. si responde bien, retorna
+4. si el error no es `401`, retorna ese error
+5. si es `401`, intenta `refreshAccessToken()`
+6. si el refresh falla:
+
+   * ejecuta `runForcedLogoutOnce()`
+   * retorna error `SESSION_EXPIRED`
+7. si el refresh funciona:
+
+   * reintenta la request con el nuevo token
+8. si el retry vuelve a responder `401`:
+
+   * ejecuta `runForcedLogoutOnce()`
+   * retorna error `SESSION_EXPIRED`
+
+---
+
+## 15.3 Forced logout una sola vez
+
+`authInterceptor.ts` usa:
+
+```ts
+let forcedLogoutInFlight: Promise<void> | null = null;
+```
+
+### Propósito
+
+Evitar que múltiples requests disparen expiraciones duplicadas y limpiezas repetidas de sesión.
+
+---
+
+## 16. Lifecycle de sesión centralizado
+
+Uno de los cambios importantes del módulo es que el cierre de sesión ya no queda enterrado en un componente UI.
+
+Ahora existe `src/core/auth/sessionLifecycle.ts`.
+
+---
+
+## 16.1 `finalizeClientLogout()`
+
+Responsabilidades:
+
+* limpiar refresh token
+* limpiar cache de React Query
+* ejecutar `hardLogout()`
+* registrar `authNotice`
+
+---
+
+## 16.2 `logoutCurrentSession()`
+
+Responsabilidades:
+
+* llamar `POST /auth/logout`
+* aunque falle backend, finalizar localmente
+* dejar notice:
+
+  * `Sesión cerrada correctamente.`
+
+---
+
+## 16.3 `logoutAllSessions()`
+
+Responsabilidades:
+
+* llamar `POST /auth/logout-all`
+* enviar verificación explícita por contraseña
+
+Payload actual:
+
+```json
+{
+  "verification": {
+    "method": "password",
+    "password": "******"
+  }
+}
+```
+
+Luego siempre finaliza la sesión local y registra el notice:
+
+* `Se cerró tu sesión en este y todos tus dispositivos.`
+
+---
+
+## 16.4 `expireSessionAndRedirect()`
+
+Se usa cuando la sesión ya no es recuperable.
+
+Responsabilidades:
+
+* limpiar sesión local
+* limpiar refresh token
+* limpiar cache
+* registrar notice:
+
+  * `Tu sesión expiró. Inicia sesión nuevamente.`
+
+---
+
+## 16.5 Regla de diseño del lifecycle
+
+La app ya no depende de que cada pantalla implemente su propia política de logout.
+
+Eso reduce:
+
+* duplicación
+* inconsistencias
+* olvidos de limpieza
+* estados “fantasma” en cache
+
+---
+
+## 17. Verificación de email en mobile
+
+## 17.1 Objetivo
+
+Impedir que un usuario autenticado pero no verificado entre al módulo interno real.
+
+---
+
+## 17.2 Pantalla involucrada
 
 * `src/features/auth/pages/VerifyEmailPage.tsx`
 
 ---
 
-## 15.3 Flujo funcional
+## 17.3 Flujo funcional del front
 
-### Reenvío de código
+### Reenvío
 
-* usa el email del usuario en store
-* llama `/auth/verify-email/request`
+* toma el email desde el store
+* llama `POST /auth/verify-email/request`
 * muestra mensaje de éxito o error
 
-### Confirmación de código
+### Confirmación
 
-* llama `/auth/verify-email/confirm`
+* solicita código de 6 dígitos
+* llama `POST /auth/verify-email/confirm`
 * si confirma correctamente:
 
-  * vuelve a pedir `/users/me`
+  * vuelve a llamar `GET /users/me`
   * actualiza la sesión global
   * redirige a:
 
     * `/onboarding` si el perfil sigue incompleto
-    * `/` si ya puede entrar al flujo interno
+    * `/profile` si ya está listo
 
 ---
 
-## 15.4 Regla de consistencia
+## 17.4 Comportamiento esperado del backend para mobile
 
-Después de verificar email, la app no debería asumir cambios locales a mano.
-Debe refrescar el usuario desde backend para mantener sincronía real.
+Cuando la llamada se hace con `X-Client-Platform: MOBILE`, el backend está preparado para un flujo mobile-first:
 
----
+* envío de código de 6 dígitos por correo
+* fallback por link/token para uso web si aplica
 
-## 16. Onboarding y perfil incompleto
-
-## 16.1 Objetivo
-
-Impedir que un usuario ya autenticado y verificado entre a módulos internos si aún no ha completado su perfil mínimo.
+Desde la app móvil, el flujo consumido directamente es el del **código**.
 
 ---
 
-## 16.2 Pantalla involucrada
+## 17.5 Regla de consistencia
 
-* `src/features/users/pages/OnboardingPage.tsx`
+Después de verificar email, el front **no asume cambios locales manuales**.
 
----
-
-## 16.3 Flujo
-
-En el onboarding actual se ejecutan dos pasos encadenados:
-
-1. `updateProfile`
-2. `changePassword`
-
-Si ambos salen bien:
-
-* redirige a `/`
+Siempre refresca desde backend usando `GET /users/me`.
 
 ---
 
-## 16.4 Actualización de sesión tras onboarding
+## 18. Etapas de acceso y navegación
 
-`useUpdateProfile()`:
+## 18.1 `AuthStage`
 
-* llama `/users/me/profile`
-* luego vuelve a llamar `/users/me`
-* actualiza el store con el usuario más reciente
-* invalida `usersKeys.me()`
+En `src/app/routes/access.ts` existe una capa de resolución explícita:
 
-Esto asegura que `profileStatus` quede actualizado en el store y el routing ya no lo trate como incompleto.
-
----
-
-## 17. Routing y guards
-
-## 17.1 Objetivo
-
-Cerrar todos los huecos de navegación manual.
-
-El routing debe impedir estos escenarios:
-
-* usuario no verificado entrando a módulos internos
-* usuario con perfil incompleto entrando al home real
-* usuario completo regresando a verify/onboarding
-* usuario guest entrando a rutas protegidas
-* acceso manual por URL directa
+```ts
+export type AuthStage =
+  | "loading"
+  | "guest"
+  | "unverified"
+  | "onboarding"
+  | "ready";
+```
 
 ---
 
-## 17.2 Implementación actual en `src/app/routes/index.tsx`
+## 18.2 `getAuthStage()`
 
-La app usa un `ProtectedRoute` local que:
+Resuelve la etapa real según:
 
-* bloquea mientras `status === "loading"`
-* manda a `/login` si `status !== "authed"`
-
-Encima de eso, cada ruta decide con redirecciones condicionales según:
-
-* `emailVerified`
+* `status`
+* `user`
+* `emailVerifiedAt`
 * `profileStatus`
 
----
+### Resultado
 
-## 17.3 Flujo por rutas
-
-### `/login`
-
-* si `status === "authed"` redirige a `/`
-* si no, muestra login
-
-### `/verify-email`
-
-* requiere sesión autenticada
-* si el email ya está verificado:
-
-  * si perfil incompleto → `/onboarding`
-  * si perfil completo → `/`
-* si aún no está verificado:
-
-  * muestra `VerifyEmailPage`
-
-### `/onboarding`
-
-* requiere sesión autenticada
-* si el email no está verificado → `/verify-email`
-* si perfil completo → `/`
-* si perfil incompleto → muestra onboarding
-
-### `/profile`
-
-* requiere sesión autenticada
-* si email no verificado → `/verify-email`
-* si perfil incompleto → `/onboarding`
-* si todo está bien → muestra perfil
-
-### `/`
-
-* requiere sesión autenticada
-* si email no verificado → `/verify-email`
-* si perfil incompleto → `/onboarding`
-* si todo está bien → redirige a `/profile`
+* `loading`
+* `guest`
+* `unverified`
+* `onboarding`
+* `ready`
 
 ---
 
-## 17.4 Guards reutilizables presentes
+## 18.3 `resolveAppEntry()`
 
-Existen además estos guards:
+Define el destino natural del usuario según su etapa:
 
-* `AuthGuard.tsx`
-* `OnboardingGuard.tsx`
-* `RoleGuard.tsx`
-
-### Observación técnica
-
-Actualmente el `index.tsx` resuelve la mayor parte del control con lógica interna y no reutiliza completamente esos guards.
-La evolución recomendada es centralizar la política de acceso en guards especializados o en una capa de resolución única de navegación.
+* `guest` → `/login`
+* `unverified` → `/verify-email`
+* `onboarding` → `/onboarding`
+* `ready` → `/profile`
 
 ---
 
-## 17.5 `RoleGuard`
+## 18.4 `getAccessRedirect()`
 
-Permite restringir vistas por rol:
+Centraliza la redirección correcta según la ruta objetivo y la etapa real del usuario.
 
-* si no está autenticado → `/login`
-* si el rol no está permitido → `/`
-
-Debe usarse solo para vistas que ya requieren usuario “ready”, no como reemplazo del flujo de verificación/onboarding.
+Esto evita que cada pantalla tenga que reinventar la política de acceso.
 
 ---
 
-## 18. Estado funcional del usuario y navegación resultante
+## 18.5 `canAccessRole()`
 
-A nivel de negocio, el usuario pasa por cuatro estados reales:
+Permite acceso solo si:
 
-### 18.1 Guest
-
-* no autenticado
-* entra a `/login`
-
-### 18.2 Authed no verificado
-
-* autenticado
-* `emailVerifiedAt = null`
-* entra a `/verify-email`
-
-### 18.3 Authed verificado con perfil incompleto
-
-* `emailVerifiedAt` existe
-* `profileStatus = "INCOMPLETE"`
-* entra a `/onboarding`
-
-### 18.4 Authed listo
-
-* email verificado
-* perfil completo
-* puede entrar a `/profile` y módulos internos
+* el usuario está en etapa `ready`
+* el rol del usuario está permitido
 
 ---
 
-## 19. Logout y cierre del ciclo de sesión
+## 18.6 `filterNavigationItems()`
 
-## 19.1 Objetivo
-
-El módulo Auth no termina en el login.
-También debe definir con precisión cómo sale el usuario y qué ocurre cuando la sesión deja de ser válida.
+Filtra elementos de navegación internos según rol, pero solo si el usuario está realmente listo para acceder.
 
 ---
 
-## 19.2 Casos que deben quedar cubiertos
+## 19. Guards del módulo
+
+## 19.1 `GuestOnlyGuard`
+
+Se usa para rutas que solo deben ver usuarios guest.
+
+Ejemplo:
+
+* `/login`
+
+Si el usuario ya tiene sesión, lo redirige a su entry real.
+
+---
+
+## 19.2 `VerifyEmailGuard`
+
+Protege la ruta `/verify-email`.
+
+* guest → `/login`
+* unverified → acceso permitido
+* onboarding → `/onboarding`
+* ready → `/profile`
+
+---
+
+## 19.3 `OnboardingGuard`
+
+Protege la ruta `/onboarding`.
+
+* guest → `/login`
+* unverified → `/verify-email`
+* onboarding → acceso permitido
+* ready → `/profile`
+
+---
+
+## 19.4 `AppReadyGuard`
+
+Protege rutas internas reales.
+
+Permite acceso solo cuando el usuario ya está en etapa `ready`.
+
+---
+
+## 19.5 `RoleGuard`
+
+Restringe por rol una vez que el usuario ya está apto para módulos internos.
+
+---
+
+## 19.6 `AuthGuard`
+
+Sigue existiendo como guard genérico de autenticación, pero el control fino de etapa ya está mejor resuelto con `access.ts` y guards especializados.
+
+---
+
+## 20. Routing actual
+
+En `src/app/routes/index.tsx`:
+
+* `/login` → `GuestOnlyGuard`
+* `/verify-email` → `VerifyEmailGuard`
+* `/onboarding` → `OnboardingGuard`
+* `/profile` → `AppReadyGuard`
+* `/` → redirección a `resolveAppEntry()`
+* fallback → redirección a `resolveAppEntry()`
+
+### Observación importante
+
+Aunque `/onboarding` y `/profile` pertenecen funcionalmente a Users, su acceso está gobernado por Auth porque dependen del estado de sesión y etapa.
+
+---
+
+## 21. Integración con Users
+
+Aunque no pertenece a Auth, esta integración es estructural.
+
+## 21.1 `GET /users/me`
+
+Se usa en:
+
+* login
+* bootstrap
+* verify-email confirm
+
+### Propósito
+
+Obtener la fuente de verdad del usuario operativo y decidir la etapa funcional real.
+
+---
+
+## 21.2 `mapUserMeToSessionUser()`
+
+Permite convertir el DTO de Users al `SessionUser` que Auth guarda en el store.
+
+---
+
+## 21.3 `profileStatus`
+
+Aunque el perfil se completa en Users, Auth consume ese dato para decidir navegación.
+
+---
+
+## 21.4 Onboarding
+
+El onboarding es una pantalla del módulo Users, pero Auth lo trata como una etapa funcional obligatoria antes del acceso total.
+
+---
+
+## 22. Logout y fin del ciclo de sesión
+
+## 22.1 Casos cubiertos
+
+El módulo Auth ya cubre:
 
 * logout manual
-* logout all
-* expiración del access token
-* refresh token inválido, expirado o revocado
-* fallo irrecuperable al recuperar la sesión
-* limpieza total del estado local
-* mensaje visible para el usuario
-* redirección segura a login
+* logout-all
+* sesión expirada
+* refresh inválido
+* bootstrap irrecuperable
+* limpieza local completa
+* cache invalidation
+* aviso de UX vía `authNotice`
 
 ---
 
-## 19.3 Estado actual del repo
-
-Hoy el logout está resuelto desde `ProfileCard.tsx`:
-
-* `handleLogout()`
-
-  * llama `authApi.logout()`
-  * ejecuta `hardLogout()`
-  * limpia refresh token
-  * redirige a `/login`
-
-* `handleLogoutAll()`
-
-  * llama `authApi.logoutAll()`
-  * ejecuta `hardLogout()`
-  * limpia refresh token
-  * redirige a `/login`
-
-### Limitaciones actuales
-
-1. la lógica está acoplada al componente de UI
-2. no se limpia React Query cache
-3. no existe un mensaje global de sesión expirada o logout exitoso
-4. `logoutAll()` no documenta todavía una verificación explícita del usuario
-5. si el refresh falla dentro del interceptor, no hay aún un cierre centralizado y controlado de sesión
-
----
-
-## 19.4 Diseño recomendado para un cierre de sesión robusto
-
-La política recomendada del módulo es:
-
-### Logout manual
-
-* llamar `/auth/logout`
-* aunque falle backend, limpiar localmente
-* borrar refresh token
-* limpiar access token en store
-* limpiar cache de React Query
-* redirigir a `/login`
-* mostrar mensaje: `Sesión cerrada correctamente.`
-
-### Logout all
-
-* llamar `/auth/logout-all`
-* invalidar todas las sesiones del usuario
-* limpiar localmente igual que logout manual
-* redirigir a `/login`
-* mostrar mensaje: `Se cerró tu sesión en este y todos tus dispositivos.`
-
-### Access token expirado
-
-* request protegida responde `401`
-* interceptor intenta refresh una vez
-* si refresh funciona, la app sigue silenciosamente
-
-### Refresh token inválido o expirado
-
-* se considera sesión no recuperable
-* se limpia estado completo
-* se redirige a `/login`
-* se muestra mensaje: `Tu sesión expiró. Inicia sesión nuevamente.`
-
----
-
-## 19.5 Limpieza mínima obligatoria al cerrar sesión
+## 22.2 Limpieza mínima obligatoria
 
 ### Debe limpiarse
 
-* `accessToken` en memoria
-* `user` en store
-* `status` hacia `guest`
-* `refreshToken` en storage
-* cache React Query asociada a usuario autenticado
+* `accessToken`
+* `user`
+* `status`
+* `refreshToken`
+* React Query cache
 
 ### No debe limpiarse
 
@@ -1089,77 +1215,61 @@ La política recomendada del módulo es:
 
 ---
 
-## 19.6 ¿Por qué limpiar React Query cache?
+## 22.3 Por qué limpiar React Query cache
 
-Porque aunque el usuario salga, el cache puede seguir reteniendo:
+Porque de lo contrario pueden quedar datos autenticados antiguos aunque el usuario ya haya salido.
 
-* datos del perfil
-* consultas protegidas previas
-* listas de guías u otros recursos privados
+Eso incluye:
 
-Si no se limpia, el logout parece bonito por fuera pero deja migas técnicas por dentro.
-
----
-
-## 20. Manejo de sesión expirada
-
-## 20.1 Caso 1: expira solo el access token
-
-Esto es el caso esperado y recuperable.
-
-### Flujo
-
-1. una request protegida responde `401`
-2. `authRequest()` detecta `401`
-3. intenta `refreshAccessToken()`
-4. si refresh funciona:
-
-   * actualiza token en store
-   * reintenta la request
-5. el usuario no ve interrupción
+* perfil
+* datos privados
+* listas protegidas
+* respuestas de queries previas
 
 ---
 
-## 20.2 Caso 2: el refresh token ya no sirve
+## 23. Manejo de sesión expirada
 
-Esto ya no es recuperable.
+## 23.1 Caso recuperable
 
-Puede ocurrir por:
+Si expira solo el access token:
 
-* expiración real
-* revocación
-* rotación invalidada
-* logout desde otro dispositivo
-* logout all
-* inconsistencia de sesión
+1. request protegida responde `401`
+2. interceptor intenta refresh
+3. si refresh funciona:
 
-### Respuesta esperada del front
-
-* finalizar sesión local
-* limpiar storage
-* limpiar cache
-* volver a `/login`
-* informar al usuario
+   * actualiza token
+   * reintenta request
+4. el usuario sigue trabajando sin interrupción visible
 
 ---
 
-## 20.3 Caso 3: bootstrap falla al restaurar la sesión
+## 23.2 Caso no recuperable
 
-Si al iniciar la app:
+Si el refresh token ya no sirve:
 
-* existe refresh token
-* pero no se logra refrescar
-* o `/users/me` falla
-
-entonces la app debe asumir que la sesión ya no es válida y volver a `guest`.
-
-Ese comportamiento ya existe en `AuthProvider`, aunque puede enriquecerse con aviso visible al usuario si se quiere una UX más explícita.
+* se considera sesión inválida
+* se ejecuta `expireSessionAndRedirect()`
+* se limpia todo
+* se registra `authNotice`
+* el usuario vuelve al login
 
 ---
 
-## 21. Mensajes de UX recomendados
+## 23.3 Bootstrap irrecuperable
 
-Para evitar una experiencia muda o confusa, el módulo debe manejar mensajes de sesión de forma coherente.
+Si al abrir la app existe refresh token pero:
+
+* no se logra refrescar
+* o `GET /users/me` falla
+
+la app invalida la sesión y vuelve a guest.
+
+---
+
+## 24. Mensajes de UX del módulo Auth
+
+Mensajes actualmente modelados mediante `authNotice`:
 
 ### Logout manual
 
@@ -1177,117 +1287,82 @@ Para evitar una experiencia muda o confusa, el módulo debe manejar mensajes de 
 
 `Te enviamos un nuevo código al correo.`
 
-### Verificación exitosa
+---
 
-Puede usarse implícitamente con redirección, o mostrar:
-`Correo verificado correctamente.`
+## 25. Seguridad y decisiones de diseño
+
+## 25.1 Access token en memoria
+
+Reduce exposición persistente del token de acceso.
 
 ---
 
-## 22. Integración con React Query
+## 25.2 Refresh token persistido
 
-## 22.1 Uso actual
-
-Se usa React Query en hooks como:
-
-* `useLogin`
-* `useChangePassword`
-* `useUpdateProfile`
-
-y existe un `QueryClient` global en `QueryProvider.tsx`.
+Permite recuperar la sesión entre aperturas de app.
 
 ---
 
-## 22.2 Reglas recomendadas
+## 25.3 `deviceId`
 
-### En login
-
-No es obligatorio limpiar cache, pero sí dejar el store completamente consistente.
-
-### En logout
-
-Sí debe limpiarse el `queryClient`.
-
-### En update profile
-
-Se invalida `usersKeys.me()` para reflejar datos actualizados.
+Permite al backend distinguir sesiones por dispositivo y aplicar lógica de seguridad por cliente.
 
 ---
 
-## 23. Seguridad y decisiones de diseño
+## 25.4 Navegación basada en etapa y no solo en autenticación
 
-## 23.1 Por qué access token en memoria
+Estar autenticado no significa estar listo para entrar al sistema.
 
-Porque reduce persistencia accidental de credenciales de acceso y obliga a que la continuidad de sesión se resuelva mediante refresh token.
-
----
-
-## 23.2 Por qué refresh token persistido
-
-Porque permite restaurar sesión después de cerrar y abrir la app sin pedir login cada vez.
-
----
-
-## 23.3 Por qué `deviceId`
-
-Porque el backend puede distinguir sesiones por dispositivo y aplicar lógica de seguridad, auditoría o logout selectivo.
-
----
-
-## 23.4 Por qué no navegar solo por `status === "authed"`
-
-Porque `authed` no implica que el usuario ya esté listo para entrar al sistema real.
 Aún puede faltar:
 
-* verificación de email
-* onboarding de perfil
+* verify email
+* onboarding
 
 ---
 
-## 24. Bugs resueltos y causa raíz
+## 25.5 Logout defensivo
 
-## 24.1 401 en `/auth/me` + 400 en `/auth/refresh`
+Aunque el backend falle en `/auth/logout` o `/auth/logout-all`, el cliente debe quedar limpio igual.
+
+Eso hace al módulo más robusto ante fallas parciales de red o backend.
+
+---
+
+## 26. Bugs resueltos y cambios clave
+
+## 26.1 401 en endpoints protegidos + refresh inconsistente
 
 ### Causa
 
-El front estaba leyendo tokens en la ubicación equivocada por desalineación entre:
-
-* envelope backend
-* tipos del front
-* unwrap HTTP
-
-### Resultado
-
-* `Authorization: Bearer undefined`
-* refresh token vacío o incorrecto
+Desalineación previa entre el shape real del backend y la lectura de tokens en frontend.
 
 ### Solución
 
-* unwrap de envelope en `apiClient`
-* lectura correcta de `res.data.tokens.accessToken`
-* lectura correcta de `res.data.tokens.refreshToken`
+* unwrap correcto del envelope
+* lectura correcta desde `data.tokens`
+* refresh centralizado y seguro
 
 ---
 
-## 24.2 `Cannot read properties of undefined (reading 'message')`
+## 26.2 Errores frágiles al leer `message`
 
 ### Causa
 
-Se accedía a `error.message` sin garantizar que existiera.
+Se asumía que cualquier error tenía `message`.
 
 ### Solución
 
-* usar `ApiResult<T>` como unión discriminada
-* acceder a `res.error` solo dentro de `if (!res.ok)`
-* usar `getErrorMessage()` como capa de protección
+* uso de `ApiResult<T>`
+* `getErrorMessage()`
+* manejo explícito por rama `ok / !ok`
 
 ---
 
-## 24.3 Refresh duplicado en dev / StrictMode
+## 26.3 Refresh duplicado
 
 ### Causa
 
-React 18 en desarrollo puede ejecutar efectos dos veces y disparar doble refresh si el flujo no está protegido.
+Múltiples requests con `401` podían disparar varios refresh.
 
 ### Solución
 
@@ -1295,69 +1370,76 @@ React 18 en desarrollo puede ejecutar efectos dos veces y disparar doble refresh
 
 ---
 
-## 24.4 Logout acoplado a UI
+## 26.4 Logout disperso en UI
 
 ### Causa
 
-La lógica de logout vive hoy dentro de `ProfileCard.tsx`.
+El cierre de sesión estaba acoplado a componentes visuales.
 
-### Riesgo
+### Solución
 
-* duplicación futura
-* limpieza incompleta
-* difícil manejo de sesión expirada global
-
-### Solución recomendada
-
-mover la política de cierre de sesión a una capa central de lifecycle de sesión.
+* `sessionLifecycle.ts`
+* `finalizeClientLogout()`
+* `logoutCurrentSession()`
+* `logoutAllSessions()`
+* `expireSessionAndRedirect()`
 
 ---
 
-## 25. Checklist de verificación manual
+## 26.5 Falta de aviso visible al usuario
 
-## 25.1 Login
+### Solución
 
-Verificar en Network:
-
-* `POST /auth/login` → 200
-* response contiene `data.tokens.accessToken`
-* response contiene `data.tokens.refreshToken`
-* request incluye `X-Client-Platform: MOBILE`
+Se introdujo `authNotice` para comunicar eventos importantes de sesión desde el flujo de acceso.
 
 ---
 
-## 25.2 Carga de usuario
+## 27. Checklist de verificación manual
 
-* `GET /users/me` → 200
-* request incluye `Authorization: Bearer <jwt real>`
+## 27.1 Login
+
+Verificar:
+
+* `POST /auth/login`
+* incluye `X-Client-Platform: MOBILE`
+* retorna `data.tokens.accessToken`
+* retorna `data.tokens.refreshToken`
 
 ---
 
-## 25.3 Refresh
+## 27.2 Hidratación de usuario
+
+Verificar:
+
+* `GET /users/me`
+* incluye `Authorization: Bearer <jwt>`
+* retorna datos suficientes para decidir etapa
+
+---
+
+## 27.3 Refresh
 
 Cuando expire el access token:
 
 * request protegida responde `401`
 * se dispara `POST /auth/refresh`
-* body enviado:
+* body:
 
-```json
-{
-  "refreshToken": "..."
-}
-```
-
-* response contiene `data.tokens.accessToken`
-* si hubo rotación, contiene también `data.tokens.refreshToken`
+  ```json
+  {
+    "refreshToken": "..."
+  }
+  ```
+* retorna nuevo access token
+* si hay rotación, retorna nuevo refresh token
 
 ---
 
-## 25.4 Verify email
+## 27.4 Verify email
 
 ### Reenvío
 
 * `POST /auth/verify-email/request`
-* body con `email`
 
 ### Confirmación
 
@@ -1367,163 +1449,93 @@ Cuando expire el access token:
   * `email`
   * `code`
 
-Después debe llamarse nuevamente `/users/me`.
+Luego debe volver a ejecutarse `GET /users/me`.
 
 ---
 
-## 25.5 Onboarding
-
-* `PATCH /users/me/profile`
-* luego `POST /auth/change-password`
-* luego navegación a `/`
-
----
-
-## 25.6 Logout manual
+## 27.5 Logout manual
 
 * `POST /auth/logout`
 * limpiar refresh token
+* limpiar cache
 * `status` pasa a `guest`
-* redirige a `/login`
+* aparece `authNotice`
+* usuario vuelve a `/login`
 
 ---
 
-## 25.7 Logout all
+## 27.6 Logout all
 
 * `POST /auth/logout-all`
-* limpiar refresh token local
+* body con verificación por contraseña
+* limpiar refresh token
+* limpiar cache
 * `status` pasa a `guest`
-* redirige a `/login`
+* aparece `authNotice`
 
 ---
 
-## 25.8 Expiración no recuperable
+## 27.7 Sesión expirada
 
 Simular refresh token inválido:
 
-* la request protegida termina en error no recuperable
-* la sesión se invalida
-* la app vuelve a login
-* el usuario ve mensaje claro
+* la sesión no se puede recuperar
+* se ejecuta forced logout
+* el usuario vuelve a login
+* aparece notice de expiración
 
 ---
 
-## 26. Recomendaciones de consistencia para dejar el módulo blindado
+## 28. Estado actual del módulo Auth
 
-## 26.1 Mantener una única forma de resultado HTTP
-
-* `request<T>()` → `ApiResult<T>`
-* `authRequest<T>()` → `ApiResult<T>`
-* hooks y pages consumen `ApiResult<T>`
-
----
-
-## 26.2 Centralizar el cierre de sesión
-
-Mover logout manual, logout all y sesión expirada a una política común.
-
----
-
-## 26.3 Centralizar la política de navegación
-
-Evitar que cada pantalla tome decisiones distintas sobre quién entra y quién no.
-
----
-
-## 26.4 Separar “sesión autenticada” de “usuario listo”
-
-Un usuario puede estar autenticado y aun así no estar listo para entrar al core de la app.
-
----
-
-## 27. Flujo resumido de extremo a extremo
-
-## 27.1 Login exitoso
-
-1. usuario ingresa credenciales
-2. backend autentica
-3. front guarda refresh token
-4. front guarda access token en memoria
-5. front consulta `/users/me`
-6. store queda autenticado
-7. router decide:
-
-   * verify-email
-   * onboarding
-   * profile
-
----
-
-## 27.2 App abierta de nuevo
-
-1. `AuthProvider` arranca en `loading`
-2. lee refresh token
-3. intenta refresh
-4. si funciona, consulta `/users/me`
-5. repuebla store
-6. router decide destino
-
----
-
-## 27.3 Request protegida con token expirado
-
-1. backend devuelve `401`
-2. interceptor intenta refresh
-3. si funciona, reintenta request
-4. usuario sigue trabajando
-
----
-
-## 27.4 Sesión no recuperable
-
-1. refresh falla
-2. limpiar estado
-3. volver a login
-4. pedir autenticación nuevamente
-
----
-
-## 28. Estado actual vs evolución inmediata recomendada
-
-## 28.1 Ya implementado en el repo
+## 28.1 Ya implementado
 
 * login con `deviceId`
 * refresh token persistido
 * access token en memoria
 * bootstrap de sesión
-* interceptor con retry por refresh
+* refresh automático
+* retry protegido por `401`
+* forced logout centralizado
 * verify email por código
-* onboarding
-* guards/rutas protegidas básicas
-* logout manual y logout all desde perfil
+* header mobile consistente
+* guards por etapa
+* resolver central de acceso
+* logout manual centralizado
+* logout-all centralizado
+* limpieza de React Query cache
+* `authNotice` para UX de sesión
 
-## 28.2 Siguiente bloque recomendado
+---
 
-* centralizar logout y sesión expirada
-* limpiar React Query cache al cerrar sesión
-* mostrar aviso global de logout/sesión expirada
-* unificar guards y routing fino en una política de acceso reutilizable
-* robustecer `logout-all` según el contrato exacto del backend
+## 28.2 Qué queda fuera porque pertenece a Users
+
+* onboarding documentado en detalle
+* `updateProfile`
+* pantalla de cuenta
+* perfil ampliado
+* datos personales operativos
+
+Eso debe vivir en el documento del **módulo Users**.
 
 ---
 
 ## 29. Conclusión
 
-El módulo Auth Mobile ya tiene una base sólida:
+El módulo Auth Mobile ya no es solo un login funcional. Ahora es el sistema que gobierna de forma coherente:
 
-* separa access token y refresh token correctamente
-* recupera sesión al iniciar
-* renueva access token automáticamente
-* controla verify email y onboarding
-* protege rutas internas principales
+* autenticación
+* continuidad de sesión
+* protección de acceso
+* verify email
+* expiración controlada
+* salida limpia del sistema
 
-El siguiente paso para dejarlo verdaderamente robusto es cerrar el ciclo completo de sesión con una política centralizada de:
+La separación correcta con Users deja la arquitectura mucho más sana:
 
-* logout
-* sesión expirada
-* limpieza local
-* cache invalidation
-* mensajes de UX
-* redirección uniforme
+* **Auth** controla quién puede entrar y en qué etapa está
+* **Users** controla qué datos personales tiene el usuario y qué tan completo está su perfil
 
-Ahí es donde el módulo deja de ser solo “login que funciona” y se convierte en un sistema de autenticación móvil consistente, resistente y agradable de mantener.
+Con esa frontera clara, el proyecto deja de mezclar “sesión” con “perfil”, y cada módulo queda responsable de su propio territorio.
+
+---
