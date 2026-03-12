@@ -106,8 +106,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <>
-      <div className="glass-card p-5 mb-4">
-        <div className="flex items-center gap-4 mb-5">
+      <div className="glass-card p-4 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="profile-avatar">{fullName.charAt(0).toUpperCase()}</div>
           <div className="flex-1 min-w-0">
             <h2 className="profile-name">{fullName}</h2>
@@ -134,9 +134,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </div>
 
-      <div className="glass-card p-5 mb-4">
+      <div className="glass-card p-4 mb-3">
         <h3 className="section-title">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -147,7 +147,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           Información Personal
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <InfoRow
             label="Nombres"
             value={user.nombres || "No registrado"}
@@ -231,9 +231,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </div>
 
-      <div className="glass-card p-5 mb-4">
+      <div className="glass-card p-4 mb-3">
         <h3 className="section-title">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -244,7 +244,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           Información de Contacto
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <InfoRow
             label="Correo Electrónico"
             value={user.email || "No registrado"}
@@ -288,9 +288,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </div>
 
-      <div className="glass-card p-5 mb-4">
+      <div className="glass-card p-4 mb-3">
         <h3 className="section-title">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -301,7 +301,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           Estado de la Cuenta
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <InfoRow
             label="Rol"
             value={roleLabel}
@@ -366,7 +366,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       </div>
 
       {localError && (
-        <div className="alert-error mb-4 flex items-center gap-3 animate-shake">
+        <div className="alert-error mb-3 flex items-center gap-2 animate-shake">
           <svg
             className="h-5 w-5 shrink-0"
             fill="none"
@@ -384,9 +384,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       )}
 
-      <div className="glass-card p-5">
+      <div className="glass-card p-4">
         <h3 className="section-title">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -397,7 +397,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           Acciones
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Button
             variant="primary"
             size="md"

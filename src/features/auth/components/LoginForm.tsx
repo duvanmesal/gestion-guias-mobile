@@ -73,7 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Notice Banner */}
       {notice && !error && (
         <div className={`alert-${getNoticeVariant()} flex items-center gap-3 animate-fade-up`}>
@@ -93,7 +93,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       {/* Email Field */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <label className="form-label">
           Correo electrónico
         </label>
@@ -128,7 +128,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       {/* Password Field */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <label className="form-label">
           Contraseña
         </label>
@@ -179,11 +179,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       {/* Submit Button */}
-      <div className="pt-2">
+      <div className="pt-1">
         <Button
           type="submit"
           variant="primary"
-          size="lg"
+          size="md"
           isLoading={isLoading}
           leftIcon={
             !isLoading && (

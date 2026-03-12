@@ -1,8 +1,6 @@
 import { IonPage, IonContent } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import OnboardingForm, {
-  type OnboardingFormValues,
-} from "../components/OnboardingForm";
+import OnboardingForm, { type OnboardingFormValues } from "../components/OnboardingForm";
 import { useCompleteProfile } from "../hooks/useCompleteProfile";
 import { useChangePassword } from "../../auth/hooks/useChangePassword";
 
@@ -12,8 +10,7 @@ const OnboardingPage: React.FC = () => {
   const changePassword = useChangePassword();
 
   const isLoading = completeProfile.isPending || changePassword.isPending;
-  const error =
-    completeProfile.error?.message ?? changePassword.error?.message ?? null;
+  const error = completeProfile.error?.message ?? changePassword.error?.message ?? null;
 
   const handleSubmit = async (values: OnboardingFormValues) => {
     try {
@@ -39,31 +36,30 @@ const OnboardingPage: React.FC = () => {
   return (
     <IonPage className="premium-page">
       <IonContent scrollY={true}>
-        <div
-          className="relative min-h-screen overflow-hidden"
-          style={{ background: "var(--color-bg-base)" }}
-        >
-          {/* Floating Orbs Background */}
+        <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
+          {/* Floating orbs */}
           <div
             className="orb orb-primary animate-float-orb"
-            style={{ width: 280, height: 280, top: "-5%", right: "-15%" }}
+            style={{ width: 260, height: 260, top: "-6%", right: "-12%" }}
           />
           <div
             className="orb orb-accent animate-float-orb-delayed"
-            style={{ width: 200, height: 200, bottom: "5%", left: "-10%" }}
+            style={{ width: 200, height: 200, bottom: "8%", left: "-8%" }}
           />
           <div
-            className="orb orb-primary animate-float-orb-delayed"
+            className="orb orb-primary"
             style={{
               width: 120,
               height: 120,
-              top: "50%",
-              left: "5%",
-              opacity: 0.4,
+              top: "45%",
+              left: "8%",
+              opacity: 0.35,
+              animation: "float-orb 14s ease-in-out infinite",
+              animationDelay: "-4s",
             }}
           />
 
-          {/* Main Content */}
+          {/* Main content */}
           <div className="relative z-10 flex flex-col min-h-screen px-6 py-8 safe-area-inset">
             <OnboardingForm
               onSubmit={handleSubmit}

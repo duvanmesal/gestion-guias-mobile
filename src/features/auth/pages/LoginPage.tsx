@@ -32,86 +32,82 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="premium-page">
       <IonContent scrollY={false}>
-        {/* Full-screen premium container */}
-        <div className="relative min-h-screen w-full overflow-hidden bg-[#0F1419]">
+        <div className="relative min-h-screen w-full overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
           {/* Animated floating orbs */}
           <div
-            className="pointer-events-none absolute top-[-10%] left-[-15%] h-[340px] w-[340px] rounded-full opacity-50 blur-[100px]"
+            className="orb orb-primary animate-float-orb"
             style={{
-              background: "radial-gradient(circle, #228B54 0%, transparent 70%)",
-              animation: "floatOrb1 12s ease-in-out infinite",
+              width: 320,
+              height: 320,
+              top: "-8%",
+              left: "-12%",
+              opacity: 0.5,
             }}
           />
           <div
-            className="pointer-events-none absolute right-[-10%] bottom-[10%] h-[280px] w-[280px] rounded-full opacity-40 blur-[90px]"
+            className="orb orb-accent animate-float-orb-delayed"
             style={{
-              background: "radial-gradient(circle, #BF9B30 0%, transparent 70%)",
-              animation: "floatOrb2 14s ease-in-out infinite",
+              width: 260,
+              height: 260,
+              bottom: "8%",
+              right: "-8%",
+              opacity: 0.4,
             }}
           />
           <div
-            className="pointer-events-none absolute top-[40%] left-[60%] h-[200px] w-[200px] rounded-full opacity-30 blur-[80px]"
+            className="orb orb-primary"
             style={{
-              background: "radial-gradient(circle, #228B54 0%, transparent 70%)",
-              animation: "floatOrb3 10s ease-in-out infinite",
+              width: 180,
+              height: 180,
+              top: "45%",
+              left: "65%",
+              opacity: 0.25,
+              animation: "float-orb 18s ease-in-out infinite",
+              animationDelay: "-5s",
             }}
           />
 
           {/* Main content */}
-          <div
-            className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-12"
-            style={{ animation: "fadeSlideUp 0.6s ease-out" }}
-          >
+          <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-10 safe-area-inset animate-fade-up">
             {/* Hero Section */}
-            <div className="mb-8 text-center">
+            <div className="mb-6 text-center">
               {/* Logo/Icon */}
               <div
-                className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl"
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
                 style={{
-                  background: "linear-gradient(135deg, #228B54 0%, #1a6b42 100%)",
-                  boxShadow: "0 8px 32px rgba(34, 139, 84, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  background: "linear-gradient(135deg, var(--color-primary) 0%, #1a6b42 100%)",
+                  boxShadow: "0 4px 16px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.08)",
                 }}
               >
                 <svg
-                  className="h-10 w-10 text-white"
+                  className="h-7 w-7 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                   />
                 </svg>
               </div>
 
               {/* Title */}
-              <h1
-                className="mb-2 text-3xl font-bold tracking-tight"
-                style={{ color: "#F5F7FA" }}
-              >
+              <h1 className="mb-1 text-2xl font-bold tracking-tight text-balance" style={{ color: "var(--color-fg-primary)" }}>
                 Bienvenido
               </h1>
-              <p className="text-base" style={{ color: "#8A939D" }}>
-                Ingresa tus credenciales para continuar
+              <p className="text-sm" style={{ color: "var(--color-fg-secondary)" }}>
+                Accede a tu cuenta de forma segura
               </p>
             </div>
 
             {/* Glass Card Form Container */}
-            <div
-              className="w-full max-w-[380px] rounded-3xl p-6"
-              style={{
-                background: "linear-gradient(145deg, rgba(25, 32, 40, 0.95) 0%, rgba(15, 20, 25, 0.9) 100%)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
-              }}
-            >
+            <div className="glass-card-elevated w-full max-w-[360px] p-5">
               <LoginForm
                 onSubmit={handleSubmit}
                 isLoading={login.isPending}
@@ -120,40 +116,31 @@ const LoginPage: React.FC = () => {
               />
             </div>
 
+            {/* Trust badge */}
+            <div className="mt-5 flex items-center gap-1.5 trust-badge">
+              <svg
+                className="trust-badge-icon"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              <span>Conexión segura</span>
+            </div>
+
             {/* Footer */}
-            <p className="mt-8 text-center text-sm" style={{ color: "#5A6570" }}>
+            <p className="mt-3 text-center text-xs" style={{ color: "var(--color-fg-muted)" }}>
               Gestión de Guías
             </p>
           </div>
         </div>
-
-        {/* Keyframe animations */}
-        <style>{`
-          @keyframes floatOrb1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
-          }
-          @keyframes floatOrb2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-25px, 15px) scale(1.1); }
-            66% { transform: translate(15px, -25px) scale(0.9); }
-          }
-          @keyframes floatOrb3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, 30px) scale(1.08); }
-          }
-          @keyframes fadeSlideUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
       </IonContent>
     </IonPage>
   );

@@ -40,21 +40,21 @@ const ProfilePage: React.FC = () => {
           />
 
           <div
-            className="relative z-10 px-5 pb-12 pt-8"
-            style={{ animation: "fadeSlideUp 0.6s ease-out" }}
+            className="relative z-10 px-5 pb-10 pt-6"
+            style={{ animation: "fadeSlideUp 0.5s ease-out" }}
           >
-            <div className="mb-6">
-              <div className="mb-2 flex items-center gap-3">
+            <div className="mb-5">
+              <div className="mb-1.5 flex items-center gap-2.5">
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg"
                   style={{
                     background:
-                      "linear-gradient(135deg, rgba(34, 139, 84, 0.2) 0%, rgba(34, 139, 84, 0.1) 100%)",
-                    border: "1px solid rgba(34, 139, 84, 0.3)",
+                      "linear-gradient(135deg, rgba(34, 139, 84, 0.15) 0%, rgba(34, 139, 84, 0.08) 100%)",
+                    border: "1px solid rgba(34, 139, 84, 0.2)",
                   }}
                 >
                   <svg
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                     style={{ color: "#228B54" }}
                     fill="none"
                     stroke="currentColor"
@@ -70,29 +70,29 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <div>
                   <h1
-                    className="text-2xl font-bold"
+                    className="text-xl font-bold"
                     style={{ color: "#F5F7FA" }}
                   >
                     Mi Cuenta
                   </h1>
                 </div>
               </div>
-              <p className="text-sm" style={{ color: "#8A939D" }}>
+              <p className="text-xs" style={{ color: "#8A939D" }}>
                 Gestiona tu perfil y configuración de cuenta
               </p>
             </div>
 
             {error && (
               <div
-                className="mb-6 flex items-center gap-3 rounded-xl px-4 py-3"
+                className="mb-4 flex items-center gap-2 rounded-lg px-3 py-2.5"
                 style={{
-                  background: "rgba(185, 55, 55, 0.15)",
-                  border: "1px solid rgba(185, 55, 55, 0.4)",
+                  background: "rgba(185, 55, 55, 0.12)",
+                  border: "1px solid rgba(185, 55, 55, 0.3)",
                   animation: "shake 0.4s ease-out",
                 }}
               >
                 <svg
-                  className="h-5 w-5 shrink-0"
+                  className="h-4 w-4 shrink-0"
                   style={{ color: "#F87171" }}
                   fill="none"
                   stroke="currentColor"
@@ -106,7 +106,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </svg>
                 <span
-                  className="text-sm font-medium"
+                  className="text-xs font-medium"
                   style={{ color: "#F87171" }}
                 >
                   {error instanceof Error
@@ -118,10 +118,10 @@ const ProfilePage: React.FC = () => {
 
             {showInitialLoading && (
               <div
-                className="mb-6 rounded-2xl px-4 py-5"
+                className="mb-4 rounded-xl px-3 py-4 text-sm"
                 style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
                   color: "#CBD5E1",
                 }}
               >
@@ -141,10 +141,10 @@ const ProfilePage: React.FC = () => {
 
             {!showInitialLoading && !user && !error && (
               <div
-                className="rounded-2xl px-4 py-5"
+                className="rounded-xl px-3 py-4 text-sm"
                 style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
                   color: "#CBD5E1",
                 }}
               >

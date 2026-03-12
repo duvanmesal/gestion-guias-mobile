@@ -7,6 +7,7 @@ import * as userApi from "../../users/data/users.api";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 import { mapUserMeToSessionUser } from "../../users/data/users.mappers";
 import Button from "../../../ui/components/Button";
+import FormMessage from "../../../ui/components/FormMessage";
 
 const RESEND_COOLDOWN = 60;
 
@@ -23,9 +24,23 @@ const VerifyEmailPage: React.FC = () => {
   const [cooldown, setCooldown] = useState(0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const confirmingRef = useRef(false);
+  const resendingRef = useRef(false);
+
   const email = user?.email ?? "";
   const code = otpValues.join("");
+  const isCodeComplete = code.length === 6;
+  const isLoading = loadingConfirm || loadingResend;
 
+  // Autofocus first OTP input on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRefs.current[0]?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Cooldown timer
   useEffect(() => {
     if (cooldown <= 0) return;
 
@@ -49,6 +64,7 @@ const VerifyEmailPage: React.FC = () => {
   const handleOtpChange = (index: number, value: string) => {
     const sanitized = value.replace(/\D/g, "");
 
+    // Handle paste of multiple digits
     if (sanitized.length > 1) {
       const chars = sanitized.slice(0, 6).split("");
       const newValues = ["", "", "", "", "", ""];
@@ -99,8 +115,9 @@ const VerifyEmailPage: React.FC = () => {
   };
 
   const handleResend = useCallback(async () => {
-    if (!email || cooldown > 0) return;
+    if (!email || cooldown > 0 || resendingRef.current) return;
 
+    resendingRef.current = true;
     setError(null);
     setSuccess(null);
     setLoadingResend(true);
@@ -109,21 +126,23 @@ const VerifyEmailPage: React.FC = () => {
       const res = await authApi.requestEmailVerification({ email });
 
       if (!res.ok) {
-        throw new Error(getErrorMessage(res.error, "No pude reenviar el código"));
+        throw new Error(getErrorMessage(res.error, "No pudimos reenviar el código. Intenta de nuevo."));
       }
 
-      setSuccess("Te enviamos un nuevo código al correo.");
+      setSuccess("Te enviamos un nuevo código. Revisa tu bandeja de entrada.");
       setCooldown(RESEND_COOLDOWN);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al reenviar código");
+      setError(err instanceof Error ? err.message : "Ocurrió un error al reenviar el código.");
     } finally {
       setLoadingResend(false);
+      resendingRef.current = false;
     }
   }, [email, cooldown]);
 
   const handleConfirm = useCallback(async () => {
-    if (!email || code.length !== 6) return;
+    if (!email || code.length !== 6 || confirmingRef.current) return;
 
+    confirmingRef.current = true;
     setError(null);
     setSuccess(null);
     setLoadingConfirm(true);
@@ -132,13 +151,13 @@ const VerifyEmailPage: React.FC = () => {
       const res = await authApi.confirmEmailVerification({ email, code });
 
       if (!res.ok) {
-        throw new Error(getErrorMessage(res.error, "Código inválido o vencido"));
+        throw new Error(getErrorMessage(res.error, "El código no es válido. Revísalo e intenta de nuevo."));
       }
 
       const meRes = await userApi.getMe();
 
       if (!meRes.ok) {
-        throw new Error(getErrorMessage(meRes.error, "No pude refrescar tu sesión"));
+        throw new Error(getErrorMessage(meRes.error, "No pudimos actualizar tu sesión. Intenta de nuevo."));
       }
 
       const mapped = mapUserMeToSessionUser(meRes.data);
@@ -155,92 +174,92 @@ const VerifyEmailPage: React.FC = () => {
 
       history.replace("/profile");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al verificar email");
+      setError(err instanceof Error ? err.message : "Error al verificar. Intenta nuevamente.");
       setOtpValues(["", "", "", "", "", ""]);
       focusInput(0);
     } finally {
       setLoadingConfirm(false);
+      confirmingRef.current = false;
     }
   }, [email, code, accessToken, history]);
 
   return (
     <IonPage className="premium-page">
       <IonContent scrollY={true}>
-        <div
-          className="relative min-h-screen overflow-hidden"
-          style={{ background: "var(--color-bg-base)" }}
-        >
+        <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
+          {/* Background orbs */}
           <div
             className="orb orb-primary animate-float-orb"
-            style={{ width: 300, height: 300, top: "-10%", left: "-20%" }}
+            style={{ width: 280, height: 280, top: "-8%", left: "-15%" }}
           />
           <div
             className="orb orb-accent animate-float-orb-delayed"
-            style={{ width: 250, height: 250, bottom: "10%", right: "-15%" }}
+            style={{ width: 220, height: 220, bottom: "12%", right: "-10%" }}
           />
           <div
-            className="orb orb-primary animate-float-orb-delayed"
+            className="orb orb-primary"
             style={{
-              width: 150,
-              height: 150,
-              top: "40%",
-              right: "10%",
-              opacity: 0.5,
+              width: 140,
+              height: 140,
+              top: "35%",
+              right: "8%",
+              opacity: 0.4,
+              animation: "float-orb 16s ease-in-out infinite",
+              animationDelay: "-8s",
             }}
           />
 
-          <div className="relative z-10 flex flex-col min-h-screen px-6 py-12 safe-area-inset">
-            <div className="text-center mb-8 animate-fade-up">
+          {/* Main content */}
+          <div className="relative z-10 flex flex-col min-h-screen px-5 py-10 safe-area-inset">
+            {/* Header */}
+            <div className="text-center mb-6 animate-fade-up">
               <div
-                className="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center"
+                className="mx-auto mb-4 w-14 h-14 rounded-xl flex items-center justify-center"
                 style={{
                   background: "var(--color-primary-soft)",
-                  boxShadow: "0 0 40px var(--color-primary-glow)",
+                  boxShadow: "0 0 20px var(--color-primary-glow)",
                 }}
               >
                 <svg
-                  className="w-10 h-10"
+                  className="w-7 h-7"
                   style={{ color: "var(--color-primary)" }}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
               </div>
 
-              <h1
-                className="text-2xl font-bold mb-3"
-                style={{ color: "var(--color-fg-primary)" }}
-              >
+              <h1 className="text-xl font-bold mb-1 text-balance" style={{ color: "var(--color-fg-primary)" }}>
                 Verifica tu correo
               </h1>
 
-              <p
-                className="text-base mb-4"
-                style={{ color: "var(--color-fg-secondary)" }}
-              >
+              <p className="text-sm mb-3" style={{ color: "var(--color-fg-secondary)" }}>
                 Ingresa el código de 6 dígitos que enviamos a
               </p>
 
+              {/* Email badge */}
               <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{
                   background: "var(--color-bg-glass)",
                   border: "1px solid var(--color-border-glass)",
                 }}
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3.5 h-3.5"
                   style={{ color: "var(--color-primary)" }}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -249,21 +268,16 @@ const VerifyEmailPage: React.FC = () => {
                     d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                   />
                 </svg>
-
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: "var(--color-fg-primary)" }}
-                >
+                <span className="text-xs font-medium" style={{ color: "var(--color-fg-primary)" }}>
                   {email || "correo no disponible"}
                 </span>
               </div>
             </div>
 
-            <div
-              className="glass-card p-6 mb-6 animate-fade-up"
-              style={{ animationDelay: "0.1s" }}
-            >
-              <div className="otp-container mb-6" onPaste={handlePaste}>
+            {/* OTP Card */}
+            <div className="glass-card p-5 mb-5 animate-fade-up delay-100">
+              {/* OTP inputs */}
+              <div className="otp-container mb-5" onPaste={handlePaste}>
                 {otpValues.map((value, index) => (
                   <input
                     key={index}
@@ -276,65 +290,40 @@ const VerifyEmailPage: React.FC = () => {
                     value={value}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`otp-input ${value ? "filled" : ""} ${
-                      error ? "error" : ""
-                    }`}
+                    className={`otp-input ${value ? "filled" : ""} ${error ? "error" : ""}`}
                     autoComplete="one-time-code"
-                    disabled={loadingConfirm || loadingResend}
+                    disabled={isLoading}
+                    aria-label={`Dígito ${index + 1} del código`}
                   />
                 ))}
               </div>
 
+              {/* Status messages */}
               {error && (
-                <div className="alert-error mb-4 flex items-start gap-3 animate-fade-up">
-                  <svg
-                    className="w-5 h-5 flex-shrink-0 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-sm">{error}</span>
+                <div className="mb-4">
+                  <FormMessage variant="error">{error}</FormMessage>
                 </div>
               )}
 
               {success && (
-                <div className="alert-success mb-4 flex items-start gap-3 animate-success-pulse">
-                  <svg
-                    className="w-5 h-5 flex-shrink-0 mt-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-sm">{success}</span>
+                <div className="mb-4">
+                  <FormMessage variant="success">{success}</FormMessage>
                 </div>
               )}
 
-              <div className="space-y-3">
+              {/* Action buttons */}
+              <div className="space-y-2.5">
                 <Button
                   type="button"
                   variant="primary"
                   size="md"
                   onClick={handleConfirm}
-                  disabled={loadingConfirm || loadingResend || code.length !== 6}
+                  disabled={!isCodeComplete || isLoading}
                   isLoading={loadingConfirm}
-                  leftIcon={<CheckCircleIcon />}
-                  className={code.length === 6 && !loadingConfirm ? "animate-pulse-glow" : ""}
+                  leftIcon={!loadingConfirm ? <CheckCircleIcon /> : undefined}
+                  className={isCodeComplete && !isLoading ? "animate-pulse-glow" : ""}
                 >
-                  Verificar correo
+                  {loadingConfirm ? "Verificando..." : "Verificar correo"}
                 </Button>
 
                 <Button
@@ -342,24 +331,32 @@ const VerifyEmailPage: React.FC = () => {
                   variant="secondary"
                   size="md"
                   onClick={handleResend}
-                  disabled={loadingConfirm || loadingResend || cooldown > 0}
+                  disabled={isLoading || cooldown > 0}
                   isLoading={loadingResend}
-                  leftIcon={cooldown > 0 ? <ClockIcon /> : <RefreshIcon />}
+                  leftIcon={
+                    !loadingResend ? (
+                      cooldown > 0 ? <ClockIcon /> : <RefreshIcon />
+                    ) : undefined
+                  }
                 >
-                  {cooldown > 0 ? `Reenviar en ${cooldown}s` : "Reenviar código"}
+                  {loadingResend
+                    ? "Enviando..."
+                    : cooldown > 0
+                    ? `Reenviar en ${cooldown}s`
+                    : "Reenviar código"}
                 </Button>
               </div>
             </div>
 
-            <p
-              className="text-center text-sm animate-fade-up"
-              style={{
-                color: "var(--color-fg-muted)",
-                animationDelay: "0.2s",
-              }}
-            >
-              Revisa tu bandeja de spam o promociones si no encuentras el correo.
-            </p>
+            {/* Helper text */}
+            <div className="text-center space-y-2 animate-fade-up delay-200">
+              <p className="text-sm" style={{ color: "var(--color-fg-muted)" }}>
+                El código puede tardar unos segundos en llegar.
+              </p>
+              <p className="text-sm" style={{ color: "var(--color-fg-muted)" }}>
+                Revisa también tu carpeta de spam o no deseados.
+              </p>
+            </div>
           </div>
         </div>
       </IonContent>
@@ -368,7 +365,7 @@ const VerifyEmailPage: React.FC = () => {
 };
 
 const CheckCircleIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -379,7 +376,7 @@ const CheckCircleIcon = () => (
 );
 
 const RefreshIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -390,7 +387,7 @@ const RefreshIcon = () => (
 );
 
 const ClockIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"

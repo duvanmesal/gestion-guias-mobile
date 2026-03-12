@@ -1,29 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { DocumentType } from "../types/users.types";
 import Button from "../../../ui/components/Button";
+import FormMessage from "../../../ui/components/FormMessage";
+import PasswordRulesCard from "../../../ui/components/passwordRulesCard";
 
 const passwordRule = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,72}$/;
 
 const schema = z
   .object({
-    nombres: z.string().min(1, "Nombres es requerido"),
-    apellidos: z.string().min(1, "Apellidos es requerido"),
-    telefono: z.string().min(7, "Teléfono inválido"),
+    nombres: z.string().min(1, "Ingresa tus nombres"),
+    apellidos: z.string().min(1, "Ingresa tus apellidos"),
+    telefono: z.string().min(7, "Ingresa un teléfono válido"),
     documentType: z.enum(["CC", "CE", "PASSPORT", "TI"]),
-    documentNumber: z.string().min(6, "Número de documento inválido"),
-    currentPassword: z.string().min(1, "La contraseña actual es requerida"),
+    documentNumber: z.string().min(6, "Ingresa un número de documento válido"),
+    currentPassword: z.string().min(1, "Ingresa tu contraseña actual"),
     newPassword: z
       .string()
-      .min(8, "La nueva contraseña debe tener al menos 8 caracteres")
-      .max(72, "La nueva contraseña es demasiado larga")
-      .regex(
-        passwordRule,
-        "La nueva contraseña debe tener mayúscula, minúscula, número y carácter especial"
-      ),
-    confirmPassword: z.string().min(1, "Debes confirmar la nueva contraseña"),
+      .min(8, "Mínimo 8 caracteres")
+      .max(72, "Máximo 72 caracteres")
+      .regex(passwordRule, "La contraseña no cumple los requisitos"),
+    confirmPassword: z.string().min(1, "Confirma tu nueva contraseña"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -43,9 +42,9 @@ interface OnboardingFormProps {
 }
 
 const STEPS = [
-  { id: 1, title: "Perfil", subtitle: "Información básica" },
-  { id: 2, title: "Contacto", subtitle: "Documento e identificación" },
-  { id: 3, title: "Seguridad", subtitle: "Configura tu contraseña" },
+  { id: 1, title: "Tu perfil", subtitle: "Cuéntanos sobre ti", icon: UserIcon },
+  { id: 2, title: "Identificación", subtitle: "Datos de contacto", icon: IdCardIcon },
+  { id: 3, title: "Seguridad", subtitle: "Protege tu cuenta", icon: ShieldIcon },
 ];
 
 const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
@@ -55,63 +54,20 @@ const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
   { value: "PASSPORT", label: "Pasaporte" },
 ];
 
-const ChevronLeftIcon = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 19l-7-7 7-7"
-    />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 5l7 7-7 7"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M5 13l4 4L19 7"
-    />
-  </svg>
-);
-
 const OnboardingForm: React.FC<OnboardingFormProps> = ({
   onSubmit,
-  isLoading,
+  isLoading = false,
   error,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const nombresRef = useRef<HTMLInputElement>(null);
+  const telefonoRef = useRef<HTMLInputElement>(null);
+  const currentPasswordRef = useRef<HTMLInputElement>(null);
+  const submittingRef = useRef(false);
 
   const {
     handleSubmit,
@@ -138,34 +94,17 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
   const newPassword = watchedValues.newPassword || "";
   const confirmPassword = watchedValues.confirmPassword || "";
 
-  const passwordStrength = useMemo(() => {
-    if (!newPassword) return { level: "none", label: "" };
-    let score = 0;
-    if (newPassword.length >= 8) score++;
-    if (/[a-z]/.test(newPassword)) score++;
-    if (/[A-Z]/.test(newPassword)) score++;
-    if (/\d/.test(newPassword)) score++;
-    if (/[@$!%*?&]/.test(newPassword)) score++;
+  const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword;
 
-    if (score <= 2) return { level: "weak", label: "Débil" };
-    if (score === 3) return { level: "fair", label: "Regular" };
-    if (score === 4) return { level: "good", label: "Buena" };
-    return { level: "strong", label: "Fuerte" };
-  }, [newPassword]);
-
-  const passwordRules = useMemo(
-    () => [
-      { label: "8+ caracteres", valid: newPassword.length >= 8 },
-      { label: "Mayúscula", valid: /[A-Z]/.test(newPassword) },
-      { label: "Minúscula", valid: /[a-z]/.test(newPassword) },
-      { label: "Número", valid: /\d/.test(newPassword) },
-      { label: "Especial (@$!%*?&)", valid: /[@$!%*?&]/.test(newPassword) },
-    ],
-    [newPassword]
-  );
-
-  const passwordsMatch =
-    newPassword && confirmPassword && newPassword === confirmPassword;
+  // Autofocus first field of each step
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentStep === 1) nombresRef.current?.focus();
+      else if (currentStep === 2) telefonoRef.current?.focus();
+      else if (currentStep === 3) currentPasswordRef.current?.focus();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
 
   const validateCurrentStep = async (): Promise<boolean> => {
     switch (currentStep) {
@@ -174,11 +113,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
       case 2:
         return await trigger(["telefono", "documentType", "documentNumber"]);
       case 3:
-        return await trigger([
-          "currentPassword",
-          "newPassword",
-          "confirmPassword",
-        ]);
+        return await trigger(["currentPassword", "newPassword", "confirmPassword"]);
       default:
         return true;
     }
@@ -197,7 +132,14 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
     }
   };
 
-  const handleFormSubmit = handleSubmit(onSubmit);
+  const handleFormSubmit = handleSubmit((values) => {
+    if (submittingRef.current || isLoading) return;
+    submittingRef.current = true;
+    onSubmit(values);
+    setTimeout(() => {
+      submittingRef.current = false;
+    }, 500);
+  });
 
   const onFinalSubmit = async () => {
     const isValid = await validateCurrentStep();
@@ -206,20 +148,22 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
     }
   };
 
+  const CurrentStepIcon = STEPS[currentStep - 1].icon;
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-5 animate-slide-right" key="step1">
+          <div className="space-y-4 animate-slide-right" key="step1">
             <FormField label="Nombres" error={errors.nombres?.message}>
               <input
+                ref={nombresRef}
                 type="text"
                 className={`premium-input ${errors.nombres ? "error" : ""}`}
                 placeholder="Ingresa tus nombres"
                 value={watchedValues.nombres}
-                onChange={(e) =>
-                  setValue("nombres", e.target.value, { shouldValidate: true })
-                }
+                disabled={isLoading}
+                onChange={(e) => setValue("nombres", e.target.value, { shouldValidate: true })}
               />
             </FormField>
 
@@ -229,9 +173,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                 className={`premium-input ${errors.apellidos ? "error" : ""}`}
                 placeholder="Ingresa tus apellidos"
                 value={watchedValues.apellidos}
-                onChange={(e) =>
-                  setValue("apellidos", e.target.value, { shouldValidate: true })
-                }
+                disabled={isLoading}
+                onChange={(e) => setValue("apellidos", e.target.value, { shouldValidate: true })}
               />
             </FormField>
           </div>
@@ -239,30 +182,30 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
 
       case 2:
         return (
-          <div className="space-y-5 animate-slide-right" key="step2">
-            <FormField label="Teléfono" error={errors.telefono?.message}>
+          <div className="space-y-4 animate-slide-right" key="step2">
+            <FormField 
+              label="Teléfono" 
+              error={errors.telefono?.message}
+              hint="Tu número de contacto principal"
+            >
               <input
+                ref={telefonoRef}
                 type="tel"
                 className={`premium-input ${errors.telefono ? "error" : ""}`}
                 placeholder="3001234567"
                 value={watchedValues.telefono}
-                onChange={(e) =>
-                  setValue("telefono", e.target.value, { shouldValidate: true })
-                }
+                disabled={isLoading}
+                onChange={(e) => setValue("telefono", e.target.value, { shouldValidate: true })}
               />
             </FormField>
 
-            <FormField
-              label="Tipo de documento"
-              error={errors.documentType?.message}
-            >
+            <FormField label="Tipo de documento" error={errors.documentType?.message}>
               <select
                 className="premium-select"
                 value={watchedValues.documentType}
+                disabled={isLoading}
                 onChange={(e) =>
-                  setValue("documentType", e.target.value as DocumentType, {
-                    shouldValidate: true,
-                  })
+                  setValue("documentType", e.target.value as DocumentType, { shouldValidate: true })
                 }
               >
                 {DOCUMENT_TYPES.map((doc) => (
@@ -273,22 +216,18 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
               </select>
             </FormField>
 
-            <FormField
-              label="Número de documento"
+            <FormField 
+              label="Número de documento" 
               error={errors.documentNumber?.message}
+              hint="Sin puntos ni espacios"
             >
               <input
                 type="text"
-                className={`premium-input ${
-                  errors.documentNumber ? "error" : ""
-                }`}
+                className={`premium-input ${errors.documentNumber ? "error" : ""}`}
                 placeholder="123456789"
                 value={watchedValues.documentNumber}
-                onChange={(e) =>
-                  setValue("documentNumber", e.target.value, {
-                    shouldValidate: true,
-                  })
-                }
+                disabled={isLoading}
+                onChange={(e) => setValue("documentNumber", e.target.value, { shouldValidate: true })}
               />
             </FormField>
           </div>
@@ -296,7 +235,39 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
 
       case 3:
         return (
-          <div className="space-y-5 animate-slide-right" key="step3">
+          <div className="space-y-4 animate-slide-right" key="step3">
+            {/* Security guidance */}
+            <div
+              className="glass-panel-soft p-3 rounded-lg"
+              style={{ borderColor: "var(--color-border-glow)" }}
+            >
+              <div className="flex items-start gap-2.5">
+                <div
+                  className="flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center"
+                  style={{ background: "var(--color-primary-soft)" }}
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    style={{ color: "var(--color-primary)" }}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-xs" style={{ color: "var(--color-fg-secondary)", lineHeight: 1.5 }}>
+                  Crea una contraseña segura para proteger tu cuenta. Usa la contraseña temporal que recibiste por correo como contraseña actual.
+                </p>
+              </div>
+            </div>
+
             <FormField
               label="Contraseña actual"
               error={errors.currentPassword?.message}
@@ -304,17 +275,13 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             >
               <div className="relative">
                 <input
+                  ref={currentPasswordRef}
                   type={showCurrentPassword ? "text" : "password"}
-                  className={`premium-input pr-12 ${
-                    errors.currentPassword ? "error" : ""
-                  }`}
+                  className={`premium-input pr-12 ${errors.currentPassword ? "error" : ""}`}
                   placeholder="Contraseña temporal"
                   value={watchedValues.currentPassword}
-                  onChange={(e) =>
-                    setValue("currentPassword", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
+                  disabled={isLoading}
+                  onChange={(e) => setValue("currentPassword", e.target.value, { shouldValidate: true })}
                 />
                 <PasswordToggle
                   show={showCurrentPassword}
@@ -323,23 +290,15 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
               </div>
             </FormField>
 
-            <FormField
-              label="Nueva contraseña"
-              error={errors.newPassword?.message}
-            >
+            <FormField label="Nueva contraseña" error={errors.newPassword?.message}>
               <div className="relative">
                 <input
                   type={showNewPassword ? "text" : "password"}
-                  className={`premium-input pr-12 ${
-                    errors.newPassword ? "error" : ""
-                  }`}
+                  className={`premium-input pr-12 ${errors.newPassword ? "error" : ""}`}
                   placeholder="Tu nueva contraseña"
                   value={watchedValues.newPassword}
-                  onChange={(e) =>
-                    setValue("newPassword", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
+                  disabled={isLoading}
+                  onChange={(e) => setValue("newPassword", e.target.value, { shouldValidate: true })}
                 />
                 <PasswordToggle
                   show={showNewPassword}
@@ -347,87 +306,21 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                 />
               </div>
 
-              {newPassword && (
-                <div className="mt-3">
-                  <div className="flex justify-between items-center mb-1">
-                    <span
-                      className="text-xs"
-                      style={{ color: "var(--color-fg-muted)" }}
-                    >
-                      Fortaleza
-                    </span>
-                    <span
-                      className="text-xs font-medium"
-                      style={{
-                        color:
-                          passwordStrength.level === "strong"
-                            ? "var(--color-primary)"
-                            : passwordStrength.level === "good"
-                            ? "#4ade80"
-                            : passwordStrength.level === "fair"
-                            ? "var(--color-accent)"
-                            : "var(--color-danger)",
-                      }}
-                    >
-                      {passwordStrength.label}
-                    </span>
-                  </div>
-                  <div className="strength-bar">
-                    <div className={`strength-fill ${passwordStrength.level}`} />
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {passwordRules.map((rule) => (
-                  <div
-                    key={rule.label}
-                    className={`rule-item ${rule.valid ? "valid" : ""}`}
-                  >
-                    <div
-                      className={`rule-icon ${
-                        rule.valid ? "valid" : "pending"
-                      }`}
-                    >
-                      {rule.valid && (
-                        <svg
-                          className="w-2.5 h-2.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                    <span>{rule.label}</span>
-                  </div>
-                ))}
+              {/* Password rules - always visible */}
+              <div className="mt-3">
+                <PasswordRulesCard password={newPassword} showStrength />
               </div>
             </FormField>
 
-            <FormField
-              label="Confirmar contraseña"
-              error={errors.confirmPassword?.message}
-            >
+            <FormField label="Confirmar contraseña" error={errors.confirmPassword?.message}>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  className={`premium-input pr-12 ${
-                    errors.confirmPassword ? "error" : ""
-                  }`}
+                  className={`premium-input pr-12 ${errors.confirmPassword ? "error" : ""}`}
                   placeholder="Repite la nueva contraseña"
                   value={watchedValues.confirmPassword}
-                  onChange={(e) =>
-                    setValue("confirmPassword", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
+                  disabled={isLoading}
+                  onChange={(e) => setValue("confirmPassword", e.target.value, { shouldValidate: true })}
                 />
                 <PasswordToggle
                   show={showConfirmPassword}
@@ -438,43 +331,19 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
               {confirmPassword && (
                 <div
                   className="mt-2 flex items-center gap-2 text-xs"
-                  style={{
-                    color: passwordsMatch
-                      ? "var(--color-primary)"
-                      : "var(--color-danger)",
-                  }}
+                  style={{ color: passwordsMatch ? "var(--color-success)" : "var(--color-danger)" }}
                 >
                   {passwordsMatch ? (
                     <>
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Las contraseñas coinciden</span>
                     </>
                   ) : (
                     <>
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                       <span>Las contraseñas no coinciden</span>
                     </>
@@ -492,68 +361,37 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="text-center mb-6 animate-fade-up">
+      {/* Header */}
+      <div className="text-center mb-5 animate-fade-up">
         <div
-          className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center"
+          className="mx-auto mb-3 w-12 h-12 rounded-xl flex items-center justify-center"
           style={{
             background: "var(--color-primary-soft)",
-            boxShadow: "0 0 30px var(--color-primary-glow)",
+            boxShadow: "0 0 16px var(--color-primary-glow)",
           }}
         >
-          <svg
-            className="w-8 h-8"
-            style={{ color: "var(--color-primary)" }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <CurrentStepIcon />
         </div>
-        <h1
-          className="text-2xl font-bold mb-1"
-          style={{ color: "var(--color-fg-primary)" }}
-        >
-          Completar Perfil
+        <h1 className="text-xl font-bold mb-0.5 text-balance" style={{ color: "var(--color-fg-primary)" }}>
+          Completa tu perfil
         </h1>
-        <p className="text-sm" style={{ color: "var(--color-fg-secondary)" }}>
+        <p className="text-xs" style={{ color: "var(--color-fg-secondary)" }}>
           Configura tu cuenta para comenzar
         </p>
       </div>
 
-      <div
-        className="stepper-container mb-8 animate-fade-up"
-        style={{ animationDelay: "0.1s" }}
-      >
+      {/* Stepper */}
+      <div className="stepper-container mb-4 animate-fade-up delay-100">
         {STEPS.map((step, index) => (
           <div key={step.id} className="contents">
             <div
               className={`stepper-step ${
-                currentStep > step.id
-                  ? "completed"
-                  : currentStep === step.id
-                  ? "active"
-                  : "pending"
+                currentStep > step.id ? "completed" : currentStep === step.id ? "active" : "pending"
               }`}
             >
               {currentStep > step.id ? (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 13l4 4L19 7"
-                  />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
                 step.id
@@ -571,47 +409,31 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         ))}
       </div>
 
-      <div className="text-center mb-6">
-        <h2
-          className="text-lg font-semibold mb-1"
-          style={{ color: "var(--color-fg-primary)" }}
-        >
+      {/* Step title */}
+      <div className="text-center mb-4">
+        <h2 className="text-base font-semibold mb-0.5" style={{ color: "var(--color-fg-primary)" }}>
           {STEPS[currentStep - 1].title}
         </h2>
-        <p className="text-sm" style={{ color: "var(--color-fg-muted)" }}>
+        <p className="text-xs" style={{ color: "var(--color-fg-muted)" }}>
           {STEPS[currentStep - 1].subtitle}
         </p>
       </div>
 
-      <div className="glass-card p-6 mb-6 flex-1">
+      {/* Form card */}
+      <div className="glass-card p-5 mb-5 flex-1">
         <form onSubmit={(e) => e.preventDefault()}>
           {renderStepContent()}
 
           {error && (
-            <div className="alert-error mt-5 flex items-start gap-3">
-              <svg
-                className="w-5 h-5 flex-shrink-0 mt-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-sm">{error}</span>
+            <div className="mt-5">
+              <FormMessage variant="error">{error}</FormMessage>
             </div>
           )}
         </form>
       </div>
 
-      <div
-        className="flex gap-3 mt-auto animate-fade-up"
-        style={{ animationDelay: "0.2s" }}
-      >
+      {/* Navigation buttons */}
+      <div className="flex gap-3 animate-fade-up delay-200">
         {currentStep > 1 && (
           <Button
             type="button"
@@ -619,7 +441,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             onClick={handleBack}
             disabled={isLoading}
             leftIcon={<ChevronLeftIcon />}
-            className="flex-1 justify-center"
+            className="flex-1"
           >
             Anterior
           </Button>
@@ -631,7 +453,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             variant="primary"
             onClick={handleNext}
             rightIcon={<ChevronRightIcon />}
-            className="flex-1 justify-center"
+            className="flex-1"
           >
             Siguiente
           </Button>
@@ -642,24 +464,22 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             onClick={onFinalSubmit}
             isLoading={isLoading}
             leftIcon={!isLoading ? <CheckIcon /> : undefined}
-            className={`flex-1 justify-center ${
-              !isLoading ? "animate-pulse-glow" : ""
-            }`}
+            className={`flex-1 ${!isLoading ? "animate-pulse-glow" : ""}`}
           >
-            {isLoading ? "Guardando..." : "Finalizar"}
+            {isLoading ? "Guardando..." : "Activar cuenta"}
           </Button>
         )}
       </div>
 
-      <p
-        className="text-center text-xs mt-4"
-        style={{ color: "var(--color-fg-muted)" }}
-      >
+      {/* Progress indicator */}
+      <p className="text-center text-xs mt-4" style={{ color: "var(--color-fg-muted)" }}>
         Paso {currentStep} de {STEPS.length}
       </p>
     </div>
   );
 };
+
+/* ===== Sub-components ===== */
 
 interface FormFieldProps {
   label: string;
@@ -668,42 +488,19 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-const FormField: React.FC<FormFieldProps> = ({
-  label,
-  error,
-  hint,
-  children,
-}) => (
+const FormField: React.FC<FormFieldProps> = ({ label, error, hint, children }) => (
   <div>
-    <label
-      className="block text-sm font-medium mb-2"
-      style={{ color: "var(--color-fg-primary)" }}
-    >
+    <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-fg-primary)" }}>
       {label}
     </label>
     {children}
     {hint && !error && (
-      <p className="mt-1.5 text-xs" style={{ color: "var(--color-fg-muted)" }}>
-        {hint}
-      </p>
+      <p className="form-hint">{hint}</p>
     )}
     {error && (
-      <p
-        className="mt-1.5 text-xs flex items-center gap-1"
-        style={{ color: "var(--color-danger)" }}
-      >
-        <svg
-          className="w-3.5 h-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
+      <p className="form-error" role="alert">
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         {error}
       </p>
@@ -720,45 +517,66 @@ const PasswordToggle: React.FC<PasswordToggleProps> = ({ show, onToggle }) => (
   <button
     type="button"
     onClick={onToggle}
-    className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded"
     style={{ color: "var(--color-fg-muted)" }}
+    aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
+    tabIndex={-1}
   >
     {show ? (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-        />
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
       </svg>
     ) : (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-        />
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
       </svg>
     )}
   </button>
+);
+
+/* ===== Icons ===== */
+
+function UserIcon() {
+  return (
+    <svg className="w-6 h-6" style={{ color: "var(--color-primary)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  );
+}
+
+function IdCardIcon() {
+  return (
+    <svg className="w-6 h-6" style={{ color: "var(--color-primary)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg className="w-6 h-6" style={{ color: "var(--color-primary)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  );
+}
+
+const ChevronLeftIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+  </svg>
+);
+
+const ChevronRightIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
 );
 
 export default OnboardingForm;

@@ -70,13 +70,13 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
   ]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="glass-card p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold" style={{ color: "var(--color-fg-primary)" }}>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="glass-card p-5">
+        <div className="mb-5">
+          <h2 className="text-lg font-bold" style={{ color: "var(--color-fg-primary)" }}>
             Editar mis datos
           </h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--color-fg-muted)" }}>
+          <p className="mt-1.5 text-xs" style={{ color: "var(--color-fg-muted)" }}>
             Aquí solo editas datos básicos. Documento, verificación y onboarding
             viven en su propio flujo.
           </p>
@@ -84,10 +84,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
 
         {error && (
           <div
-            className="mb-5 rounded-xl px-4 py-3 text-sm font-medium"
+            className="mb-4 rounded-lg px-3 py-2.5 text-xs font-medium"
             style={{
-              background: "rgba(185, 55, 55, 0.15)",
-              border: "1px solid rgba(185, 55, 55, 0.4)",
+              background: "rgba(185, 55, 55, 0.12)",
+              border: "1px solid rgba(185, 55, 55, 0.3)",
               color: "#F87171",
             }}
           >
@@ -95,7 +95,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           </div>
         )}
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div>
             <label htmlFor="nombres" className="form-label">
               Nombres
@@ -150,8 +150,8 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         </div>
       </div>
 
-      <div className="glass-card p-5">
-        <div className="space-y-3">
+      <div className="glass-card p-4">
+        <div className="space-y-2.5">
           <Button
             type="submit"
             variant="primary"

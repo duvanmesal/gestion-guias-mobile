@@ -49,21 +49,21 @@ const EditProfilePage: React.FC = () => {
             style={{ width: 180, height: 180, bottom: "8%", left: "-8%" }}
           />
 
-          <div className="relative z-10 flex min-h-screen flex-col px-6 py-8 safe-area-inset">
-            <div className="mb-6 flex items-center gap-3">
+          <div className="relative z-10 flex min-h-screen flex-col px-5 py-6 safe-area-inset">
+            <div className="mb-5 flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={goToProfile}
-                className="flex h-10 w-10 items-center justify-center rounded-xl"
+                className="flex h-9 w-9 items-center justify-center rounded-lg"
                 style={{
-                  background: "rgba(255, 255, 255, 0.06)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
                   color: "var(--color-fg-primary)",
                 }}
                 aria-label="Volver al perfil"
               >
                 <svg
-                  className="h-5 w-5"
+                  className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -79,13 +79,13 @@ const EditProfilePage: React.FC = () => {
 
               <div>
                 <h1
-                  className="text-2xl font-bold"
+                  className="text-xl font-bold"
                   style={{ color: "var(--color-fg-primary)" }}
                 >
                   Editar perfil
                 </h1>
                 <p
-                  className="text-sm"
+                  className="text-xs"
                   style={{ color: "var(--color-fg-muted)" }}
                 >
                   Actualiza tus datos básicos
