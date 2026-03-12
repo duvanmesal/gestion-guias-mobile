@@ -6,6 +6,7 @@ import * as authApi from "../data/auth.api";
 import * as userApi from "../../users/data/users.api";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 import { mapUserMeToSessionUser } from "../../users/data/users.mappers";
+import Button from "../../../ui/components/Button";
 
 const RESEND_COOLDOWN = 60;
 
@@ -25,10 +26,19 @@ const VerifyEmailPage: React.FC = () => {
   const email = user?.email ?? "";
   const code = otpValues.join("");
 
-  // Cooldown timer
   useEffect(() => {
     if (cooldown <= 0) return;
-    const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
+
+    const timer = setInterval(() => {
+      setCooldown((current) => {
+        if (current <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [cooldown]);
 
@@ -38,14 +48,15 @@ const VerifyEmailPage: React.FC = () => {
 
   const handleOtpChange = (index: number, value: string) => {
     const sanitized = value.replace(/\D/g, "");
-    
-    // Handle paste of full code
+
     if (sanitized.length > 1) {
       const chars = sanitized.slice(0, 6).split("");
-      const newValues = [...otpValues];
+      const newValues = ["", "", "", "", "", ""];
+
       chars.forEach((char, i) => {
         if (i < 6) newValues[i] = char;
       });
+
       setOtpValues(newValues);
       focusInput(Math.min(chars.length, 5));
       return;
@@ -60,24 +71,31 @@ const VerifyEmailPage: React.FC = () => {
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otpValues[index] && index > 0) {
       focusInput(index - 1);
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted) {
-      const chars = pasted.split("");
-      const newValues = ["", "", "", "", "", ""];
-      chars.forEach((char, i) => {
-        if (i < 6) newValues[i] = char;
-      });
-      setOtpValues(newValues);
-      focusInput(Math.min(chars.length, 5));
-    }
+
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    if (!pasted) return;
+
+    const chars = pasted.split("");
+    const newValues = ["", "", "", "", "", ""];
+
+    chars.forEach((char, i) => {
+      if (i < 6) newValues[i] = char;
+    });
+
+    setOtpValues(newValues);
+    focusInput(Math.min(chars.length, 5));
   };
 
   const handleResend = useCallback(async () => {
@@ -89,9 +107,11 @@ const VerifyEmailPage: React.FC = () => {
 
     try {
       const res = await authApi.requestEmailVerification({ email });
+
       if (!res.ok) {
         throw new Error(getErrorMessage(res.error, "No pude reenviar el código"));
       }
+
       setSuccess("Te enviamos un nuevo código al correo.");
       setCooldown(RESEND_COOLDOWN);
     } catch (err) {
@@ -110,16 +130,19 @@ const VerifyEmailPage: React.FC = () => {
 
     try {
       const res = await authApi.confirmEmailVerification({ email, code });
+
       if (!res.ok) {
         throw new Error(getErrorMessage(res.error, "Código inválido o vencido"));
       }
 
       const meRes = await userApi.getMe();
+
       if (!meRes.ok) {
         throw new Error(getErrorMessage(meRes.error, "No pude refrescar tu sesión"));
       }
 
       const mapped = mapUserMeToSessionUser(meRes.data);
+
       useSessionStore.getState().setAuthedSession({
         user: mapped,
         accessToken: accessToken ?? "",
@@ -129,6 +152,7 @@ const VerifyEmailPage: React.FC = () => {
         history.replace("/onboarding");
         return;
       }
+
       history.replace("/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al verificar email");
@@ -142,8 +166,10 @@ const VerifyEmailPage: React.FC = () => {
   return (
     <IonPage className="premium-page">
       <IonContent scrollY={true}>
-        <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
-          {/* Floating Orbs Background */}
+        <div
+          className="relative min-h-screen overflow-hidden"
+          style={{ background: "var(--color-bg-base)" }}
+        >
           <div
             className="orb orb-primary animate-float-orb"
             style={{ width: 300, height: 300, top: "-10%", left: "-20%" }}
@@ -154,14 +180,17 @@ const VerifyEmailPage: React.FC = () => {
           />
           <div
             className="orb orb-primary animate-float-orb-delayed"
-            style={{ width: 150, height: 150, top: "40%", right: "10%", opacity: 0.5 }}
+            style={{
+              width: 150,
+              height: 150,
+              top: "40%",
+              right: "10%",
+              opacity: 0.5,
+            }}
           />
 
-          {/* Main Content */}
           <div className="relative z-10 flex flex-col min-h-screen px-6 py-12 safe-area-inset">
-            {/* Hero Section */}
             <div className="text-center mb-8 animate-fade-up">
-              {/* Icon */}
               <div
                 className="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center"
                 style={{
@@ -191,6 +220,7 @@ const VerifyEmailPage: React.FC = () => {
               >
                 Verifica tu correo
               </h1>
+
               <p
                 className="text-base mb-4"
                 style={{ color: "var(--color-fg-secondary)" }}
@@ -198,7 +228,6 @@ const VerifyEmailPage: React.FC = () => {
                 Ingresa el código de 6 dígitos que enviamos a
               </p>
 
-              {/* Email Chip */}
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
                 style={{
@@ -220,6 +249,7 @@ const VerifyEmailPage: React.FC = () => {
                     d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                   />
                 </svg>
+
                 <span
                   className="text-sm font-medium"
                   style={{ color: "var(--color-fg-primary)" }}
@@ -229,30 +259,32 @@ const VerifyEmailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Glass Card */}
             <div
               className="glass-card p-6 mb-6 animate-fade-up"
               style={{ animationDelay: "0.1s" }}
             >
-              {/* OTP Input */}
               <div className="otp-container mb-6" onPaste={handlePaste}>
                 {otpValues.map((value, index) => (
                   <input
                     key={index}
-                    ref={(el) => { inputRefs.current[index] = el }}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
                     value={value}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`otp-input ${value ? "filled" : ""} ${error ? "error" : ""}`}
+                    className={`otp-input ${value ? "filled" : ""} ${
+                      error ? "error" : ""
+                    }`}
                     autoComplete="one-time-code"
+                    disabled={loadingConfirm || loadingResend}
                   />
                 ))}
               </div>
 
-              {/* Error Alert */}
               {error && (
                 <div className="alert-error mb-4 flex items-start gap-3 animate-fade-up">
                   <svg
@@ -272,7 +304,6 @@ const VerifyEmailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Success Alert */}
               {success && (
                 <div className="alert-success mb-4 flex items-start gap-3 animate-success-pulse">
                   <svg
@@ -292,92 +323,34 @@ const VerifyEmailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Verify Button */}
-              <button
-                onClick={handleConfirm}
-                disabled={loadingConfirm || code.length !== 6}
-                className={`btn-primary mb-4 flex items-center justify-center gap-2 ${
-                  code.length === 6 && !loadingConfirm ? "animate-pulse-glow" : ""
-                }`}
-              >
-                {loadingConfirm ? (
-                  <>
-                    <div className="loading-spinner" />
-                    <span>Verificando...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>Verificar correo</span>
-                  </>
-                )}
-              </button>
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleConfirm}
+                  disabled={loadingConfirm || loadingResend || code.length !== 6}
+                  isLoading={loadingConfirm}
+                  leftIcon={<CheckCircleIcon />}
+                  className={code.length === 6 && !loadingConfirm ? "animate-pulse-glow" : ""}
+                >
+                  Verificar correo
+                </Button>
 
-              {/* Resend Button */}
-              <button
-                onClick={handleResend}
-                disabled={loadingResend || cooldown > 0}
-                className="btn-secondary flex items-center justify-center gap-2"
-              >
-                {loadingResend ? (
-                  <>
-                    <div
-                      className="loading-spinner"
-                      style={{ borderTopColor: "var(--color-fg-secondary)" }}
-                    />
-                    <span>Reenviando...</span>
-                  </>
-                ) : cooldown > 0 ? (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span>Reenviar en {cooldown}s</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      />
-                    </svg>
-                    <span>Reenviar código</span>
-                  </>
-                )}
-              </button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={handleResend}
+                  disabled={loadingConfirm || loadingResend || cooldown > 0}
+                  isLoading={loadingResend}
+                  leftIcon={cooldown > 0 ? <ClockIcon /> : <RefreshIcon />}
+                >
+                  {cooldown > 0 ? `Reenviar en ${cooldown}s` : "Reenviar código"}
+                </Button>
+              </div>
             </div>
 
-            {/* Help Text */}
             <p
               className="text-center text-sm animate-fade-up"
               style={{
@@ -393,5 +366,38 @@ const VerifyEmailPage: React.FC = () => {
     </IonPage>
   );
 };
+
+const CheckCircleIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+const RefreshIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
 
 export default VerifyEmailPage;

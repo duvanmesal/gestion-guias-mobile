@@ -3,21 +3,21 @@ import { useHistory } from "react-router-dom";
 import OnboardingForm, {
   type OnboardingFormValues,
 } from "../components/OnboardingForm";
-import { useUpdateProfile } from "../hooks/useUpdateProfile";
+import { useCompleteProfile } from "../hooks/useCompleteProfile";
 import { useChangePassword } from "../../auth/hooks/useChangePassword";
 
 const OnboardingPage: React.FC = () => {
   const history = useHistory();
-  const updateProfile = useUpdateProfile();
+  const completeProfile = useCompleteProfile();
   const changePassword = useChangePassword();
 
-  const isLoading = updateProfile.isPending || changePassword.isPending;
+  const isLoading = completeProfile.isPending || changePassword.isPending;
   const error =
-    updateProfile.error?.message ?? changePassword.error?.message ?? null;
+    completeProfile.error?.message ?? changePassword.error?.message ?? null;
 
   const handleSubmit = async (values: OnboardingFormValues) => {
     try {
-      await updateProfile.mutateAsync({
+      await completeProfile.mutateAsync({
         nombres: values.nombres,
         apellidos: values.apellidos,
         telefono: values.telefono,

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { DocumentType } from "../types/users.types";
+import Button from "../../../ui/components/Button";
 
 const passwordRule = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,72}$/;
 
@@ -54,6 +55,54 @@ const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
   { value: "PASSPORT", label: "Pasaporte" },
 ];
 
+const ChevronLeftIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 19l-7-7 7-7"
+    />
+  </svg>
+);
+
+const ChevronRightIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 5l7 7-7 7"
+    />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M5 13l4 4L19 7"
+    />
+  </svg>
+);
+
 const OnboardingForm: React.FC<OnboardingFormProps> = ({
   onSubmit,
   isLoading,
@@ -89,7 +138,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
   const newPassword = watchedValues.newPassword || "";
   const confirmPassword = watchedValues.confirmPassword || "";
 
-  // Password strength calculation
   const passwordStrength = useMemo(() => {
     if (!newPassword) return { level: "none", label: "" };
     let score = 0;
@@ -105,7 +153,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
     return { level: "strong", label: "Fuerte" };
   }, [newPassword]);
 
-  // Password rules validation
   const passwordRules = useMemo(
     () => [
       { label: "8+ caracteres", valid: newPassword.length >= 8 },
@@ -117,7 +164,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
     [newPassword]
   );
 
-  const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword;
+  const passwordsMatch =
+    newPassword && confirmPassword && newPassword === confirmPassword;
 
   const validateCurrentStep = async (): Promise<boolean> => {
     switch (currentStep) {
@@ -126,7 +174,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
       case 2:
         return await trigger(["telefono", "documentType", "documentNumber"]);
       case 3:
-        return await trigger(["currentPassword", "newPassword", "confirmPassword"]);
+        return await trigger([
+          "currentPassword",
+          "newPassword",
+          "confirmPassword",
+        ]);
       default:
         return true;
     }
@@ -227,7 +279,9 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             >
               <input
                 type="text"
-                className={`premium-input ${errors.documentNumber ? "error" : ""}`}
+                className={`premium-input ${
+                  errors.documentNumber ? "error" : ""
+                }`}
                 placeholder="123456789"
                 value={watchedValues.documentNumber}
                 onChange={(e) =>
@@ -293,7 +347,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                 />
               </div>
 
-              {/* Password Strength Bar */}
               {newPassword && (
                 <div className="mt-3">
                   <div className="flex justify-between items-center mb-1">
@@ -320,14 +373,11 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                     </span>
                   </div>
                   <div className="strength-bar">
-                    <div
-                      className={`strength-fill ${passwordStrength.level}`}
-                    />
+                    <div className={`strength-fill ${passwordStrength.level}`} />
                   </div>
                 </div>
               )}
 
-              {/* Password Rules */}
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {passwordRules.map((rule) => (
                   <div
@@ -335,7 +385,9 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                     className={`rule-item ${rule.valid ? "valid" : ""}`}
                   >
                     <div
-                      className={`rule-icon ${rule.valid ? "valid" : "pending"}`}
+                      className={`rule-icon ${
+                        rule.valid ? "valid" : "pending"
+                      }`}
                     >
                       {rule.valid && (
                         <svg
@@ -383,7 +435,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
                 />
               </div>
 
-              {/* Match Indicator */}
               {confirmPassword && (
                 <div
                   className="mt-2 flex items-center gap-2 text-xs"
@@ -441,7 +492,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Header */}
       <div className="text-center mb-6 animate-fade-up">
         <div
           className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center"
@@ -476,8 +526,10 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         </p>
       </div>
 
-      {/* Stepper */}
-      <div className="stepper-container mb-8 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+      <div
+        className="stepper-container mb-8 animate-fade-up"
+        style={{ animationDelay: "0.1s" }}
+      >
         {STEPS.map((step, index) => (
           <div key={step.id} className="contents">
             <div
@@ -519,7 +571,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         ))}
       </div>
 
-      {/* Step Title */}
       <div className="text-center mb-6">
         <h2
           className="text-lg font-semibold mb-1"
@@ -532,12 +583,10 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         </p>
       </div>
 
-      {/* Glass Card with Form */}
       <div className="glass-card p-6 mb-6 flex-1">
         <form onSubmit={(e) => e.preventDefault()}>
           {renderStepContent()}
 
-          {/* Global Error */}
           {error && (
             <div className="alert-error mt-5 flex items-start gap-3">
               <svg
@@ -559,90 +608,49 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         </form>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex gap-3 mt-auto animate-fade-up" style={{ animationDelay: "0.2s" }}>
+      <div
+        className="flex gap-3 mt-auto animate-fade-up"
+        style={{ animationDelay: "0.2s" }}
+      >
         {currentStep > 1 && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={handleBack}
             disabled={isLoading}
-            className="btn-secondary flex-1 flex items-center justify-center gap-2"
+            leftIcon={<ChevronLeftIcon />}
+            className="flex-1 justify-center"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            <span>Anterior</span>
-          </button>
+            Anterior
+          </Button>
         )}
 
         {currentStep < 3 ? (
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={handleNext}
-            className="btn-primary flex-1 flex items-center justify-center gap-2"
+            rightIcon={<ChevronRightIcon />}
+            className="flex-1 justify-center"
           >
-            <span>Siguiente</span>
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+            Siguiente
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={onFinalSubmit}
-            disabled={isLoading}
-            className={`btn-primary flex-1 flex items-center justify-center gap-2 ${
+            isLoading={isLoading}
+            leftIcon={!isLoading ? <CheckIcon /> : undefined}
+            className={`flex-1 justify-center ${
               !isLoading ? "animate-pulse-glow" : ""
             }`}
           >
-            {isLoading ? (
-              <>
-                <div className="loading-spinner" />
-                <span>Guardando...</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>Finalizar</span>
-              </>
-            )}
-          </button>
+            {isLoading ? "Guardando..." : "Finalizar"}
+          </Button>
         )}
       </div>
 
-      {/* Step Indicator Text */}
       <p
         className="text-center text-xs mt-4"
         style={{ color: "var(--color-fg-muted)" }}
@@ -653,7 +661,6 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
   );
 };
 
-// Helper Components
 interface FormFieldProps {
   label: string;
   error?: string;
@@ -661,7 +668,12 @@ interface FormFieldProps {
   children: React.ReactNode;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ label, error, hint, children }) => (
+const FormField: React.FC<FormFieldProps> = ({
+  label,
+  error,
+  hint,
+  children,
+}) => (
   <div>
     <label
       className="block text-sm font-medium mb-2"
@@ -712,7 +724,12 @@ const PasswordToggle: React.FC<PasswordToggleProps> = ({ show, onToggle }) => (
     style={{ color: "var(--color-fg-muted)" }}
   >
     {show ? (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -721,7 +738,12 @@ const PasswordToggle: React.FC<PasswordToggleProps> = ({ show, onToggle }) => (
         />
       </svg>
     ) : (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"

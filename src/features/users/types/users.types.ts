@@ -6,7 +6,7 @@ import type {
 
 export type DocumentType = UserDocumentType;
 
-export interface UpdateProfileRequest {
+export interface CompleteProfileRequest {
   nombres: string;
   apellidos: string;
   telefono: string;
@@ -14,8 +14,30 @@ export interface UpdateProfileRequest {
   documentNumber: string;
 }
 
-export interface UpdateProfileResponse {
+export type CompleteProfileResponse = {
   profileStatus: ProfileStatus;
+};
+
+export interface UpdateMeRequest {
+  nombres?: string;
+  apellidos?: string;
+  telefono?: string;
+}
+
+export interface UpdateMeResponse {
+  id: string;
+  email?: string;
+  nombres?: string;
+  apellidos?: string;
+  telefono?: string | null;
+  rol?: Role;
+  role?: Role;
+  activo?: boolean;
+  profileStatus: ProfileStatus;
+  profileCompletedAt?: string | null;
+  emailVerifiedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GuideLookupItem {

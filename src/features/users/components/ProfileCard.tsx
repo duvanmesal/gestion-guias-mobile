@@ -75,7 +75,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }
   };
 
-  // Status chip component
   const StatusChip = ({
     label,
     variant,
@@ -87,7 +86,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     return <span className={chipClass}>{label}</span>;
   };
 
-  // Info row component
   const InfoRow = ({
     label,
     value,
@@ -98,9 +96,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     icon: React.ReactNode;
   }) => (
     <div className="info-row">
-      <div className="info-row-icon">
-        {icon}
-      </div>
+      <div className="info-row-icon">{icon}</div>
       <div className="info-row-content">
         <p className="info-row-label">{label}</p>
         <p className="info-row-value">{value}</p>
@@ -110,20 +106,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <>
-      {/* Profile Identity Card */}
       <div className="glass-card p-5 mb-4">
-        {/* Avatar + Name Section */}
         <div className="flex items-center gap-4 mb-5">
-          <div className="profile-avatar">
-            {fullName.charAt(0).toUpperCase()}
-          </div>
+          <div className="profile-avatar">{fullName.charAt(0).toUpperCase()}</div>
           <div className="flex-1 min-w-0">
             <h2 className="profile-name">{fullName}</h2>
             <p className="profile-email">{user.email || "Sin correo registrado"}</p>
           </div>
         </div>
 
-        {/* Status Chips */}
         <div className="flex flex-wrap gap-2">
           <StatusChip label={roleLabel} variant="primary" />
           <StatusChip
@@ -143,11 +134,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </div>
 
-      {/* Personal Info Section */}
       <div className="glass-card p-5 mb-4">
         <h3 className="section-title">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
           Información Personal
         </h3>
@@ -157,8 +152,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Nombres"
             value={user.nombres || "No registrado"}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             }
           />
@@ -166,8 +172,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Apellidos"
             value={user.apellidos || "No registrado"}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             }
           />
@@ -175,8 +192,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Tipo de Documento"
             value={documentTypeLabel}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                />
               </svg>
             }
           />
@@ -184,19 +212,34 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Número de Documento"
             value={documentNumberMasked}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                />
               </svg>
             }
           />
         </div>
       </div>
 
-      {/* Contact Info Section */}
       <div className="glass-card p-5 mb-4">
         <h3 className="section-title">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
           </svg>
           Información de Contacto
         </h3>
@@ -206,8 +249,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Correo Electrónico"
             value={user.email || "No registrado"}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
               </svg>
             }
           />
@@ -215,19 +269,34 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Teléfono"
             value={user.telefono || "No registrado"}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
               </svg>
             }
           />
         </div>
       </div>
 
-      {/* Account Status Section */}
       <div className="glass-card p-5 mb-4">
         <h3 className="section-title">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            />
           </svg>
           Estado de la Cuenta
         </h3>
@@ -237,8 +306,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Rol"
             value={roleLabel}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                />
               </svg>
             }
           />
@@ -246,8 +326,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Estado de Verificación"
             value={verificationLabel}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             }
           />
@@ -255,15 +346,25 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             label="Estado del Perfil"
             value={profileStatusLabel}
             icon={
-              <svg className="h-4 w-4" style={{ color: "var(--color-primary)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              <svg
+                className="h-4 w-4"
+                style={{ color: "var(--color-primary)" }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                />
               </svg>
             }
           />
         </div>
       </div>
 
-      {/* Error Banner */}
       {localError && (
         <div className="alert-error mb-4 flex items-center gap-3 animate-shake">
           <svg
@@ -283,20 +384,42 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       )}
 
-      {/* Action Buttons Section */}
       <div className="glass-card p-5">
         <h3 className="section-title">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+            />
           </svg>
           Acciones
         </h3>
 
         <div className="space-y-3">
-          {/* Refresh Button */}
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => history.push("/profile/edit")}
+            disabled={busy !== null || isRefreshing}
+            leftIcon={
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            }
+          >
+            Editar mis datos
+          </Button>
+
           {onRefresh && (
             <Button
-              variant="primary"
+              variant="secondary"
               size="md"
               onClick={onRefresh}
               disabled={isRefreshing || busy !== null}
@@ -304,16 +427,20 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               leftIcon={
                 !isRefreshing && (
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
                   </svg>
                 )
               }
             >
-              {isRefreshing ? "Actualizando..." : "Actualizar datos"}
+              {isRefreshing ? "Recargando..." : "Recargar información"}
             </Button>
           )}
 
-          {/* Logout Button */}
           <Button
             variant="secondary"
             size="md"
@@ -323,7 +450,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             leftIcon={
               busy !== "logout" && (
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
                 </svg>
               )
             }
@@ -331,7 +463,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             {busy === "logout" ? "Cerrando sesión..." : "Cerrar sesión"}
           </Button>
 
-          {/* Logout All Sessions Button */}
           <Button
             variant="danger"
             size="md"
@@ -341,7 +472,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             leftIcon={
               busy !== "logoutAll" && (
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
               )
             }
@@ -351,7 +487,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </div>
 
-      {/* Alert for logout all sessions */}
       <IonAlert
         isOpen={logoutAllOpen}
         onDidDismiss={() => setLogoutAllOpen(false)}

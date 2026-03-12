@@ -5,50 +5,51 @@ import { useMyAccount } from "../hooks/useMyAccount";
 
 const ProfilePage: React.FC = () => {
   const storeUser = useSessionStore((s) => s.user);
-  const { data, isFetching, refetch, error } = useMyAccount();
+  const { data, isFetching, isLoading, refetch, error } = useMyAccount();
 
   const user = data ?? storeUser;
+  const showInitialLoading = (isLoading || isFetching) && !user;
 
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        {/* Full-screen premium container */}
         <div className="relative min-h-screen w-full bg-[#0F1419]">
-          {/* Animated floating orbs */}
           <div
             className="pointer-events-none absolute top-[-5%] right-[-10%] h-[300px] w-[300px] rounded-full opacity-40 blur-[100px]"
             style={{
-              background: "radial-gradient(circle, #228B54 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, #228B54 0%, transparent 70%)",
               animation: "floatOrb1 12s ease-in-out infinite",
             }}
           />
           <div
             className="pointer-events-none absolute left-[-15%] bottom-[20%] h-[250px] w-[250px] rounded-full opacity-35 blur-[90px]"
             style={{
-              background: "radial-gradient(circle, #BF9B30 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, #BF9B30 0%, transparent 70%)",
               animation: "floatOrb2 14s ease-in-out infinite",
             }}
           />
           <div
             className="pointer-events-none absolute top-[50%] left-[70%] h-[180px] w-[180px] rounded-full opacity-25 blur-[80px]"
             style={{
-              background: "radial-gradient(circle, #228B54 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, #228B54 0%, transparent 70%)",
               animation: "floatOrb3 10s ease-in-out infinite",
             }}
           />
 
-          {/* Main content */}
           <div
             className="relative z-10 px-5 pb-12 pt-8"
             style={{ animation: "fadeSlideUp 0.6s ease-out" }}
           >
-            {/* Header Section */}
             <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="mb-2 flex items-center gap-3">
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl"
                   style={{
-                    background: "linear-gradient(135deg, rgba(34, 139, 84, 0.2) 0%, rgba(34, 139, 84, 0.1) 100%)",
+                    background:
+                      "linear-gradient(135deg, rgba(34, 139, 84, 0.2) 0%, rgba(34, 139, 84, 0.1) 100%)",
                     border: "1px solid rgba(34, 139, 84, 0.3)",
                   }}
                 >
@@ -68,7 +69,10 @@ const ProfilePage: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold" style={{ color: "#F5F7FA" }}>
+                  <h1
+                    className="text-2xl font-bold"
+                    style={{ color: "#F5F7FA" }}
+                  >
                     Mi Cuenta
                   </h1>
                 </div>
@@ -78,7 +82,6 @@ const ProfilePage: React.FC = () => {
               </p>
             </div>
 
-            {/* Error State */}
             {error && (
               <div
                 className="mb-6 flex items-center gap-3 rounded-xl px-4 py-3"
@@ -102,14 +105,31 @@ const ProfilePage: React.FC = () => {
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="text-sm font-medium" style={{ color: "#F87171" }}>
-                  {error instanceof Error ? error.message : "No pude cargar tu cuenta."}
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "#F87171" }}
+                >
+                  {error instanceof Error
+                    ? error.message
+                    : "No pude cargar tu cuenta."}
                 </span>
               </div>
             )}
 
-            {/* Profile Card */}
-            {user && (
+            {showInitialLoading && (
+              <div
+                className="mb-6 rounded-2xl px-4 py-5"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  color: "#CBD5E1",
+                }}
+              >
+                Cargando tu perfil...
+              </div>
+            )}
+
+            {!showInitialLoading && user && (
               <ProfileCard
                 user={user}
                 isRefreshing={isFetching}
@@ -118,10 +138,22 @@ const ProfilePage: React.FC = () => {
                 }}
               />
             )}
+
+            {!showInitialLoading && !user && !error && (
+              <div
+                className="rounded-2xl px-4 py-5"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  color: "#CBD5E1",
+                }}
+              >
+                No hay datos de perfil disponibles en este momento.
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Keyframe animations */}
         <style>{`
           @keyframes floatOrb1 {
             0%, 100% { transform: translate(0, 0) scale(1); }

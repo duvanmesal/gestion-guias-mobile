@@ -7,6 +7,7 @@ import LoginPage from "../../features/auth/pages/LoginPage";
 import VerifyEmailPage from "../../features/auth/pages/VerifyEmailPage";
 import OnboardingPage from "../../features/users/pages/OnboardingPage";
 import ProfilePage from "../../features/users/pages/ProfilePage";
+import EditProfilePage from "../../features/users/pages/EditProfilePage";
 
 import GuestOnlyGuard from "./guards/GuestOnlyGuard";
 import VerifyEmailGuard from "./guards/VerifyEmailGuard";
@@ -43,6 +44,12 @@ const AppRoutes: React.FC = () => {
       <Route path="/profile" exact>
         <AppReadyGuard>
           <ProfilePage />
+        </AppReadyGuard>
+      </Route>
+
+      <Route path="/profile/edit" exact>
+        <AppReadyGuard>
+          <EditProfilePage />
         </AppReadyGuard>
       </Route>
 
