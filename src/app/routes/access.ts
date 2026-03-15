@@ -50,7 +50,7 @@ export function resolveAppEntry(snapshot: SessionSnapshot): string {
     case "onboarding":
       return "/onboarding";
     case "ready":
-      return "/profile";
+      return "/home";
     case "loading":
     default:
       return "/";
@@ -81,12 +81,10 @@ export function getAccessRedirect(
 
   if (stage === "loading") return null;
 
-  // Guest-only
   if (path === "/login") {
     return stage === "guest" ? null : resolveAppEntry(snapshot);
   }
 
-  // Verify flow
   if (path === "/verify-email") {
     switch (stage) {
       case "guest":
@@ -96,13 +94,12 @@ export function getAccessRedirect(
       case "onboarding":
         return "/onboarding";
       case "ready":
-        return "/profile";
+        return "/home";
       default:
         return "/login";
     }
   }
 
-  // Onboarding flow
   if (path === "/onboarding") {
     switch (stage) {
       case "guest":
@@ -112,13 +109,12 @@ export function getAccessRedirect(
       case "onboarding":
         return null;
       case "ready":
-        return "/profile";
+        return "/home";
       default:
         return "/login";
     }
   }
 
-  // Cualquier ruta protegida/interna
   switch (stage) {
     case "guest":
       return "/login";

@@ -8,6 +8,8 @@ import VerifyEmailPage from "../../features/auth/pages/VerifyEmailPage";
 import OnboardingPage from "../../features/users/pages/OnboardingPage";
 import ProfilePage from "../../features/users/pages/ProfilePage";
 import EditProfilePage from "../../features/users/pages/EditProfilePage";
+import HomePage from "../../features/dashboard/pages/HomePage";
+import ModulePlaceholderPage from "../../features/dashboard/pages/ModulePlaceholderPage";
 
 import GuestOnlyGuard from "./guards/GuestOnlyGuard";
 import VerifyEmailGuard from "./guards/VerifyEmailGuard";
@@ -41,6 +43,12 @@ const AppRoutes: React.FC = () => {
         </OnboardingGuard>
       </Route>
 
+      <Route path="/home" exact>
+        <AppReadyGuard>
+          <HomePage />
+        </AppReadyGuard>
+      </Route>
+
       <Route path="/profile" exact>
         <AppReadyGuard>
           <ProfilePage />
@@ -50,6 +58,33 @@ const AppRoutes: React.FC = () => {
       <Route path="/profile/edit" exact>
         <AppReadyGuard>
           <EditProfilePage />
+        </AppReadyGuard>
+      </Route>
+
+      <Route path="/turnos" exact>
+        <AppReadyGuard>
+          <ModulePlaceholderPage
+            title="Turnos"
+            description="Aquí puedes conectar el listado real de turnos, detalle, check-in y check-out sin romper la navegación desde el dashboard."
+          />
+        </AppReadyGuard>
+      </Route>
+
+      <Route path="/atenciones" exact>
+        <AppReadyGuard>
+          <ModulePlaceholderPage
+            title="Atenciones"
+            description="Esta ruta queda sembrada para enlazar la toma de turnos disponibles y el resumen operativo de atenciones."
+          />
+        </AppReadyGuard>
+      </Route>
+
+      <Route path="/recaladas" exact>
+        <AppReadyGuard>
+          <ModulePlaceholderPage
+            title="Recaladas"
+            description="Este espacio te deja anclar la agenda madre de recaladas y sus próximos hitos sin dejar huecos en la experiencia."
+          />
         </AppReadyGuard>
       </Route>
 
