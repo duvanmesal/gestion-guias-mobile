@@ -58,7 +58,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
     try {
       if (!password.trim()) {
-        setLocalError("Debes ingresar tu contraseña actual.");
+        setLocalError("Debes ingresar tu contrasena actual.");
         return;
       }
 
@@ -75,55 +75,40 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }
   };
 
-  const StatusChip = ({
-    label,
-    variant,
-  }: {
-    label: string;
-    variant: "success" | "warning" | "primary" | "neutral";
-  }) => {
-    const chipClass = `status-chip status-chip-${variant}`;
-    return <span className={chipClass}>{label}</span>;
-  };
-
-  const InfoRow = ({
-    label,
-    value,
-    icon,
-  }: {
-    label: string;
-    value: string;
-    icon: React.ReactNode;
-  }) => (
-    <div className="info-row">
-      <div className="info-row-icon">{icon}</div>
-      <div className="info-row-content">
-        <p className="info-row-label">{label}</p>
-        <p className="info-row-value">{value}</p>
-      </div>
-    </div>
-  );
-
   return (
     <>
-      <div className="glass-card p-4 mb-3">
+      {/* Profile Header Card */}
+      <NeuCard className="p-4 mb-3 animate-fade-up">
         <div className="flex items-center gap-3 mb-4">
-          <div className="profile-avatar">{fullName.charAt(0).toUpperCase()}</div>
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold shrink-0"
+            style={{
+              background: "var(--color-primary)",
+              color: "white",
+              boxShadow: "0 4px 12px rgba(34,139,84,0.3)",
+            }}
+          >
+            {fullName.charAt(0).toUpperCase()}
+          </div>
           <div className="flex-1 min-w-0">
-            <h2 className="profile-name">{fullName}</h2>
-            <p className="profile-email">{user.email || "Sin correo registrado"}</p>
+            <h2 className="text-lg font-bold text-[var(--color-fg-primary)] truncate">
+              {fullName}
+            </h2>
+            <p className="text-sm text-[var(--color-fg-secondary)] truncate">
+              {user.email || "Sin correo registrado"}
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           <StatusChip label={roleLabel} variant="primary" />
           <StatusChip
             label={verificationLabel}
-            variant={user.emailVerifiedAt ? "success" : "warning"}
+            variant={user.emailVerifiedAt ? "success" : "neutral"}
           />
           <StatusChip
-            label={`Perfil ${profileStatusLabel}`}
-            variant={user.profileStatus === "COMPLETE" ? "success" : "warning"}
+            label={profileStatusLabel}
+            variant={user.profileStatus === "COMPLETE" ? "success" : "neutral"}
           />
           {typeof user.activo === "boolean" && (
             <StatusChip
@@ -132,272 +117,117 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             />
           )}
         </div>
-      </div>
+      </NeuCard>
 
-      <div className="glass-card p-4 mb-3">
-        <h3 className="section-title">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          Información Personal
-        </h3>
+      {/* Personal Info Section */}
+      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "50ms" }}>
+        <SectionHeader
+          icon={
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          }
+          title="Informacion Personal"
+        />
 
-        <div className="space-y-2">
-          <InfoRow
-            label="Nombres"
-            value={user.nombres || "No registrado"}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Apellidos"
-            value={user.apellidos || "No registrado"}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Tipo de Documento"
-            value={documentTypeLabel}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Número de Documento"
-            value={documentNumberMasked}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                />
-              </svg>
-            }
-          />
+        <div className="space-y-2 mt-3">
+          <InfoRow label="Nombres" value={user.nombres || "No registrado"} />
+          <InfoRow label="Apellidos" value={user.apellidos || "No registrado"} />
+          <InfoRow label="Documento" value={documentTypeLabel} />
+          <InfoRow label="Numero" value={documentNumberMasked} />
         </div>
-      </div>
+      </NeuCard>
 
-      <div className="glass-card p-4 mb-3">
-        <h3 className="section-title">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-          Información de Contacto
-        </h3>
+      {/* Contact Info Section */}
+      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <SectionHeader
+          icon={
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          }
+          title="Contacto"
+        />
 
-        <div className="space-y-2">
-          <InfoRow
-            label="Correo Electrónico"
-            value={user.email || "No registrado"}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Teléfono"
-            value={user.telefono || "No registrado"}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                />
-              </svg>
-            }
-          />
+        <div className="space-y-2 mt-3">
+          <InfoRow label="Correo" value={user.email || "No registrado"} />
+          <InfoRow label="Telefono" value={user.telefono || "No registrado"} />
         </div>
-      </div>
+      </NeuCard>
 
-      <div className="glass-card p-4 mb-3">
-        <h3 className="section-title">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            />
-          </svg>
-          Estado de la Cuenta
-        </h3>
+      {/* Account Status Section */}
+      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "150ms" }}>
+        <SectionHeader
+          icon={
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+          }
+          title="Estado de Cuenta"
+        />
 
-        <div className="space-y-2">
-          <InfoRow
-            label="Rol"
-            value={roleLabel}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Estado de Verificación"
-            value={verificationLabel}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            }
-          />
-          <InfoRow
-            label="Estado del Perfil"
-            value={profileStatusLabel}
-            icon={
-              <svg
-                className="h-4 w-4"
-                style={{ color: "var(--color-primary)" }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                />
-              </svg>
-            }
-          />
+        <div className="space-y-2 mt-3">
+          <InfoRow label="Rol" value={roleLabel} />
+          <InfoRow label="Verificacion" value={verificationLabel} />
+          <InfoRow label="Perfil" value={profileStatusLabel} />
         </div>
-      </div>
+      </NeuCard>
 
+      {/* Error message */}
       {localError && (
-        <div className="alert-error mb-3 flex items-center gap-2 animate-shake">
-          <svg
-            className="h-5 w-5 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-sm font-medium">{localError}</span>
-        </div>
+        <NeuCard className="mb-3 p-3 animate-shake" inset>
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-4 w-4 shrink-0"
+              style={{ color: "var(--color-danger)" }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-xs font-medium text-[var(--color-danger)]">{localError}</span>
+          </div>
+        </NeuCard>
       )}
 
-      <div className="glass-card p-4">
-        <h3 className="section-title">
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-            />
-          </svg>
-          Acciones
-        </h3>
+      {/* Actions Section */}
+      <NeuCard className="p-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <SectionHeader
+          icon={
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+              />
+            </svg>
+          }
+          title="Acciones"
+        />
 
-        <div className="space-y-2">
+        <div className="space-y-2 mt-3">
           <Button
             variant="primary"
             size="md"
@@ -425,7 +255,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               disabled={isRefreshing || busy !== null}
               isLoading={isRefreshing}
               leftIcon={
-                !isRefreshing && (
+                !isRefreshing ? (
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
@@ -434,10 +264,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                )
+                ) : undefined
               }
             >
-              {isRefreshing ? "Recargando..." : "Recargar información"}
+              {isRefreshing ? "Recargando..." : "Recargar informacion"}
             </Button>
           )}
 
@@ -448,7 +278,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             disabled={busy !== null || isRefreshing}
             isLoading={busy === "logout"}
             leftIcon={
-              busy !== "logout" && (
+              busy !== "logout" ? (
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -457,10 +287,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-              )
+              ) : undefined
             }
           >
-            {busy === "logout" ? "Cerrando sesión..." : "Cerrar sesión"}
+            {busy === "logout" ? "Cerrando sesion..." : "Cerrar sesion"}
           </Button>
 
           <Button
@@ -470,7 +300,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             disabled={busy !== null || isRefreshing}
             isLoading={busy === "logoutAll"}
             leftIcon={
-              busy !== "logoutAll" && (
+              busy !== "logoutAll" ? (
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -479,24 +309,24 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                   />
                 </svg>
-              )
+              ) : undefined
             }
           >
             {busy === "logoutAll" ? "Cerrando todas..." : "Cerrar todas las sesiones"}
           </Button>
         </div>
-      </div>
+      </NeuCard>
 
       <IonAlert
         isOpen={logoutAllOpen}
         onDidDismiss={() => setLogoutAllOpen(false)}
         header="Cerrar todas las sesiones"
-        message="Ingresa tu contraseña actual para cerrar sesión en todos tus dispositivos."
+        message="Ingresa tu contrasena actual para cerrar sesion en todos tus dispositivos."
         inputs={[
           {
             name: "password",
             type: "password",
-            placeholder: "Contraseña actual",
+            placeholder: "Contrasena actual",
           },
         ]}
         buttons={[
@@ -514,6 +344,93 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         ]}
       />
     </>
+  );
+};
+
+/* ================================
+   NEUMORPHIC COMPONENTS
+   ================================ */
+
+const NeuCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  inset?: boolean;
+  style?: React.CSSProperties;
+}> = ({ children, className = "", inset = false, style }) => {
+  const neuStyles = inset
+    ? {
+        background: "var(--color-bg-base)",
+        boxShadow: "inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.02)",
+      }
+    : {
+        background: "linear-gradient(145deg, #161d24, #121920)",
+        boxShadow: "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.03)",
+      };
+
+  return (
+    <div className={`rounded-xl ${className}`} style={{ ...neuStyles, ...style }}>
+      {children}
+    </div>
+  );
+};
+
+const SectionHeader: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+}> = ({ icon, title }) => (
+  <div className="flex items-center gap-2">
+    <span style={{ color: "var(--color-primary)" }}>{icon}</span>
+    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-muted)]">
+      {title}
+    </h3>
+  </div>
+);
+
+const InfoRow: React.FC<{
+  label: string;
+  value: string;
+}> = ({ label, value }) => (
+  <NeuCard className="flex items-center justify-between px-3 py-2.5" inset>
+    <p className="text-xs text-[var(--color-fg-muted)]">{label}</p>
+    <p className="text-sm font-medium text-[var(--color-fg-primary)] text-right truncate max-w-[60%]">
+      {value}
+    </p>
+  </NeuCard>
+);
+
+const StatusChip: React.FC<{
+  label: string;
+  variant: "success" | "primary" | "neutral";
+}> = ({ label, variant }) => {
+  const styles = {
+    success: {
+      background: "rgba(34,139,84,0.15)",
+      border: "1px solid rgba(34,139,84,0.25)",
+      color: "var(--color-primary)",
+    },
+    primary: {
+      background: "rgba(34,139,84,0.15)",
+      border: "1px solid rgba(34,139,84,0.25)",
+      color: "var(--color-primary)",
+    },
+    neutral: {
+      background: "rgba(255,255,255,0.05)",
+      border: "1px solid rgba(255,255,255,0.05)",
+      color: "var(--color-fg-muted)",
+    },
+  };
+
+  const style = styles[variant];
+
+  return (
+    <span
+      className="inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+      style={style}
+    >
+      {label}
+    </span>
   );
 };
 

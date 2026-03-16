@@ -34,30 +34,20 @@ const EditProfilePage: React.FC = () => {
   };
 
   return (
-    <IonPage className="premium-page">
+    <IonPage>
       <IonContent scrollY={true}>
-        <div
-          className="relative min-h-screen overflow-hidden"
-          style={{ background: "var(--color-bg-base)" }}
-        >
-          <div
-            className="orb orb-primary animate-float-orb"
-            style={{ width: 260, height: 260, top: "-8%", right: "-12%" }}
-          />
-          <div
-            className="orb orb-accent animate-float-orb-delayed"
-            style={{ width: 180, height: 180, bottom: "8%", left: "-8%" }}
-          />
-
-          <div className="relative z-10 flex min-h-screen flex-col px-5 py-6 safe-area-inset">
-            <div className="mb-5 flex items-center gap-2.5">
+        <div className="min-h-screen bg-[var(--color-bg-base)]">
+          <div className="px-6 py-10 animate-fade-up">
+            {/* Header with back button */}
+            <header className="mb-6 flex items-center gap-3">
               <button
                 type="button"
                 onClick={goToProfile}
-                className="flex h-9 w-9 items-center justify-center rounded-lg"
+                className="flex h-10 w-10 items-center justify-center rounded-xl transition-all active:scale-95"
                 style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  background: "linear-gradient(145deg, #161d24, #121920)",
+                  boxShadow: "3px 3px 6px rgba(0,0,0,0.35), -2px -2px 5px rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.03)",
                   color: "var(--color-fg-primary)",
                 }}
                 aria-label="Volver al perfil"
@@ -78,21 +68,16 @@ const EditProfilePage: React.FC = () => {
               </button>
 
               <div>
-                <h1
-                  className="text-xl font-bold"
-                  style={{ color: "var(--color-fg-primary)" }}
-                >
+                <h1 className="text-xl font-bold text-[var(--color-fg-primary)]">
                   Editar perfil
                 </h1>
-                <p
-                  className="text-xs"
-                  style={{ color: "var(--color-fg-muted)" }}
-                >
-                  Actualiza tus datos básicos
+                <p className="text-xs text-[var(--color-fg-muted)]">
+                  Actualiza tus datos basicos
                 </p>
               </div>
-            </div>
+            </header>
 
+            {/* Form content */}
             {user ? (
               <EditProfileForm
                 initialValues={{
@@ -109,12 +94,32 @@ const EditProfilePage: React.FC = () => {
                 }
               />
             ) : (
-              <div
-                className="glass-card p-6 text-sm"
-                style={{ color: "var(--color-fg-muted)" }}
-              >
-                No pude cargar la información del perfil.
-              </div>
+              <NeuCard className="p-5 text-center">
+                <svg
+                  className="mx-auto h-10 w-10 mb-3"
+                  style={{ color: "var(--color-fg-muted)" }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-sm text-[var(--color-fg-secondary)]">
+                  No pude cargar la informacion del perfil.
+                </p>
+                <button
+                  type="button"
+                  onClick={goToProfile}
+                  className="mt-4 text-sm font-medium text-[var(--color-primary)]"
+                >
+                  Volver al perfil
+                </button>
+              </NeuCard>
             )}
           </div>
         </div>
@@ -122,5 +127,25 @@ const EditProfilePage: React.FC = () => {
     </IonPage>
   );
 };
+
+/* ================================
+   NEUMORPHIC COMPONENTS
+   ================================ */
+
+const NeuCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = "" }) => (
+  <div
+    className={`rounded-xl ${className}`}
+    style={{
+      background: "linear-gradient(145deg, #161d24, #121920)",
+      boxShadow: "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.03)",
+    }}
+  >
+    {children}
+  </div>
+);
 
 export default EditProfilePage;
