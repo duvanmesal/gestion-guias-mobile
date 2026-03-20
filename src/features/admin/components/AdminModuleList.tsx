@@ -5,6 +5,9 @@ export interface AdminModuleListItem {
   title: string;
   description: string;
   onOpen: () => void;
+  badge?: string;
+  helperText?: string;
+  disabled?: boolean;
 }
 
 interface AdminModuleListProps {
@@ -44,6 +47,9 @@ const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
           title={item.title}
           description={item.description}
           onOpen={item.onOpen}
+          badge={item.badge}
+          helperText={item.helperText}
+          disabled={item.disabled}
         />
       ))}
     </div>

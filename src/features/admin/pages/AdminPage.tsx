@@ -11,7 +11,9 @@ const AdminPage: React.FC = () => {
   const location = useLocation();
   const user = useSessionStore((state) => state.user);
 
-  const roleLabel = user?.role === "SUPER_ADMIN" ? "Super Admin" : "Supervisor";
+  const roleLabel =
+    user?.role === "SUPER_ADMIN" ? "Super Admin" : "Supervisor";
+  const isSuperAdmin = user?.role === "SUPER_ADMIN";
 
   const adminItems = useMemo(
     () => [
@@ -19,8 +21,21 @@ const AdminPage: React.FC = () => {
         key: "catalogos",
         title: "Catálogos",
         description:
-          "Centro administrativo para países y los próximos catálogos maestros del sistema.",
+          "Centro administrativo para países, buques y los próximos catálogos maestros del sistema.",
         onOpen: () => history.push("/admin/catalogos"),
+        badge: "Activo",
+      },
+      {
+        key: "invitaciones",
+        title: "Invitaciones",
+        description:
+          "Alta controlada de usuarios por correo, seguimiento de accesos temporales y reenvío de credenciales.",
+        onOpen: () => history.push("/admin/invitaciones"),
+        badge: isSuperAdmin ? "Super Admin" : "Restringido",
+        helperText: isSuperAdmin
+          ? "Aquí puedes crear invitaciones y revisar si siguen pendientes, usadas o expiradas."
+          : "Este submódulo solo está habilitado para Super Admin porque el backend lo protege con ese rol.",
+        disabled: !isSuperAdmin,
       },
       {
         key: "users",
@@ -28,6 +43,10 @@ const AdminPage: React.FC = () => {
         description:
           "Módulo reservado para altas, seguimiento y administración avanzada de usuarios.",
         onOpen: () => {},
+        badge: "Próximo",
+        helperText:
+          "Lo siguiente natural después de invitaciones es la administración posterior del usuario ya creado.",
+        disabled: true,
       },
       {
         key: "profile",
@@ -35,9 +54,10 @@ const AdminPage: React.FC = () => {
         description:
           "Atajo para revisar datos del perfil, seguridad y estado de la sesión actual.",
         onOpen: () => history.push("/profile"),
+        badge: "Cuenta",
       },
     ],
-    [history]
+    [history, isSuperAdmin]
   );
 
   useEffect(() => {
@@ -61,7 +81,7 @@ const AdminPage: React.FC = () => {
           <div className="mx-auto flex w-full max-w-md flex-col gap-5">
             <AdminEntryCard
               title="Centro administrativo"
-              description="Aquí vive todo lo que no debe ir en el bottom nav operativo. El primer bloque que abrimos es Catálogos, empezando por Países."
+              description="Aquí vive todo lo que no debe ir en el bottom nav operativo. Catálogos y Invitaciones ya quedaron bajo /admin/* para mantener la navegación limpia y escalable."
               roleLabel={roleLabel}
             />
 
@@ -88,8 +108,8 @@ const AdminPage: React.FC = () => {
                 style={{ color: "var(--color-fg-secondary)" }}
               >
                 Admin queda como hub y sus submódulos viven bajo{" "}
-                <code>/admin/*</code>, así evitamos meter catálogos y gestión de
-                usuarios en la barra inferior.
+                <code>/admin/*</code>, así evitamos meter catálogos,
+                invitaciones y gestión de usuarios en la barra inferior.
               </p>
             </section>
           </div>
