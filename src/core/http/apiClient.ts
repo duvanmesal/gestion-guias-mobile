@@ -1,20 +1,16 @@
 import { ENV } from "../config/env";
-import { normalizeError } from "./errorNormalizer";
-import type { ApiRequestOptions, ApiResult } from "./types";
 import { isApiEnvelope } from "./apiEnvelope";
+import { normalizeError } from "./errorNormalizer";
+import type { ApiEnvelopeResult, ApiRequestOptions, ApiResult } from "./types";
 
 function unwrap<T>(json: unknown): T {
   if (isApiEnvelope(json)) {
-    // Si viene envelope, devolvemos SOLO data
     return (json.data ?? undefined) as unknown as T;
   }
   return json as T;
 }
 
-export async function request<T>(
-  path: string,
-  opts: ApiRequestOptions = {}
-): Promise<ApiResult<T>> {
+async function performRequest(path: string, opts: ApiRequestOptions = {}) {
   const { method = "GET", body, headers = {}, signal } = opts;
   const url = `${ENV.apiUrl}${path}`;
 
@@ -23,48 +19,168 @@ export async function request<T>(
     ...headers,
   };
 
+  const res = await fetch(url, {
+    method,
+    headers: reqHeaders,
+    body: body != null ? JSON.stringify(body) : undefined,
+    signal,
+  });
+
+  const isEmpty =
+    res.status === 204 || res.headers.get("content-length") === "0";
+
+  if (isEmpty) {
+    return { res, isEmpty: true as const, json: undefined as unknown };
+  }
+
+  let json: unknown;
   try {
-    const res = await fetch(url, {
-      method,
-      headers: reqHeaders,
-      body: body != null ? JSON.stringify(body) : undefined,
-      signal,
-    });
+    json = await res.json();
+  } catch {
+    return {
+      res,
+      isEmpty: false as const,
+      parseError: true as const,
+      json: undefined as unknown,
+    };
+  }
 
-    const isEmpty =
-      res.status === 204 || res.headers.get("content-length") === "0";
+  return { res, isEmpty: false as const, parseError: false as const, json };
+}
 
-    if (isEmpty) {
-      if (res.ok) return { ok: true, data: undefined as unknown as T };
+export async function request<T>(
+  path: string,
+  opts: ApiRequestOptions = {}
+): Promise<ApiResult<T>> {
+  try {
+    const result = await performRequest(path, opts);
+
+    if (result.isEmpty) {
+      if (result.res.ok) return { ok: true, data: undefined as unknown as T };
       return {
         ok: false,
-        error: { status: res.status, code: "HTTP_ERROR", message: res.statusText },
+        error: {
+          status: result.res.status,
+          code: "HTTP_ERROR",
+          message: result.res.statusText,
+        },
       };
     }
 
-    let json: unknown;
-    try {
-      json = await res.json();
-    } catch {
-      if (res.ok) return { ok: true, data: undefined as unknown as T };
+    if (result.parseError) {
+      if (result.res.ok) return { ok: true, data: undefined as unknown as T };
       return {
         ok: false,
-        error: { status: res.status, code: "PARSE_ERROR", message: "Invalid JSON" },
+        error: {
+          status: result.res.status,
+          code: "PARSE_ERROR",
+          message: "Invalid JSON",
+        },
       };
     }
 
-    if (res.ok) return { ok: true, data: unwrap<T>(json) };
+    if (result.res.ok) return { ok: true, data: unwrap<T>(result.json) };
 
-    // si vino envelope con error, úsalo
-    if (isApiEnvelope(json) && json.error) {
-      return { ok: false, error: { status: res.status, ...json.error } };
+    if (isApiEnvelope(result.json) && result.json.error) {
+      return {
+        ok: false,
+        error: { status: result.res.status, ...result.json.error },
+      };
     }
 
     return {
       ok: false,
       error: normalizeError(
-        { ...((json && typeof json === "object") ? json : {}), status: res.status },
-        res.statusText
+        {
+          ...((result.json && typeof result.json === "object")
+            ? result.json
+            : {}),
+          status: result.res.status,
+        },
+        result.res.statusText
+      ),
+    };
+  } catch (err: unknown) {
+    return { ok: false, error: normalizeError(err, "Network request failed") };
+  }
+}
+
+export async function requestEnvelope<T, M = unknown>(
+  path: string,
+  opts: ApiRequestOptions = {}
+): Promise<ApiEnvelopeResult<T, M>> {
+  try {
+    const result = await performRequest(path, opts);
+
+    if (result.isEmpty) {
+      if (result.res.ok) {
+        return {
+          ok: true,
+          data: undefined as unknown as T,
+          meta: null,
+        };
+      }
+      return {
+        ok: false,
+        error: {
+          status: result.res.status,
+          code: "HTTP_ERROR",
+          message: result.res.statusText,
+        },
+      };
+    }
+
+    if (result.parseError) {
+      if (result.res.ok) {
+        return {
+          ok: true,
+          data: undefined as unknown as T,
+          meta: null,
+        };
+      }
+      return {
+        ok: false,
+        error: {
+          status: result.res.status,
+          code: "PARSE_ERROR",
+          message: "Invalid JSON",
+        },
+      };
+    }
+
+    if (result.res.ok) {
+      if (isApiEnvelope(result.json)) {
+        return {
+          ok: true,
+          data: (result.json.data ?? undefined) as T,
+          meta: (result.json.meta ?? null) as M | null,
+        };
+      }
+
+      return {
+        ok: true,
+        data: result.json as T,
+        meta: null,
+      };
+    }
+
+    if (isApiEnvelope(result.json) && result.json.error) {
+      return {
+        ok: false,
+        error: { status: result.res.status, ...result.json.error },
+      };
+    }
+
+    return {
+      ok: false,
+      error: normalizeError(
+        {
+          ...((result.json && typeof result.json === "object")
+            ? result.json
+            : {}),
+          status: result.res.status,
+        },
+        result.res.statusText
       ),
     };
   } catch (err: unknown) {

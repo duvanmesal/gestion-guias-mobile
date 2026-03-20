@@ -129,10 +129,10 @@ export function getAccessRedirect(
   }
 }
 
-export function filterNavigationItems(
-  items: NavigationItem[],
+export function filterNavigationItems<T extends NavigationItem>(
+  items: T[],
   snapshot: SessionSnapshot
-): NavigationItem[] {
+): T[] {
   const stage = getAuthStage(snapshot);
 
   if (stage !== "ready") return [];

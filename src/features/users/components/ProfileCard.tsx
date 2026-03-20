@@ -14,7 +14,14 @@ import {
   getVerificationLabel,
   maskDocumentNumber,
 } from "../utils/accountFormatters";
-import Button from "../../../ui/components/Button";
+import {
+  Button,
+  InfoBanner,
+  PageSectionHeader,
+  StatusChip as SharedStatusChip,
+  SurfaceCard,
+  WarningBanner,
+} from "../../../ui/components";
 
 interface ProfileCardProps {
   user: SessionUser;
@@ -77,11 +84,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <>
-      {/* Profile Header Card */}
-      <NeuCard className="p-4 mb-3 animate-fade-up">
-        <div className="flex items-center gap-3 mb-4">
+      <NeuCard className="mb-3 p-4 animate-fade-up">
+        <div className="mb-4 flex items-center gap-3">
           <div
-            className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold shrink-0"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold"
             style={{
               background: "var(--color-primary)",
               color: "white",
@@ -90,7 +96,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           >
             {fullName.charAt(0).toUpperCase()}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="text-lg font-bold text-[var(--color-fg-primary)] truncate">
               {fullName}
             </h2>
@@ -101,41 +107,50 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          <StatusChip label={roleLabel} variant="primary" />
-          <StatusChip
-            label={verificationLabel}
-            variant={user.emailVerifiedAt ? "success" : "neutral"}
-          />
-          <StatusChip
-            label={profileStatusLabel}
-            variant={user.profileStatus === "COMPLETE" ? "success" : "neutral"}
-          />
-          {typeof user.activo === "boolean" && (
-            <StatusChip
-              label={user.activo ? "Activo" : "Inactivo"}
-              variant={user.activo ? "success" : "neutral"}
-            />
-          )}
+          <SharedStatusChip tone="primary">{roleLabel}</SharedStatusChip>
+          <SharedStatusChip tone={user.emailVerifiedAt ? "success" : "neutral"}>
+            {verificationLabel}
+          </SharedStatusChip>
+          <SharedStatusChip
+            tone={user.profileStatus === "COMPLETE" ? "success" : "neutral"}
+          >
+            {profileStatusLabel}
+          </SharedStatusChip>
+          {typeof user.activo === "boolean" ? (
+            <SharedStatusChip tone={user.activo ? "success" : "neutral"}>
+              {user.activo ? "Activo" : "Inactivo"}
+            </SharedStatusChip>
+          ) : null}
         </div>
       </NeuCard>
 
-      {/* Personal Info Section */}
-      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "50ms" }}>
-        <SectionHeader
-          icon={
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          }
+      {isRefreshing ? (
+        <InfoBanner
+          className="mb-3 animate-fade-up"
+          description="Estamos trayendo los cambios mas recientes de tu cuenta."
+          eyebrow="Perfil"
+          title="Actualizando informacion"
+        />
+      ) : null}
+
+      <NeuCard className="mb-3 p-4 animate-fade-up" style={{ animationDelay: "50ms" }}>
+        <PageSectionHeader
           title="Informacion Personal"
+          action={
+            <span style={{ color: "var(--color-primary)" }}>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </span>
+          }
         />
 
-        <div className="space-y-2 mt-3">
+        <div className="mt-3 space-y-2">
           <InfoRow label="Nombres" value={user.nombres || "No registrado"} />
           <InfoRow label="Apellidos" value={user.apellidos || "No registrado"} />
           <InfoRow label="Documento" value={documentTypeLabel} />
@@ -143,91 +158,80 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
       </NeuCard>
 
-      {/* Contact Info Section */}
-      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "100ms" }}>
-        <SectionHeader
-          icon={
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-          }
+      <NeuCard className="mb-3 p-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <PageSectionHeader
           title="Contacto"
+          action={
+            <span style={{ color: "var(--color-primary)" }}>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </span>
+          }
         />
 
-        <div className="space-y-2 mt-3">
+        <div className="mt-3 space-y-2">
           <InfoRow label="Correo" value={user.email || "No registrado"} />
           <InfoRow label="Telefono" value={user.telefono || "No registrado"} />
         </div>
       </NeuCard>
 
-      {/* Account Status Section */}
-      <NeuCard className="p-4 mb-3 animate-fade-up" style={{ animationDelay: "150ms" }}>
-        <SectionHeader
-          icon={
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          }
+      <NeuCard className="mb-3 p-4 animate-fade-up" style={{ animationDelay: "150ms" }}>
+        <PageSectionHeader
           title="Estado de Cuenta"
+          action={
+            <span style={{ color: "var(--color-primary)" }}>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+            </span>
+          }
         />
 
-        <div className="space-y-2 mt-3">
+        <div className="mt-3 space-y-2">
           <InfoRow label="Rol" value={roleLabel} />
           <InfoRow label="Verificacion" value={verificationLabel} />
           <InfoRow label="Perfil" value={profileStatusLabel} />
         </div>
       </NeuCard>
 
-      {/* Error message */}
-      {localError && (
-        <NeuCard className="mb-3 p-3 animate-shake" inset>
-          <div className="flex items-center gap-2">
-            <svg
-              className="h-4 w-4 shrink-0"
-              style={{ color: "var(--color-danger)" }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="text-xs font-medium text-[var(--color-danger)]">{localError}</span>
-          </div>
-        </NeuCard>
-      )}
+      {localError ? (
+        <WarningBanner
+          className="mb-3 animate-shake"
+          description={localError}
+          eyebrow="Cuenta"
+          title="No pude completar la accion"
+        />
+      ) : null}
 
-      {/* Actions Section */}
       <NeuCard className="p-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
-        <SectionHeader
-          icon={
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-              />
-            </svg>
-          }
+        <PageSectionHeader
           title="Acciones"
+          action={
+            <span style={{ color: "var(--color-primary)" }}>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                />
+              </svg>
+            </span>
+          }
         />
 
-        <div className="space-y-2 mt-3">
+        <div className="mt-3 space-y-2">
           <Button
             variant="primary"
             size="md"
@@ -247,7 +251,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             Editar mis datos
           </Button>
 
-          {onRefresh && (
+          {onRefresh ? (
             <Button
               variant="secondary"
               size="md"
@@ -269,7 +273,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             >
               {isRefreshing ? "Recargando..." : "Recargar informacion"}
             </Button>
-          )}
+          ) : null}
 
           <Button
             variant="secondary"
@@ -347,10 +351,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
-/* ================================
-   NEUMORPHIC COMPONENTS
-   ================================ */
-
 const NeuCard: React.FC<{
   children: React.ReactNode;
   className?: string;
@@ -360,78 +360,41 @@ const NeuCard: React.FC<{
   const neuStyles = inset
     ? {
         background: "var(--color-bg-base)",
-        boxShadow: "inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03)",
+        boxShadow:
+          "inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.02)",
       }
     : {
         background: "linear-gradient(145deg, #161d24, #121920)",
-        boxShadow: "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
+        boxShadow:
+          "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.03)",
       };
 
   return (
-    <div className={`rounded-xl ${className}`} style={{ ...neuStyles, ...style }}>
+    <SurfaceCard
+      className={`rounded-xl ${className}`.trim()}
+      radius="lg"
+      style={{ ...neuStyles, ...style }}
+      variant="raised"
+    >
       {children}
-    </div>
+    </SurfaceCard>
   );
 };
-
-const SectionHeader: React.FC<{
-  icon: React.ReactNode;
-  title: string;
-}> = ({ icon, title }) => (
-  <div className="flex items-center gap-2">
-    <span style={{ color: "var(--color-primary)" }}>{icon}</span>
-    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-muted)]">
-      {title}
-    </h3>
-  </div>
-);
 
 const InfoRow: React.FC<{
   label: string;
   value: string;
 }> = ({ label, value }) => (
-  <NeuCard className="flex items-center justify-between px-3 py-2.5" inset>
-    <p className="text-xs text-[var(--color-fg-muted)]">{label}</p>
-    <p className="text-sm font-medium text-[var(--color-fg-primary)] text-right truncate max-w-[60%]">
+  <NeuCard className="flex items-center justify-between gap-3 px-3 py-2.5" inset>
+    <p className="min-w-0 flex-1 break-words text-xs text-[var(--color-fg-muted)]">
+      {label}
+    </p>
+    <p className="max-w-[60%] break-words text-right text-sm font-medium text-[var(--color-fg-primary)]">
       {value}
     </p>
   </NeuCard>
 );
-
-const StatusChip: React.FC<{
-  label: string;
-  variant: "success" | "primary" | "neutral";
-}> = ({ label, variant }) => {
-  const styles = {
-    success: {
-      background: "rgba(34,139,84,0.15)",
-      border: "1px solid rgba(34,139,84,0.25)",
-      color: "var(--color-primary)",
-    },
-    primary: {
-      background: "rgba(34,139,84,0.15)",
-      border: "1px solid rgba(34,139,84,0.25)",
-      color: "var(--color-primary)",
-    },
-    neutral: {
-      background: "rgba(255,255,255,0.05)",
-      border: "1px solid rgba(255,255,255,0.05)",
-      color: "var(--color-fg-muted)",
-    },
-  };
-
-  const style = styles[variant];
-
-  return (
-    <span
-      className="inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-      style={style}
-    >
-      {label}
-    </span>
-  );
-};
 
 export default ProfileCard;

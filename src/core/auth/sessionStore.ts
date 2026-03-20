@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { adminDebug } from "../debug/adminDebug";
 import type { SessionState } from "./types";
 
 const GUEST_BASE: Pick<
@@ -17,39 +18,96 @@ export const useSessionStore = create<SessionState>((set) => ({
   authNotice: null,
 
   setLoading: () =>
-    set({
-      status: "loading",
+    set((prev) => {
+      const next = {
+        status: "loading" as const,
+      };
+
+      adminDebug("sessionStore.setLoading", {
+        prevStatus: prev.status,
+        nextStatus: next.status,
+        prevUserRole: prev.user?.role ?? null,
+      });
+
+      return next;
     }),
 
   setGuest: () =>
-    set({
-      ...GUEST_BASE,
+    set((prev) => {
+      adminDebug("sessionStore.setGuest", {
+        prevStatus: prev.status,
+        nextStatus: GUEST_BASE.status,
+        prevUserRole: prev.user?.role ?? null,
+      });
+
+      return {
+        ...GUEST_BASE,
+      };
     }),
 
   setAuthedSession: ({ user, accessToken }) =>
-    set({
-      status: "authed",
-      user,
-      accessToken,
+    set((prev) => {
+      adminDebug("sessionStore.setAuthedSession", {
+        prevStatus: prev.status,
+        nextStatus: "authed",
+        userId: user.id,
+        userRole: user.role,
+        profileStatus: user.profileStatus,
+        emailVerifiedAt: user.emailVerifiedAt ?? null,
+        hasAccessToken: Boolean(accessToken),
+      });
+
+      return {
+        status: "authed",
+        user,
+        accessToken,
+      };
     }),
 
   setAccessToken: (accessToken) =>
-    set({
-      accessToken,
+    set((prev) => {
+      adminDebug("sessionStore.setAccessToken", {
+        status: prev.status,
+        userRole: prev.user?.role ?? null,
+        hadAccessToken: Boolean(prev.accessToken),
+        hasAccessToken: Boolean(accessToken),
+      });
+
+      return {
+        accessToken,
+      };
     }),
 
   setAuthNotice: (authNotice) =>
-    set({
-      authNotice,
+    set(() => {
+      adminDebug("sessionStore.setAuthNotice", {
+        noticeKind: authNotice?.kind ?? null,
+        noticeMessage: authNotice?.message ?? null,
+      });
+
+      return {
+        authNotice,
+      };
     }),
 
   clearAuthNotice: () =>
-    set({
-      authNotice: null,
+    set(() => {
+      adminDebug("sessionStore.clearAuthNotice");
+
+      return {
+        authNotice: null,
+      };
     }),
 
   hardLogout: () =>
-    set({
-      ...GUEST_BASE,
+    set((prev) => {
+      adminDebug("sessionStore.hardLogout", {
+        prevStatus: prev.status,
+        prevUserRole: prev.user?.role ?? null,
+      });
+
+      return {
+        ...GUEST_BASE,
+      };
     }),
 }));

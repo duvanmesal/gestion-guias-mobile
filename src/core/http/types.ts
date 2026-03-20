@@ -18,11 +18,13 @@ export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: ApiErrorShape };
 
+export type ApiEnvelopeResult<T, M = unknown> =
+  | { ok: true; data: T; meta: M | null }
+  | { ok: false; error: ApiErrorShape };
+
 export interface ApiRequestOptions {
   method?: HttpMethod;
   body?: unknown;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
-
-

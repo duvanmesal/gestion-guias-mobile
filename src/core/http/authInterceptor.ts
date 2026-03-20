@@ -1,8 +1,8 @@
-import { useSessionStore } from "../auth/sessionStore";
 import { expireSessionAndRedirect } from "../auth/sessionLifecycle";
+import { useSessionStore } from "../auth/sessionStore";
 import { refreshAccessToken } from "./refresh";
-import { request } from "./apiClient";
-import type { ApiRequestOptions, ApiResult } from "./types";
+import { request, requestEnvelope } from "./apiClient";
+import type { ApiEnvelopeResult, ApiRequestOptions, ApiResult } from "./types";
 
 let forcedLogoutInFlight: Promise<void> | null = null;
 
@@ -49,6 +49,58 @@ export async function authRequest<T>(
   retryHeaders.Authorization = `Bearer ${newToken}`;
 
   const retryRes = await request<T>(path, { ...opts, headers: retryHeaders });
+
+  if (!retryRes.ok && retryRes.error.status === 401) {
+    await runForcedLogoutOnce();
+    return {
+      ok: false,
+      error: {
+        status: 401,
+        code: "SESSION_EXPIRED",
+        message: "Tu sesión expiró. Inicia sesión nuevamente.",
+      },
+    };
+  }
+
+  return retryRes;
+}
+
+export async function authRequestEnvelope<T, M = unknown>(
+  path: string,
+  opts: ApiRequestOptions = {}
+): Promise<ApiEnvelopeResult<T, M>> {
+  const token = useSessionStore.getState().accessToken;
+
+  const headers: Record<string, string> = { ...(opts.headers ?? {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await requestEnvelope<T, M>(path, { ...opts, headers });
+
+  if (res.ok) return res;
+
+  if (res.error.status !== 401) return res;
+
+  const newToken = await refreshAccessToken();
+
+  if (!newToken) {
+    await runForcedLogoutOnce();
+    return {
+      ok: false,
+      error: {
+        status: 401,
+        code: "SESSION_EXPIRED",
+        message: "Tu sesión expiró. Inicia sesión nuevamente.",
+      },
+    };
+  }
+
+  const retryHeaders: Record<string, string> = { ...(opts.headers ?? {}) };
+  retryHeaders.Authorization = `Bearer ${newToken}`;
+
+  const retryRes = await requestEnvelope<T, M>(path, {
+    ...opts,
+    headers: retryHeaders,
+  });
 
   if (!retryRes.ok && retryRes.error.status === 401) {
     await runForcedLogoutOnce();
