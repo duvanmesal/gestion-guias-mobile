@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import RoleGuard from "../../../app/routes/guards/RoleGuard";
 import { adminDebug } from "../../../core/debug/adminDebug";
 import BuquesPage from "../catalogs/pages/BuquesPage";
@@ -9,6 +9,9 @@ import PaisUpsertPage from "../catalogs/pages/PaisUpsertPage";
 import InvitationCreatePage from "../invitations/pages/InvitationCreatePage";
 import InvitationsPage from "../invitations/pages/InvitationsPage";
 import AdminPage from "../pages/AdminPage";
+import AdminUserCreatePage from "../users/pages/AdminUserCreatePage";
+import AdminUsersPage from "../users/pages/AdminUsersPage";
+import AdminUserUpsertPage from "../users/pages/AdminUserUpsertPage";
 
 const adminAllowedRoles = ["SUPERVISOR", "SUPER_ADMIN"] as const;
 
@@ -16,25 +19,7 @@ const AdminRoutes: React.FC = () => {
   adminDebug("AdminRoutes.render");
 
   return (
-    <>
-      <Route path="/admin" exact>
-        <RoleGuard allowed={[...adminAllowedRoles]}>
-          <AdminPage />
-        </RoleGuard>
-      </Route>
-
-      <Route path="/admin/catalogos" exact>
-        <RoleGuard allowed={[...adminAllowedRoles]}>
-          <CatalogsPage />
-        </RoleGuard>
-      </Route>
-
-      <Route path="/admin/catalogos/paises" exact>
-        <RoleGuard allowed={[...adminAllowedRoles]}>
-          <PaisesPage />
-        </RoleGuard>
-      </Route>
-
+    <Switch>
       <Route path="/admin/catalogos/paises/nuevo" exact>
         <RoleGuard allowed={["SUPER_ADMIN"]}>
           <PaisUpsertPage />
@@ -47,9 +32,9 @@ const AdminRoutes: React.FC = () => {
         </RoleGuard>
       </Route>
 
-      <Route path="/admin/catalogos/buques" exact>
+      <Route path="/admin/catalogos/paises" exact>
         <RoleGuard allowed={[...adminAllowedRoles]}>
-          <BuquesPage />
+          <PaisesPage />
         </RoleGuard>
       </Route>
 
@@ -65,9 +50,33 @@ const AdminRoutes: React.FC = () => {
         </RoleGuard>
       </Route>
 
-      <Route path="/admin/invitaciones" exact>
+      <Route path="/admin/catalogos/buques" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <BuquesPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <CatalogsPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/usuarios/nuevo" exact>
         <RoleGuard allowed={["SUPER_ADMIN"]}>
-          <InvitationsPage />
+          <AdminUserCreatePage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/usuarios/:id" exact>
+        <RoleGuard allowed={["SUPER_ADMIN"]}>
+          <AdminUserUpsertPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/usuarios" exact>
+        <RoleGuard allowed={["SUPER_ADMIN"]}>
+          <AdminUsersPage />
         </RoleGuard>
       </Route>
 
@@ -76,7 +85,19 @@ const AdminRoutes: React.FC = () => {
           <InvitationCreatePage />
         </RoleGuard>
       </Route>
-    </>
+
+      <Route path="/admin/invitaciones" exact>
+        <RoleGuard allowed={["SUPER_ADMIN"]}>
+          <InvitationsPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <AdminPage />
+        </RoleGuard>
+      </Route>
+    </Switch>
   );
 };
 

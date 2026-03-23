@@ -41,12 +41,13 @@ const AdminPage: React.FC = () => {
         key: "users",
         title: "Gestión de usuarios",
         description:
-          "Módulo reservado para altas, seguimiento y administración avanzada de usuarios.",
-        onOpen: () => {},
-        badge: "Próximo",
-        helperText:
-          "Lo siguiente natural después de invitaciones es la administración posterior del usuario ya creado.",
-        disabled: true,
+          "Listado administrativo de usuarios creados, con acceso a filtros, seguimiento y evolución del módulo.",
+        onOpen: () => history.push("/admin/usuarios"),
+        badge: isSuperAdmin ? "Super Admin" : "Restringido",
+        helperText: isSuperAdmin
+          ? "Desde aquí aterrizamos la gestión posterior al alta del usuario ya creado."
+          : "Este submódulo solo está habilitado para Super Admin porque el backend restringe la administración global de usuarios.",
+        disabled: !isSuperAdmin,
       },
       {
         key: "profile",
@@ -81,7 +82,7 @@ const AdminPage: React.FC = () => {
           <div className="mx-auto flex w-full max-w-md flex-col gap-5">
             <AdminEntryCard
               title="Centro administrativo"
-              description="Aquí vive todo lo que no debe ir en el bottom nav operativo. Catálogos y Invitaciones ya quedaron bajo /admin/* para mantener la navegación limpia y escalable."
+              description="Aquí vive todo lo que no debe ir en el bottom nav operativo. Catálogos, Invitaciones y Gestión de usuarios quedan bajo /admin/* para mantener la navegación limpia y escalable."
               roleLabel={roleLabel}
             />
 
