@@ -6,7 +6,7 @@ import Button from "../../../../ui/components/Button";
 import ErrorState from "../../../../ui/components/ErrorState";
 import LoadingScreen from "../../../../ui/components/LoadingScreen";
 import PaisForm, { type PaisFormValues } from "../components/PaisForm";
-import { useCreatePais } from "../hooks/useCreatepais";
+import { useCreatePais } from "../hooks/useCreatePais";
 import { usePais } from "../hooks/usePais";
 import { useUpdatePais } from "../hooks/useUpdatePais";
 

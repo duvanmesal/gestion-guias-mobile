@@ -191,8 +191,8 @@ const AdminUserUpsertPage: React.FC = () => {
                   onCancel={() => {
                     history.push("/admin/usuarios");
                   }}
-                  onSubmit={(values) => {
-                    void handleSubmit(values as AdminUserEditFormValues);
+                  onSubmit={(values: AdminUserEditFormValues) => {
+                    void handleSubmit(values);
                   }}
                 />
 

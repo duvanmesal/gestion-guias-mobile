@@ -1,12 +1,17 @@
+import type { FC, ReactElement, ReactNode } from "react";
+
 type MessageVariant = "error" | "success" | "warning" | "info";
 
 interface FormMessageProps {
   variant: MessageVariant;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-const variantConfig: Record<MessageVariant, { alertClass: string; icon: JSX.Element }> = {
+const variantConfig: Record<
+  MessageVariant,
+  { alertClass: string; icon: ReactElement }
+> = {
   error: {
     alertClass: "alert-error",
     icon: (
@@ -41,7 +46,11 @@ const variantConfig: Record<MessageVariant, { alertClass: string; icon: JSX.Elem
   },
 };
 
-const FormMessage: React.FC<FormMessageProps> = ({ variant, children, className = "" }) => {
+const FormMessage: FC<FormMessageProps> = ({
+  variant,
+  children,
+  className = "",
+}) => {
   const config = variantConfig[variant];
   const animationClass = variant === "error" ? "animate-shake" : "animate-fade-up";
 

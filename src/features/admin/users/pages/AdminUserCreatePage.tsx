@@ -61,8 +61,8 @@ const AdminUserCreatePage: React.FC = () => {
               onCancel={() => {
                 history.push("/admin/usuarios");
               }}
-              onSubmit={(values) => {
-                void handleSubmit(values as AdminUserCreateFormValues);
+              onSubmit={(values: AdminUserCreateFormValues) => {
+                void handleSubmit(values);
               }}
             />
           </div>
