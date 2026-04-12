@@ -9,8 +9,9 @@ import AtencionDetailPage from "../../features/atenciones/pages/AtencionDetailPa
 import AtencionEditPage from "../../features/atenciones/pages/AtencionEditPage";
 import AtencionesListPage from "../../features/atenciones/pages/AtencionesListPage";
 import HomePage from "../../features/dashboard/pages/HomePage";
-import ModulePlaceholderPage from "../../features/dashboard/pages/ModulePlaceholderPage";
 import RecaladaCreatePage from "../../features/recaladas/pages/RecaladaCreatePage";
+import TurnoDetailPage from "../../features/turnos/pages/TurnoDetailPage";
+import TurnosListPage from "../../features/turnos/pages/TurnosListPage";
 import RecaladaDetailPage from "../../features/recaladas/pages/RecaladaDetailPage";
 import RecaladaEditPage from "../../features/recaladas/pages/RecaladaEditPage";
 import RecaladasListPage from "../../features/recaladas/pages/RecaladasListPage";
@@ -49,11 +50,12 @@ const AppTabsShell: React.FC = () => {
           <ProfilePage />
         </Route>
 
+        <Route path="/turnos/:id(\d+)" exact>
+          <TurnoDetailPage />
+        </Route>
+
         <Route path="/turnos" exact>
-          <ModulePlaceholderPage
-            title="Turnos"
-            description="Aquí puedes conectar el listado real de turnos, detalle, check-in y check-out sin romper la navegación desde el dashboard."
-          />
+          <TurnosListPage />
         </Route>
 
         <Route path="/atenciones/nueva" exact>
