@@ -4,6 +4,10 @@ import { Redirect, Route, useLocation } from "react-router-dom";
 import { useSessionStore } from "../../core/auth/sessionStore";
 import { adminDebug } from "../../core/debug/adminDebug";
 import AdminRoutes from "../../features/admin/routes/AdminRoutes";
+import AtencionCreatePage from "../../features/atenciones/pages/AtencionCreatePage";
+import AtencionDetailPage from "../../features/atenciones/pages/AtencionDetailPage";
+import AtencionEditPage from "../../features/atenciones/pages/AtencionEditPage";
+import AtencionesListPage from "../../features/atenciones/pages/AtencionesListPage";
 import HomePage from "../../features/dashboard/pages/HomePage";
 import ModulePlaceholderPage from "../../features/dashboard/pages/ModulePlaceholderPage";
 import RecaladaCreatePage from "../../features/recaladas/pages/RecaladaCreatePage";
@@ -52,11 +56,24 @@ const AppTabsShell: React.FC = () => {
           />
         </Route>
 
+        <Route path="/atenciones/nueva" exact>
+          <RoleGuard allowed={["SUPERVISOR", "SUPER_ADMIN"]}>
+            <AtencionCreatePage />
+          </RoleGuard>
+        </Route>
+
+        <Route path="/atenciones/:id(\d+)/editar" exact>
+          <RoleGuard allowed={["SUPERVISOR", "SUPER_ADMIN"]}>
+            <AtencionEditPage />
+          </RoleGuard>
+        </Route>
+
+        <Route path="/atenciones/:id(\d+)" exact>
+          <AtencionDetailPage />
+        </Route>
+
         <Route path="/atenciones" exact>
-          <ModulePlaceholderPage
-            title="Atenciones"
-            description="Esta ruta queda sembrada para enlazar la toma de turnos disponibles y el resumen operativo de atenciones."
-          />
+          <AtencionesListPage />
         </Route>
 
         <Route path="/recaladas/nueva" exact>

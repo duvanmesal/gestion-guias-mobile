@@ -384,14 +384,32 @@ const RecaladaDetailPage: React.FC = () => {
             ) : null}
 
             <SurfaceCard className="gap-4 p-4" radius="xl" variant="raised">
-              <PageSectionHeader
-                title="Atenciones"
-                description={
-                  atencionesQuery.isLoading
-                    ? "Cargando..."
-                    : `${atenciones.length} atención${atenciones.length !== 1 ? "es" : ""} asociada${atenciones.length !== 1 ? "s" : ""}`
-                }
-              />
+              <div className="flex items-start justify-between gap-3">
+                <PageSectionHeader
+                  title="Atenciones"
+                  description={
+                    atencionesQuery.isLoading
+                      ? "Cargando..."
+                      : `${atenciones.length} atención${atenciones.length !== 1 ? "es" : ""} asociada${atenciones.length !== 1 ? "s" : ""}`
+                  }
+                />
+                {isSupervisor &&
+                opStatus !== "CANCELED" &&
+                opStatus !== "DEPARTED" ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    fullWidth={false}
+                    onClick={() =>
+                      history.push(
+                        `/atenciones/nueva?recaladaId=${recaladaId}`
+                      )
+                    }
+                  >
+                    Nueva
+                  </Button>
+                ) : null}
+              </div>
 
               {atencionesQuery.isLoading ? (
                 <div className="space-y-2">
@@ -410,6 +428,23 @@ const RecaladaDetailPage: React.FC = () => {
                 <EmptyStateCard
                   title="Sin atenciones"
                   description="Esta recalada aún no tiene atenciones asignadas."
+                  action={
+                    isSupervisor &&
+                    opStatus !== "CANCELED" &&
+                    opStatus !== "DEPARTED" ? (
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() =>
+                          history.push(
+                            `/atenciones/nueva?recaladaId=${recaladaId}`
+                          )
+                        }
+                      >
+                        Crear atención
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : (
                 <div className="space-y-2">
@@ -419,36 +454,49 @@ const RecaladaDetailPage: React.FC = () => {
                         t.status !== "AVAILABLE" && t.status !== "CANCELED"
                     ).length;
                     return (
-                      <SurfaceCard
+                      <button
                         key={atencion.id}
-                        className="gap-1 px-3 py-3"
-                        radius="lg"
-                        variant="inset"
+                        type="button"
+                        onClick={() =>
+                          history.push(`/atenciones/${atencion.id}`)
+                        }
+                        className="w-full text-left transition active:scale-[0.99]"
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-semibold text-[var(--color-fg-primary)]">
-                            Atención #{atencion.id}
+                        <SurfaceCard
+                          className="gap-1 px-3 py-3"
+                          radius="lg"
+                          variant="inset"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="truncate text-sm font-semibold text-[var(--color-fg-primary)]">
+                              Atención #{atencion.id}
+                            </p>
+                            <StatusChip
+                              tone={
+                                atencion.operationalStatus === "CANCELED"
+                                  ? "danger"
+                                  : atencion.operationalStatus === "COMPLETED"
+                                    ? "success"
+                                    : "info"
+                              }
+                            >
+                              {atencion.operationalStatus}
+                            </StatusChip>
+                          </div>
+                          <p className="text-[0.6875rem] text-[var(--color-fg-muted)]">
+                            {formatDate(atencion.fechaInicio)} →{" "}
+                            {formatDate(atencion.fechaFin)}
                           </p>
-                          <StatusChip
-                            tone={
-                              atencion.operationalStatus === "CANCELED"
-                                ? "danger"
-                                : atencion.operationalStatus === "COMPLETED"
-                                  ? "success"
-                                  : "info"
-                            }
-                          >
-                            {atencion.operationalStatus}
-                          </StatusChip>
-                        </div>
-                        <p className="text-[0.6875rem] text-[var(--color-fg-muted)]">
-                          {formatDate(atencion.fechaInicio)} →{" "}
-                          {formatDate(atencion.fechaFin)}
-                        </p>
-                        <p className="text-[0.6875rem] text-[var(--color-fg-secondary)]">
-                          Turnos: {turnosOcupados} / {atencion.turnosTotal}
-                        </p>
-                      </SurfaceCard>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[0.6875rem] text-[var(--color-fg-secondary)]">
+                              Turnos: {turnosOcupados} / {atencion.turnosTotal}
+                            </p>
+                            <span className="text-[0.6875rem] font-semibold text-[var(--color-accent)]">
+                              Ver detalle →
+                            </span>
+                          </div>
+                        </SurfaceCard>
+                      </button>
                     );
                   })}
                 </div>
