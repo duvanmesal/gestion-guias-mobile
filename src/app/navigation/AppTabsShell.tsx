@@ -6,7 +6,12 @@ import { adminDebug } from "../../core/debug/adminDebug";
 import AdminRoutes from "../../features/admin/routes/AdminRoutes";
 import HomePage from "../../features/dashboard/pages/HomePage";
 import ModulePlaceholderPage from "../../features/dashboard/pages/ModulePlaceholderPage";
+import RecaladaCreatePage from "../../features/recaladas/pages/RecaladaCreatePage";
+import RecaladaDetailPage from "../../features/recaladas/pages/RecaladaDetailPage";
+import RecaladaEditPage from "../../features/recaladas/pages/RecaladaEditPage";
+import RecaladasListPage from "../../features/recaladas/pages/RecaladasListPage";
 import ProfilePage from "../../features/users/pages/ProfilePage";
+import RoleGuard from "../routes/guards/RoleGuard";
 import { filterNavigationItems } from "../routes/access";
 import BottomNavBar from "./BottomNavBar";
 import { APP_NAVIGATION_ITEMS } from "./navigation.config";
@@ -54,11 +59,24 @@ const AppTabsShell: React.FC = () => {
           />
         </Route>
 
+        <Route path="/recaladas/nueva" exact>
+          <RoleGuard allowed={["SUPERVISOR", "SUPER_ADMIN"]}>
+            <RecaladaCreatePage />
+          </RoleGuard>
+        </Route>
+
+        <Route path="/recaladas/:id(\d+)/editar" exact>
+          <RoleGuard allowed={["SUPERVISOR", "SUPER_ADMIN"]}>
+            <RecaladaEditPage />
+          </RoleGuard>
+        </Route>
+
+        <Route path="/recaladas/:id(\d+)" exact>
+          <RecaladaDetailPage />
+        </Route>
+
         <Route path="/recaladas" exact>
-          <ModulePlaceholderPage
-            title="Recaladas"
-            description="Este espacio te deja anclar la agenda madre de recaladas y sus próximos hitos sin dejar huecos en la experiencia."
-          />
+          <RecaladasListPage />
         </Route>
 
         <AdminRoutes />
