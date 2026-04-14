@@ -4,6 +4,29 @@ import { refreshAccessToken } from "./refresh";
 import { request, requestEnvelope } from "./apiClient";
 import type { ApiEnvelopeResult, ApiRequestOptions, ApiResult } from "./types";
 
+const EXPECTED_AUDIENCE = "mobile";
+
+function decodeJwtPayload(token: string): { aud?: string; exp?: number } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const json = atob(padded);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function isValidAccessToken(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  if (!payload) return false;
+  if (payload.aud !== EXPECTED_AUDIENCE) return false;
+  if (payload.exp && payload.exp * 1000 < Date.now()) return false;
+  return true;
+}
+
 let forcedLogoutInFlight: Promise<void> | null = null;
 
 async function runForcedLogoutOnce(): Promise<void> {
@@ -23,7 +46,20 @@ export async function authRequest<T>(
   const token = useSessionStore.getState().accessToken;
 
   const headers: Record<string, string> = { ...(opts.headers ?? {}) };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    if (!isValidAccessToken(token)) {
+      await runForcedLogoutOnce();
+      return {
+        ok: false,
+        error: {
+          status: 401,
+          code: "INVALID_TOKEN",
+          message: "Token inválido. Inicia sesión nuevamente.",
+        },
+      };
+    }
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const res: ApiResult<T> = await request<T>(path, { ...opts, headers });
 
@@ -72,7 +108,20 @@ export async function authRequestEnvelope<T, M = unknown>(
   const token = useSessionStore.getState().accessToken;
 
   const headers: Record<string, string> = { ...(opts.headers ?? {}) };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    if (!isValidAccessToken(token)) {
+      await runForcedLogoutOnce();
+      return {
+        ok: false,
+        error: {
+          status: 401,
+          code: "INVALID_TOKEN",
+          message: "Token inválido. Inicia sesión nuevamente.",
+        },
+      };
+    }
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const res = await requestEnvelope<T, M>(path, { ...opts, headers });
 
