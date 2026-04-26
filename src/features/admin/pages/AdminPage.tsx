@@ -6,6 +6,37 @@ import { adminDebug } from "../../../core/debug/adminDebug";
 import AdminEntryCard from "../components/AdminEntryCard";
 import AdminModuleList from "../components/AdminModuleList";
 
+/* ── Module icons (Feather-style strokes) ── */
+const Icons = {
+  catalog: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  ),
+  mail: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  ),
+  users: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+  user: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+};
+
 const AdminPage: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
@@ -20,42 +51,46 @@ const AdminPage: React.FC = () => {
       {
         key: "catalogos",
         title: "Catálogos",
-        description:
-          "Centro administrativo para países, buques y los próximos catálogos maestros del sistema.",
+        description: "Países, buques y catálogos maestros del sistema.",
         onOpen: () => history.push("/admin/catalogos"),
         badge: "Activo",
+        tone: "cyan" as const,
+        icon: Icons.catalog,
       },
       {
         key: "invitaciones",
         title: "Invitaciones",
-        description:
-          "Alta controlada de usuarios por correo, seguimiento de accesos temporales y reenvío de credenciales.",
+        description: "Alta de usuarios por correo y seguimiento de accesos.",
         onOpen: () => history.push("/admin/invitaciones"),
-        badge: isSuperAdmin ? "Super Admin" : "Restringido",
-        helperText: isSuperAdmin
-          ? "Aquí puedes crear invitaciones y revisar si siguen pendientes, usadas o expiradas."
-          : "Este submódulo solo está habilitado para Super Admin porque el backend lo protege con ese rol.",
+        badge: isSuperAdmin ? "S. Admin" : undefined,
+        helperText: !isSuperAdmin
+          ? "Solo Super Admin puede gestionar invitaciones."
+          : undefined,
         disabled: !isSuperAdmin,
+        tone: "teal" as const,
+        icon: Icons.mail,
       },
       {
         key: "users",
-        title: "Gestión de usuarios",
-        description:
-          "Listado administrativo de usuarios creados, con acceso a filtros, seguimiento y evolución del módulo.",
+        title: "Usuarios",
+        description: "Gestión global de usuarios, filtros y seguimiento.",
         onOpen: () => history.push("/admin/usuarios"),
-        badge: isSuperAdmin ? "Super Admin" : "Restringido",
-        helperText: isSuperAdmin
-          ? "Desde aquí aterrizamos la gestión posterior al alta del usuario ya creado."
-          : "Este submódulo solo está habilitado para Super Admin porque el backend restringe la administración global de usuarios.",
+        badge: isSuperAdmin ? "S. Admin" : undefined,
+        helperText: !isSuperAdmin
+          ? "Solo Super Admin gestiona usuarios."
+          : undefined,
         disabled: !isSuperAdmin,
+        tone: "amber" as const,
+        icon: Icons.users,
       },
       {
         key: "profile",
         title: "Mi cuenta",
-        description:
-          "Atajo para revisar datos del perfil, seguridad y estado de la sesión actual.",
+        description: "Datos del perfil, seguridad y sesión actual.",
         onOpen: () => history.push("/profile"),
         badge: "Cuenta",
+        tone: "violet" as const,
+        icon: Icons.user,
       },
     ],
     [history, isSuperAdmin]
@@ -78,11 +113,11 @@ const AdminPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-36 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-5">
             <AdminEntryCard
               title="Centro administrativo"
-              description="Aquí vive todo lo que no debe ir en el bottom nav operativo. Catálogos, Invitaciones y Gestión de usuarios quedan bajo /admin/* para mantener la navegación limpia y escalable."
+              description="Catálogos, invitaciones y gestión de usuarios viven bajo /admin/* para mantener el bottom nav operativo limpio."
               roleLabel={roleLabel}
             />
 
@@ -90,29 +125,6 @@ const AdminPage: React.FC = () => {
               title="Módulos administrativos"
               items={adminItems}
             />
-
-            <section
-              className="rounded-[24px] border px-4 py-4"
-              style={{
-                background: "rgba(255,255,255,0.03)",
-                borderColor: "rgba(255,255,255,0.06)",
-              }}
-            >
-              <p
-                className="text-sm font-semibold"
-                style={{ color: "var(--color-fg-primary)" }}
-              >
-                Ruta administrativa escalable
-              </p>
-              <p
-                className="mt-2 text-sm leading-6"
-                style={{ color: "var(--color-fg-secondary)" }}
-              >
-                Admin queda como hub y sus submódulos viven bajo{" "}
-                <code>/admin/*</code>, así evitamos meter catálogos,
-                invitaciones y gestión de usuarios en la barra inferior.
-              </p>
-            </section>
           </div>
         </div>
       </IonContent>

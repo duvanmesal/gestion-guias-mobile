@@ -72,11 +72,10 @@ const inputClassName =
   "w-full rounded-2xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-fg-muted)]";
 
 const inputStyle = {
-  background: "rgba(255,255,255,0.03)",
+  background: "var(--color-glass-subtle)",
   borderColor: "var(--color-border-glass)",
   color: "var(--color-fg-primary)",
-  boxShadow:
-    "inset 2px 2px 5px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.03)",
+  boxShadow: "var(--shadow-neu-inset)",
 } as const;
 
 const AtencionesListPage: React.FC = () => {
@@ -109,7 +108,7 @@ const AtencionesListPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-32 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div>

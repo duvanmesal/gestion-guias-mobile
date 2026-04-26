@@ -267,7 +267,7 @@ const AtencionDetailPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-40 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <div className="flex items-center gap-3">
               <Button
@@ -486,11 +486,10 @@ const AtencionDetailPage: React.FC = () => {
                 maxLength={500}
                 className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
+                  background: "var(--color-glass-subtle)",
                   borderColor: "var(--color-border-glass)",
                   color: "var(--color-fg-primary)",
-                  boxShadow:
-                    "inset 2px 2px 5px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.03)",
+                  boxShadow: "var(--shadow-neu-inset)",
                 }}
               />
               <div className="grid grid-cols-2 gap-3">

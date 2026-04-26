@@ -45,9 +45,9 @@ const EditProfilePage: React.FC = () => {
                 onClick={goToProfile}
                 className="flex h-10 w-10 items-center justify-center rounded-xl transition-all active:scale-95"
                 style={{
-                  background: "linear-gradient(145deg, #161d24, #121920)",
+                  background: "var(--color-neu-raised)",
                   boxShadow: "3px 3px 6px rgba(0,0,0,0.35), -2px -2px 5px rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.03)",
+                  border: "1px solid var(--color-glass-subtle)",
                   color: "var(--color-fg-primary)",
                 }}
                 aria-label="Volver al perfil"
@@ -139,9 +139,9 @@ const NeuCard: React.FC<{
   <div
     className={`rounded-xl ${className}`}
     style={{
-      background: "linear-gradient(145deg, #161d24, #121920)",
-      boxShadow: "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.03)",
+      background: "var(--color-neu-raised)",
+      boxShadow: "var(--shadow-neu-raised)",
+      border: "1px solid var(--color-glass-subtle)",
     }}
   >
     {children}

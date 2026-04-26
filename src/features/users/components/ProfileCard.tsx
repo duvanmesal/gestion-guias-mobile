@@ -91,7 +91,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             style={{
               background: "var(--color-primary)",
               color: "white",
-              boxShadow: "0 4px 12px rgba(34,139,84,0.3)",
+              boxShadow: "0 4px 12px var(--color-border-glow)",
             }}
           >
             {fullName.charAt(0).toUpperCase()}
@@ -360,15 +360,13 @@ const NeuCard: React.FC<{
   const neuStyles = inset
     ? {
         background: "var(--color-bg-base)",
-        boxShadow:
-          "inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03)",
+        boxShadow: "var(--shadow-neu-inset)",
         border: "1px solid rgba(255,255,255,0.02)",
       }
     : {
-        background: "linear-gradient(145deg, #161d24, #121920)",
-        boxShadow:
-          "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.03)",
+        background: "var(--color-neu-raised)",
+        boxShadow: "var(--shadow-neu-raised)",
+        border: "1px solid var(--color-glass-subtle)",
       };
 
   return (

@@ -366,7 +366,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
         <div
           className="mx-auto w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
           style={{
-            background: "linear-gradient(135deg, var(--color-primary) 0%, #1a6b42 100%)",
+            background: "var(--gradient-primary)",
             boxShadow: "0 4px 16px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.08)",
           }}
         >

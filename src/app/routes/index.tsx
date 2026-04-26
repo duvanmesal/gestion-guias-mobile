@@ -6,6 +6,8 @@ import { adminDebug, describeSession } from "../../core/debug/adminDebug";
 
 import LoginPage from "../../features/auth/pages/LoginPage";
 import VerifyEmailPage from "../../features/auth/pages/VerifyEmailPage";
+import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage";
 import OnboardingPage from "../../features/users/pages/OnboardingPage";
 import EditProfilePage from "../../features/users/pages/EditProfilePage";
 
@@ -36,6 +38,18 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" exact>
         <GuestOnlyGuard>
           <LoginPage />
+        </GuestOnlyGuard>
+      </Route>
+
+      <Route path="/forgot-password" exact>
+        <GuestOnlyGuard>
+          <ForgotPasswordPage />
+        </GuestOnlyGuard>
+      </Route>
+
+      <Route path="/reset-password" exact>
+        <GuestOnlyGuard>
+          <ResetPasswordPage />
         </GuestOnlyGuard>
       </Route>
 

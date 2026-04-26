@@ -48,11 +48,10 @@ const inputClassName =
   "w-full rounded-2xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-fg-muted)]";
 
 const inputStyle = {
-  background: "rgba(255,255,255,0.03)",
+  background: "var(--color-glass-subtle)",
   borderColor: "var(--color-border-glass)",
   color: "var(--color-fg-primary)",
-  boxShadow:
-    "inset 2px 2px 5px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.03)",
+  boxShadow: "var(--shadow-neu-inset)",
 } as const;
 
 const InvitationForm: React.FC<InvitationFormProps> = ({
@@ -125,8 +124,8 @@ const InvitationForm: React.FC<InvitationFormProps> = ({
           <div
             className="rounded-2xl border px-3 py-3 text-sm"
             style={{
-              background: "rgba(34,139,84,0.12)",
-              borderColor: "rgba(34,139,84,0.22)",
+              background: "var(--color-primary-soft)",
+              borderColor: "var(--color-border-glow)",
               color: "var(--color-primary)",
             }}
           >

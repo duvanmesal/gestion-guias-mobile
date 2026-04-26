@@ -25,12 +25,12 @@ const ErrorState: React.FC<ErrorStateProps> = ({
       className={`relative mb-4 flex items-center justify-center rounded-full ${compact ? "h-12 w-12" : "h-16 w-16"}`}
       style={{
         background: "var(--color-danger-soft)",
-        boxShadow: "0 0 24px rgba(239, 68, 68, 0.2)",
+        boxShadow: "0 0 24px var(--color-danger-soft)",
       }}
     >
       <svg
         className={compact ? "h-6 w-6" : "h-8 w-8"}
-        style={{ color: "#F87171" }}
+        style={{ color: "var(--color-error-text)" }}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

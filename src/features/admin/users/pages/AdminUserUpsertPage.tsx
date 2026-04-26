@@ -89,7 +89,7 @@ const AdminUserUpsertPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-32 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -164,8 +164,8 @@ const AdminUserUpsertPage: React.FC = () => {
                   <div
                     className="rounded-2xl border px-4 py-3 text-sm"
                     style={{
-                      background: "rgba(34,139,84,0.12)",
-                      borderColor: "rgba(34,139,84,0.22)",
+                      background: "var(--color-primary-soft)",
+                      borderColor: "var(--color-border-glow)",
                       color: "var(--color-primary)",
                     }}
                   >

@@ -77,16 +77,16 @@ const ProfilePage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className="h-12 w-12 rounded-full"
-                    style={{ background: "rgba(255,255,255,0.06)" }}
+                    style={{ background: "var(--color-glass-soft)" }}
                   />
                   <div className="flex-1">
                     <div
                       className="h-4 w-32 rounded"
-                      style={{ background: "rgba(255,255,255,0.06)" }}
+                      style={{ background: "var(--color-glass-soft)" }}
                     />
                     <div
                       className="mt-2 h-3 w-48 rounded"
-                      style={{ background: "rgba(255,255,255,0.04)" }}
+                      style={{ background: "var(--color-input-bg)" }}
                     />
                   </div>
                 </div>
@@ -148,13 +148,13 @@ const NeuCard: React.FC<{
   const neuStyles = inset
     ? {
         background: "var(--color-bg-base)",
-        boxShadow: "inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.03)",
+        boxShadow: "var(--shadow-neu-inset)",
         border: "1px solid rgba(255,255,255,0.02)",
       }
     : {
-        background: "linear-gradient(145deg, #161d24, #121920)",
-        boxShadow: "4px 4px 10px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.03)",
+        background: "var(--color-neu-raised)",
+        boxShadow: "var(--shadow-neu-raised)",
+        border: "1px solid var(--color-glass-subtle)",
       };
 
   return (
@@ -168,9 +168,9 @@ const NeuIconBox: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div
     className="flex h-8 w-8 items-center justify-center rounded-lg"
     style={{
-      background: "linear-gradient(145deg, #161d24, #121920)",
+      background: "var(--color-neu-raised)",
       boxShadow: "3px 3px 6px rgba(0,0,0,0.35), -2px -2px 5px rgba(255,255,255,0.03)",
-      border: "1px solid rgba(34,139,84,0.15)",
+      border: "1px solid var(--color-primary-soft)",
     }}
   >
     {children}

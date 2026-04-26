@@ -13,7 +13,7 @@ const iconWrapStyle: CSSProperties = {
   background: "var(--color-warning-soft)",
   border: "1px solid var(--color-warning-border)",
   boxShadow:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px rgba(245, 158, 11, 0.12)",
+    "inset 0 1px 0 var(--color-glass-medium), 0 8px 18px var(--color-warning-soft)",
 };
 
 const WarningBanner: React.FC<WarningBannerProps> = ({

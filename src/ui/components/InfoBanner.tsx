@@ -13,7 +13,7 @@ const iconWrapStyle: CSSProperties = {
   background: "var(--color-info-soft)",
   border: "1px solid var(--color-info-border)",
   boxShadow:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px rgba(96, 165, 250, 0.12)",
+    "inset 0 1px 0 var(--color-glass-medium), 0 8px 18px var(--color-info-soft)",
 };
 
 const InfoBanner: React.FC<InfoBannerProps> = ({

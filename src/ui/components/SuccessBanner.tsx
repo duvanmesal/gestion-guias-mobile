@@ -13,7 +13,7 @@ const iconWrapStyle: CSSProperties = {
   background: "var(--color-success-soft)",
   border: "1px solid var(--color-success-border)",
   boxShadow:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 18px rgba(52, 211, 153, 0.12)",
+    "inset 0 1px 0 var(--color-glass-medium), 0 8px 18px var(--color-success-soft)",
 };
 
 const SuccessBanner: React.FC<SuccessBannerProps> = ({

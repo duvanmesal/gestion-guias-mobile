@@ -87,7 +87,7 @@ const InvitationsPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-32 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -134,7 +134,7 @@ const InvitationsPage: React.FC = () => {
                   className="rounded-2xl border px-3 py-3"
                   style={{
                     borderColor: "var(--color-border-glass)",
-                    background: "rgba(255,255,255,0.04)",
+                    background: "var(--color-input-bg)",
                   }}
                 >
                   <p className="text-lg font-bold text-[var(--color-fg-primary)]">
@@ -149,7 +149,7 @@ const InvitationsPage: React.FC = () => {
                   className="rounded-2xl border px-3 py-3"
                   style={{
                     borderColor: "var(--color-border-glass)",
-                    background: "rgba(255,255,255,0.04)",
+                    background: "var(--color-input-bg)",
                   }}
                 >
                   <p className="text-lg font-bold text-[var(--color-fg-primary)]">
@@ -164,7 +164,7 @@ const InvitationsPage: React.FC = () => {
                   className="rounded-2xl border px-3 py-3"
                   style={{
                     borderColor: "var(--color-border-glass)",
-                    background: "rgba(255,255,255,0.04)",
+                    background: "var(--color-input-bg)",
                   }}
                 >
                   <p className="text-lg font-bold text-[var(--color-fg-primary)]">
@@ -203,10 +203,10 @@ const InvitationsPage: React.FC = () => {
                 style={{
                   background: feedbackMessage.toLowerCase().includes("no pude")
                     ? "var(--color-danger-soft)"
-                    : "rgba(34,139,84,0.12)",
+                    : "var(--color-primary-soft)",
                   borderColor: feedbackMessage.toLowerCase().includes("no pude")
                     ? "var(--color-danger-border)"
-                    : "rgba(34,139,84,0.22)",
+                    : "var(--color-border-glow)",
                   color: feedbackMessage.toLowerCase().includes("no pude")
                     ? "var(--color-danger)"
                     : "var(--color-primary)",

@@ -2,463 +2,311 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Button from "../../../ui/components/Button";
-import SurfaceCard from "../../../ui/components/SurfaceCard";
-import type {
-  RecaladaOperationalStatus,
-  RecaladaSource,
-} from "../types/recaladas.types";
+import type { RecaladaOperationalStatus, RecaladaSource } from "../types/recaladas.types";
 
+/* ─────────────────────────────────────────────
+   SCHEMA
+───────────────────────────────────────────── */
 const recaladaFormSchema = z
   .object({
-    buqueId: z.string().min(1, "Selecciona un buque"),
-    paisOrigenId: z.string().min(1, "Selecciona un país de origen"),
-    fechaLlegada: z.string().min(1, "La fecha de llegada es obligatoria"),
-    fechaSalida: z.string().optional(),
-    terminal: z
-      .string()
-      .trim()
-      .max(80, "Máximo 80 caracteres")
-      .optional()
-      .or(z.literal("")),
-    muelle: z
-      .string()
-      .trim()
-      .max(80, "Máximo 80 caracteres")
-      .optional()
-      .or(z.literal("")),
-    pasajerosEstimados: z.preprocess(
-      (v) => (v === "" || v == null ? undefined : Number(v)),
-      z
-        .number()
-        .int()
-        .min(1, "Mínimo 1 pasajero")
-        .max(300000)
-        .optional()
-    ),
-    tripulacionEstimada: z.preprocess(
-      (v) => (v === "" || v == null ? undefined : Number(v)),
-      z.number().int().nonnegative().max(300000).optional()
-    ),
-    observaciones: z
-      .string()
-      .trim()
-      .max(2000, "Máximo 2000 caracteres")
-      .optional()
-      .or(z.literal("")),
-    fuente: z.enum(["MANUAL", "IMPORT"]).default("MANUAL"),
+    buqueId:             z.string().min(1, "Selecciona un buque"),
+    paisOrigenId:        z.string().min(1, "Selecciona un país de origen"),
+    fechaLlegada:        z.string().min(1, "La fecha de llegada es obligatoria"),
+    fechaSalida:         z.string().optional(),
+    terminal:            z.string().trim().max(80).optional().or(z.literal("")),
+    muelle:              z.string().trim().max(80).optional().or(z.literal("")),
+    pasajerosEstimados:  z.preprocess((v) => (v === "" || v == null ? undefined : Number(v)), z.number().int().min(1).max(300000).optional()),
+    tripulacionEstimada: z.preprocess((v) => (v === "" || v == null ? undefined : Number(v)), z.number().int().nonnegative().max(300000).optional()),
+    observaciones:       z.string().trim().max(2000).optional().or(z.literal("")),
+    fuente:              z.enum(["MANUAL", "IMPORT"]).default("MANUAL"),
   })
   .refine(
-    (data) =>
-      !data.fechaSalida ||
-      !data.fechaLlegada ||
-      new Date(data.fechaSalida) >= new Date(data.fechaLlegada),
-    {
-      message: "La fecha de salida debe ser mayor o igual a la de llegada",
-      path: ["fechaSalida"],
-    }
+    (d) => !d.fechaSalida || !d.fechaLlegada || new Date(d.fechaSalida) >= new Date(d.fechaLlegada),
+    { message: "La fecha de salida debe ser ≥ la de llegada", path: ["fechaSalida"] }
   );
 
 export type RecaladaFormValues = z.infer<typeof recaladaFormSchema>;
 
-export interface BuqueLookupOption {
-  id: number;
-  nombre: string;
-}
-
-export interface PaisLookupOption {
-  id: number;
-  codigo: string;
-  nombre: string;
-}
+export interface BuqueLookupOption  { id: number; nombre: string; }
+export interface PaisLookupOption   { id: number; codigo: string; nombre: string; }
 
 interface RecaladaFormProps {
-  buques: BuqueLookupOption[];
-  paises: PaisLookupOption[];
+  buques:          BuqueLookupOption[];
+  paises:          PaisLookupOption[];
   initialValues?: {
-    buqueId?: number;
-    paisOrigenId?: number;
-    fechaLlegada?: string;
-    fechaSalida?: string | null;
-    terminal?: string | null;
-    muelle?: string | null;
-    pasajerosEstimados?: number | null;
-    tripulacionEstimada?: number | null;
-    observaciones?: string | null;
-    fuente?: RecaladaSource;
+    buqueId?: number; paisOrigenId?: number;
+    fechaLlegada?: string; fechaSalida?: string | null;
+    terminal?: string | null; muelle?: string | null;
+    pasajerosEstimados?: number | null; tripulacionEstimada?: number | null;
+    observaciones?: string | null; fuente?: RecaladaSource;
   } | null;
-  isEdit?: boolean;
+  isEdit?:            boolean;
   operationalStatus?: RecaladaOperationalStatus;
-  isLoading?: boolean;
-  error?: string | null;
-  onCancel?: () => void;
-  onSubmit: (values: RecaladaFormValues) => void | Promise<void>;
+  isLoading?:         boolean;
+  error?:             string | null;
+  onCancel?:          () => void;
+  onSubmit:           (values: RecaladaFormValues) => void | Promise<void>;
 }
 
+/* ─────────────────────────────────────────────
+   PALETTE
+───────────────────────────────────────────── */
+const C = {
+  violet:       "#8B5CF6",
+  violetFaint:  "rgba(139,92,246,0.10)",
+  violetBorder: "rgba(139,92,246,0.28)",
+  violetGlow:   "rgba(139,92,246,0.42)",
+  amber:        "#F59E0B",
+  amberFaint:   "rgba(245,158,11,0.09)",
+  amberBorder:  "rgba(245,158,11,0.26)",
+  cyan:         "#38BDF8",
+  cyanFaint:    "rgba(56,189,248,0.09)",
+  cyanBorder:   "rgba(56,189,248,0.25)",
+  danger:       "#F43F5E",
+  dangerFaint:  "rgba(244,63,94,0.10)",
+  dangerBorder: "rgba(244,63,94,0.26)",
+  teal:         "#2DD4BF",
+  fg:           "var(--color-fg-primary)",
+  fgSec:        "var(--color-fg-secondary)",
+  fgMuted:      "var(--color-fg-muted)",
+  surface:      "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+};
+
+/* ─────────────────────────────────────────────
+   ICONS
+───────────────────────────────────────────── */
+const Ico = {
+  warning: (s = 13) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  info:    (s = 13) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
+  save:    (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>,
+};
+
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
 function toInputDatetime(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-const inputClassName =
-  "w-full rounded-2xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-fg-muted)]";
-
-const inputStyle = {
-  background: "rgba(255,255,255,0.03)",
-  borderColor: "var(--color-border-glass)",
-  color: "var(--color-fg-primary)",
-  boxShadow:
-    "inset 2px 2px 5px rgba(0,0,0,0.35), inset -2px -2px 5px rgba(255,255,255,0.03)",
-} as const;
-
-const disabledStyle = {
-  ...inputStyle,
-  opacity: 0.45,
-  cursor: "not-allowed",
-} as const;
-
+/* ─────────────────────────────────────────────
+   COMPONENT
+───────────────────────────────────────────── */
 const RecaladaForm: React.FC<RecaladaFormProps> = ({
-  buques,
-  paises,
-  initialValues,
-  isEdit = false,
-  operationalStatus,
-  isLoading = false,
-  error,
-  onCancel,
-  onSubmit,
+  buques, paises, initialValues, isEdit = false,
+  operationalStatus, isLoading = false, error, onCancel, onSubmit,
 }) => {
   const isArrivedEdit = isEdit && operationalStatus === "ARRIVED";
 
   const {
-    register,
-    handleSubmit,
-    reset,
+    register, handleSubmit, reset,
     formState: { errors, isDirty },
   } = useForm<RecaladaFormValues>({
     resolver: zodResolver(recaladaFormSchema),
-    defaultValues: {
-      buqueId: initialValues?.buqueId ? String(initialValues.buqueId) : "",
-      paisOrigenId: initialValues?.paisOrigenId
-        ? String(initialValues.paisOrigenId)
-        : "",
-      fechaLlegada: toInputDatetime(initialValues?.fechaLlegada),
-      fechaSalida: toInputDatetime(initialValues?.fechaSalida),
-      terminal: initialValues?.terminal ?? "",
-      muelle: initialValues?.muelle ?? "",
-      pasajerosEstimados:
-        typeof initialValues?.pasajerosEstimados === "number"
-          ? initialValues.pasajerosEstimados
-          : undefined,
-      tripulacionEstimada:
-        typeof initialValues?.tripulacionEstimada === "number"
-          ? initialValues.tripulacionEstimada
-          : undefined,
-      observaciones: initialValues?.observaciones ?? "",
-      fuente: initialValues?.fuente ?? "MANUAL",
-    },
+    defaultValues: buildDefaults(initialValues),
   });
 
-  useEffect(() => {
-    reset({
-      buqueId: initialValues?.buqueId ? String(initialValues.buqueId) : "",
-      paisOrigenId: initialValues?.paisOrigenId
-        ? String(initialValues.paisOrigenId)
-        : "",
-      fechaLlegada: toInputDatetime(initialValues?.fechaLlegada),
-      fechaSalida: toInputDatetime(initialValues?.fechaSalida),
-      terminal: initialValues?.terminal ?? "",
-      muelle: initialValues?.muelle ?? "",
-      pasajerosEstimados:
-        typeof initialValues?.pasajerosEstimados === "number"
-          ? initialValues.pasajerosEstimados
-          : undefined,
-      tripulacionEstimada:
-        typeof initialValues?.tripulacionEstimada === "number"
-          ? initialValues.tripulacionEstimada
-          : undefined,
-      observaciones: initialValues?.observaciones ?? "",
-      fuente: initialValues?.fuente ?? "MANUAL",
-    });
-  }, [
-    initialValues?.buqueId,
-    initialValues?.paisOrigenId,
-    initialValues?.fechaLlegada,
-    initialValues?.fechaSalida,
-    initialValues?.terminal,
-    initialValues?.muelle,
-    initialValues?.pasajerosEstimados,
-    initialValues?.tripulacionEstimada,
-    initialValues?.observaciones,
-    initialValues?.fuente,
-    reset,
+  useEffect(() => { reset(buildDefaults(initialValues)); }, [
+    initialValues?.buqueId, initialValues?.paisOrigenId,
+    initialValues?.fechaLlegada, initialValues?.fechaSalida,
+    initialValues?.terminal, initialValues?.muelle,
+    initialValues?.pasajerosEstimados, initialValues?.tripulacionEstimada,
+    initialValues?.observaciones, initialValues?.fuente, reset,
   ]);
 
+  const inputBase: React.CSSProperties = {
+    width: "100%", boxSizing: "border-box",
+    borderRadius: 13, padding: "11px 14px",
+    background: "rgba(255,255,255,0.04)",
+    border: `1px solid rgba(139,92,246,0.18)`,
+    color: C.fg, fontSize: "0.875rem", outline: "none",
+    transition: "border-color 150ms ease, box-shadow 150ms ease",
+  };
+
+  const disabledBase: React.CSSProperties = { ...inputBase, opacity: 0.4, cursor: "not-allowed" };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <SurfaceCard className="gap-4 p-4" radius="xl" variant="raised">
-        <div>
-          <h2 className="text-base font-semibold text-[var(--color-fg-primary)]">
-            {isEdit ? "Datos de la recalada" : "Nueva recalada"}
-          </h2>
-          <p className="mt-1 text-sm leading-5 text-[var(--color-fg-muted)]">
-            {isArrivedEdit
-              ? "La recalada ya llegó. Solo puedes editar fechas operativas, terminal, muelle, pasajeros y observaciones."
-              : "Completa los datos de la agenda madre operativa."}
+    <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+
+      {/* Info notice for arrived edits */}
+      {isArrivedEdit && (
+        <div style={{ borderRadius: 14, padding: "11px 14px", background: C.amberFaint, border: `1px solid ${C.amberBorder}`, display: "flex", gap: 8 }}>
+          <span style={{ color: C.amber, flexShrink: 0, marginTop: 1 }}>{Ico.info()}</span>
+          <p style={{ fontSize: "0.78rem", color: C.amber, lineHeight: 1.5 }}>
+            La recalada ya llegó. Solo puedes editar fechas operativas, terminal, muelle, pasajeros y observaciones.
           </p>
         </div>
+      )}
 
-        {error ? (
-          <div
-            className="rounded-2xl border px-3 py-3 text-sm"
-            style={{
-              background: "var(--color-danger-soft)",
-              borderColor: "var(--color-danger-border)",
-              color: "var(--color-danger)",
-            }}
-          >
-            {error}
-          </div>
-        ) : null}
+      {/* API error */}
+      {error && (
+        <div style={{ borderRadius: 14, padding: "11px 14px", background: C.dangerFaint, border: `1px solid ${C.dangerBorder}`, display: "flex", gap: 8 }}>
+          <span style={{ color: C.danger, flexShrink: 0, marginTop: 1 }}>{Ico.warning()}</span>
+          <p style={{ fontSize: "0.8125rem", color: C.danger, fontWeight: 500 }}>{error}</p>
+        </div>
+      )}
 
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            Buque
-          </label>
-          <select
-            {...register("buqueId")}
-            disabled={isLoading || isArrivedEdit}
-            className={inputClassName}
-            style={isArrivedEdit ? disabledStyle : inputStyle}
-          >
+      {/* ── Section: Identificación ── */}
+      <FormSection title="Identificación" color={C.cyan}>
+        <Field label="Buque" error={errors.buqueId?.message}>
+          <select {...register("buqueId")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
             <option value="">Selecciona un buque</option>
-            {buques.map((b) => (
-              <option key={b.id} value={String(b.id)}>
-                {b.nombre}
-              </option>
-            ))}
+            {buques.map((b) => <option key={b.id} value={String(b.id)}>{b.nombre}</option>)}
           </select>
-          {errors.buqueId?.message ? (
-            <p className="text-xs text-[var(--color-danger)]">
-              {errors.buqueId.message}
-            </p>
-          ) : null}
-        </div>
+        </Field>
 
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            País de origen
-          </label>
-          <select
-            {...register("paisOrigenId")}
-            disabled={isLoading || isArrivedEdit}
-            className={inputClassName}
-            style={isArrivedEdit ? disabledStyle : inputStyle}
-          >
+        <Field label="País de origen" error={errors.paisOrigenId?.message}>
+          <select {...register("paisOrigenId")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
             <option value="">Selecciona un país</option>
-            {paises.map((p) => (
-              <option key={p.id} value={String(p.id)}>
-                {p.codigo} · {p.nombre}
-              </option>
-            ))}
+            {paises.map((p) => <option key={p.id} value={String(p.id)}>{p.codigo} · {p.nombre}</option>)}
           </select>
-          {errors.paisOrigenId?.message ? (
-            <p className="text-xs text-[var(--color-danger)]">
-              {errors.paisOrigenId.message}
-            </p>
-          ) : null}
-        </div>
+        </Field>
 
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            Fecha de llegada
-          </label>
-          <input
-            {...register("fechaLlegada")}
-            type="datetime-local"
-            disabled={isLoading || isArrivedEdit}
-            className={inputClassName}
-            style={isArrivedEdit ? disabledStyle : inputStyle}
-          />
-          {errors.fechaLlegada?.message ? (
-            <p className="text-xs text-[var(--color-danger)]">
-              {errors.fechaLlegada.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            Fecha de salida{" "}
-            <span className="normal-case font-normal">(opcional)</span>
-          </label>
-          <input
-            {...register("fechaSalida")}
-            type="datetime-local"
-            disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          />
-          {errors.fechaSalida?.message ? (
-            <p className="text-xs text-[var(--color-danger)]">
-              {errors.fechaSalida.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-              Terminal
-            </label>
-            <input
-              {...register("terminal")}
-              type="text"
-              placeholder="Terminal Sur"
-              maxLength={80}
-              disabled={isLoading}
-              className={inputClassName}
-              style={inputStyle}
-            />
-            {errors.terminal?.message ? (
-              <p className="text-xs text-[var(--color-danger)]">
-                {errors.terminal.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-              Muelle
-            </label>
-            <input
-              {...register("muelle")}
-              type="text"
-              placeholder="M-3"
-              maxLength={80}
-              disabled={isLoading}
-              className={inputClassName}
-              style={inputStyle}
-            />
-            {errors.muelle?.message ? (
-              <p className="text-xs text-[var(--color-danger)]">
-                {errors.muelle.message}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-              Pasajeros est.
-            </label>
-            <input
-              {...register("pasajerosEstimados")}
-              type="number"
-              inputMode="numeric"
-              min={1}
-              placeholder="500"
-              disabled={isLoading}
-              className={inputClassName}
-              style={inputStyle}
-            />
-            {errors.pasajerosEstimados?.message ? (
-              <p className="text-xs text-[var(--color-danger)]">
-                {errors.pasajerosEstimados.message}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-              Tripulación est.
-            </label>
-            <input
-              {...register("tripulacionEstimada")}
-              type="number"
-              inputMode="numeric"
-              min={0}
-              placeholder="20"
-              disabled={isLoading}
-              className={inputClassName}
-              style={inputStyle}
-            />
-            {errors.tripulacionEstimada?.message ? (
-              <p className="text-xs text-[var(--color-danger)]">
-                {errors.tripulacionEstimada.message}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            Fuente
-          </label>
-          <select
-            {...register("fuente")}
-            disabled={isLoading || isArrivedEdit}
-            className={inputClassName}
-            style={isArrivedEdit ? disabledStyle : inputStyle}
-          >
+        <Field label="Fuente" error={undefined}>
+          <select {...register("fuente")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
             <option value="MANUAL">Manual</option>
             <option value="IMPORT">Importación</option>
           </select>
-        </div>
+        </Field>
+      </FormSection>
 
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
-            Observaciones
-          </label>
+      {/* ── Section: Fechas ── */}
+      <FormSection title="Fechas" color={C.violet}>
+        <Field label="Fecha de llegada" error={errors.fechaLlegada?.message}>
+          <input {...register("fechaLlegada")} type="datetime-local" disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase} />
+        </Field>
+
+        <Field label="Fecha de salida (opcional)" error={errors.fechaSalida?.message}>
+          <input {...register("fechaSalida")} type="datetime-local" disabled={isLoading} style={inputBase} />
+        </Field>
+      </FormSection>
+
+      {/* ── Section: Logística ── */}
+      <FormSection title="Logística" color={C.amber}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <Field label="Terminal" error={errors.terminal?.message}>
+            <input {...register("terminal")} type="text" placeholder="Terminal Sur" maxLength={80} disabled={isLoading} style={inputBase} />
+          </Field>
+          <Field label="Muelle" error={errors.muelle?.message}>
+            <input {...register("muelle")} type="text" placeholder="M-3" maxLength={80} disabled={isLoading} style={inputBase} />
+          </Field>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <Field label="Pasajeros est." error={errors.pasajerosEstimados?.message}>
+            <input {...register("pasajerosEstimados")} type="number" inputMode="numeric" min={1} placeholder="500" disabled={isLoading} style={inputBase} />
+          </Field>
+          <Field label="Tripulación est." error={errors.tripulacionEstimada?.message}>
+            <input {...register("tripulacionEstimada")} type="number" inputMode="numeric" min={0} placeholder="20" disabled={isLoading} style={inputBase} />
+          </Field>
+        </div>
+      </FormSection>
+
+      {/* ── Section: Notas ── */}
+      <FormSection title="Notas" color={C.fgMuted}>
+        <Field label="Observaciones" error={errors.observaciones?.message}>
           <textarea
             {...register("observaciones")}
-            rows={3}
-            placeholder="Notas operativas adicionales..."
-            maxLength={2000}
+            rows={3} maxLength={2000}
+            placeholder="Notas operativas adicionales…"
             disabled={isLoading}
-            className={`${inputClassName} resize-none`}
-            style={inputStyle}
+            style={{ ...inputBase, resize: "none" }}
           />
-          {errors.observaciones?.message ? (
-            <p className="text-xs text-[var(--color-danger)]">
-              {errors.observaciones.message}
-            </p>
-          ) : null}
-        </div>
-      </SurfaceCard>
+        </Field>
+      </FormSection>
 
-      <SurfaceCard className="gap-3 p-4" radius="xl" variant="raised">
-        <Button
+      {/* ── Actions ── */}
+      <div style={{ borderRadius: 18, background: C.surface, border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", display: "flex", flexDirection: "column", gap: 9 }}>
+        <button
           type="submit"
-          variant="primary"
-          size="md"
-          isLoading={isLoading}
           disabled={isLoading || (isEdit && !isDirty)}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            padding: "15px 20px", borderRadius: 16, width: "100%",
+            background: (isLoading || (isEdit && !isDirty))
+              ? "rgba(139,92,246,0.25)"
+              : "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #6D28D9 100%)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: (isLoading || (isEdit && !isDirty)) ? "none" : `0 8px 24px ${C.violetGlow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
+            color: "white", fontSize: "0.9rem", fontWeight: 800,
+            cursor: (isLoading || (isEdit && !isDirty)) ? "not-allowed" : "pointer",
+          }}
         >
-          {isEdit ? "Guardar cambios" : "Crear recalada"}
-        </Button>
+          {isLoading
+            ? <><span className="loading-spinner" style={{ borderTopColor: "white" }} /> Guardando…</>
+            : <>{Ico.save()} {isEdit ? "Guardar cambios" : "Crear recalada"}</>
+          }
+        </button>
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="md"
           disabled={isLoading}
           onClick={onCancel}
+          style={{
+            padding: "13px 20px", borderRadius: 14, width: "100%",
+            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+            color: C.fgSec, fontSize: "0.875rem", fontWeight: 600,
+            cursor: isLoading ? "not-allowed" : "pointer",
+          }}
         >
           Cancelar
-        </Button>
+        </button>
 
-        {isEdit && !isDirty ? (
-          <p className="text-center text-xs text-[var(--color-fg-muted)]">
+        {isEdit && !isDirty && (
+          <p style={{ textAlign: "center", fontSize: "0.72rem", color: C.fgMuted }}>
             Modifica un campo para habilitar el guardado.
           </p>
-        ) : null}
-      </SurfaceCard>
+        )}
+      </div>
     </form>
   );
 };
+
+/* ─────────────────────────────────────────────
+   SUB-COMPONENTS
+───────────────────────────────────────────── */
+const FormSection: React.FC<{ title: string; color: string; children: React.ReactNode }> = ({ title, color, children }) => (
+  <div style={{ borderRadius: 18, background: "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)", border: "1px solid rgba(255,255,255,0.06)", padding: "1.125rem 1.125rem" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.875rem" }}>
+      <div style={{ width: 3, height: 13, borderRadius: 2, background: color, opacity: 0.9, flexShrink: 0 }} />
+      <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color }}>{title}</span>
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${color}28, transparent)` }} />
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {children}
+    </div>
+  </div>
+);
+
+const Field: React.FC<{ label: string; error?: string; children: React.ReactNode }> = ({ label, error, children }) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+    <label style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--color-fg-muted)" }}>
+      {label}
+    </label>
+    {children}
+    {error && (
+      <p style={{ fontSize: "0.72rem", color: "#F43F5E", fontWeight: 500 }}>{error}</p>
+    )}
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
+function buildDefaults(iv: RecaladaFormProps["initialValues"]) {
+  return {
+    buqueId:             iv?.buqueId ? String(iv.buqueId) : "",
+    paisOrigenId:        iv?.paisOrigenId ? String(iv.paisOrigenId) : "",
+    fechaLlegada:        toInputDatetime(iv?.fechaLlegada),
+    fechaSalida:         toInputDatetime(iv?.fechaSalida),
+    terminal:            iv?.terminal ?? "",
+    muelle:              iv?.muelle ?? "",
+    pasajerosEstimados:  typeof iv?.pasajerosEstimados === "number" ? iv.pasajerosEstimados : undefined,
+    tripulacionEstimada: typeof iv?.tripulacionEstimada === "number" ? iv.tripulacionEstimada : undefined,
+    observaciones:       iv?.observaciones ?? "",
+    fuente:              (iv?.fuente ?? "MANUAL") as "MANUAL" | "IMPORT",
+  };
+}
 
 export default RecaladaForm;

@@ -11,7 +11,7 @@ const variantStyles: Record<HintVariant, string> = {
   default: "color: var(--color-fg-muted)",
   success: "color: var(--color-success)",
   warning: "color: var(--color-warning)",
-  error: "color: #F87171",
+  error: "color: var(--color-error-text)",
 };
 
 const FieldHint: React.FC<FieldHintProps> = ({

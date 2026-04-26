@@ -92,3 +92,24 @@ export function changePassword(
     headers: { ...PLATFORM_HEADER },
   });
 }
+
+export function forgotPassword(payload: {
+  email: string;
+}): Promise<ApiResult<{ message: string }>> {
+  return request<{ message: string }>("/auth/forgot-password", {
+    method: "POST",
+    body: payload,
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function resetPassword(payload: {
+  token: string;
+  newPassword: string;
+}): Promise<ApiResult<{ message: string }>> {
+  return request<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    body: payload,
+    headers: { ...PLATFORM_HEADER },
+  });
+}

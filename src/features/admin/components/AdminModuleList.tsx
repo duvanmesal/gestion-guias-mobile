@@ -1,5 +1,7 @@
 import AdminModuleRow from "./AdminModuleRow";
 
+type ModuleTone = "cyan" | "amber" | "teal" | "violet";
+
 export interface AdminModuleListItem {
   key: string;
   title: string;
@@ -8,6 +10,8 @@ export interface AdminModuleListItem {
   badge?: string;
   helperText?: string;
   disabled?: boolean;
+  tone?: ModuleTone;
+  icon?: React.ReactNode;
 }
 
 interface AdminModuleListProps {
@@ -17,30 +21,38 @@ interface AdminModuleListProps {
 
 const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
   <section
-    className="rounded-[26px] border p-4"
+    className="rounded-[24px] border p-4"
     style={{
-      background: "rgba(20,26,33,0.76)",
-      borderColor: "rgba(255,255,255,0.06)",
+      background: "var(--color-bg-elevated)",
+      borderColor: "var(--color-glass-soft)",
       boxShadow:
         "inset 1px 1px 0 rgba(255,255,255,0.03), inset -1px -1px 0 rgba(0,0,0,0.18)",
     }}
   >
-    <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="mb-3 flex items-center gap-2">
+      <span
+        aria-hidden
+        style={{
+          width: 3, height: 13, borderRadius: 2,
+          background: "var(--color-primary)", opacity: 0.9,
+          flexShrink: 0,
+        }}
+      />
       <h2
-        className="text-sm font-semibold uppercase tracking-[0.18em]"
-        style={{ color: "var(--color-fg-muted)" }}
+        className="text-[11px] font-bold uppercase tracking-[0.18em]"
+        style={{ color: "var(--color-primary)" }}
       >
         {title}
       </h2>
       <span
-        className="text-[11px] font-medium"
-        style={{ color: "var(--color-fg-secondary)" }}
+        className="ml-auto text-[11px] font-medium"
+        style={{ color: "var(--color-fg-muted)" }}
       >
         {items.length} accesos
       </span>
     </div>
 
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-3 auto-rows-fr">
       {items.map((item) => (
         <AdminModuleRow
           key={item.key}
@@ -50,6 +62,8 @@ const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
           badge={item.badge}
           helperText={item.helperText}
           disabled={item.disabled}
+          tone={item.tone}
+          icon={item.icon}
         />
       ))}
     </div>

@@ -57,7 +57,7 @@ const AdminUsersPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-32 pt-8">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
           <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -111,7 +111,7 @@ const AdminUsersPage: React.FC = () => {
                     className="rounded-2xl border px-3 py-3 text-center"
                     style={{
                       borderColor: "var(--color-border-glass)",
-                      background: "rgba(255,255,255,0.04)",
+                      background: "var(--color-input-bg)",
                     }}
                   >
                     <p className="text-lg font-bold text-[var(--color-fg-primary)]">
@@ -227,7 +227,7 @@ const AdminUsersPage: React.FC = () => {
                   className="flex items-center justify-between gap-3 rounded-2xl border px-3 py-3 text-sm"
                   style={{
                     borderColor: "var(--color-border-glass)",
-                    background: "rgba(255,255,255,0.03)",
+                    background: "var(--color-glass-subtle)",
                   }}
                 >
                   <div>

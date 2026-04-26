@@ -57,7 +57,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             <div
               className="relative flex h-20 w-20 items-center justify-center rounded-full"
               style={{
-                background: "linear-gradient(145deg, rgba(25, 32, 40, 0.9), rgba(15, 20, 25, 0.95))",
+                background: "var(--color-neu-raised)",
                 border: "1px solid var(--color-border-glass)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
               }}

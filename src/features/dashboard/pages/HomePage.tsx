@@ -1,4 +1,10 @@
-import { IonContent, IonPage } from "@ionic/react";
+import type { RefresherEventDetail } from "@ionic/core";
+import {
+  IonContent,
+  IonPage,
+  IonRefresher,
+  IonRefresherContent,
+} from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
@@ -15,15 +21,34 @@ const HomePage: React.FC = () => {
     return <LoadingScreen message="Cargando tu centro de operaciones..." />;
   }
 
+  const handleRefresh = async (event: CustomEvent<RefresherEventDetail>) => {
+    try {
+      await refetch();
+    } finally {
+      event.detail.complete();
+    }
+  };
+
   return (
-    <IonPage>
+    <IonPage className="premium-page">
       <IonContent scrollY={true}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent
+            pullingIcon="chevron-down-circle-outline"
+            refreshingSpinner="crescent"
+          />
+        </IonRefresher>
+
         <DashboardNeumorphic
           data={data}
           user={user}
           isRefreshing={isFetching}
           errorMessage={
-            error instanceof Error ? error.message : error ? String(error) : null
+            error instanceof Error
+              ? error.message
+              : error
+              ? String(error)
+              : null
           }
           onRetry={() => {
             void refetch();
