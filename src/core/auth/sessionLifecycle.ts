@@ -11,7 +11,7 @@ interface FinalizeClientLogoutOptions {
 }
 
 interface LogoutAllOptions {
-  password: string;
+  code: string;
 }
 
 function getAuthHeader(): Record<string, string> {
@@ -69,8 +69,8 @@ export async function logoutAllSessions(
       method: "POST",
       body: {
         verification: {
-          method: "password",
-          password: options.password,
+          method: "code",
+          code: options.code,
         },
       },
       headers: {
@@ -86,6 +86,16 @@ export async function logoutAllSessions(
       },
     });
   }
+}
+
+export async function requestLogoutAllCode(): Promise<void> {
+  await request<void>("/auth/logout-all/request", {
+    method: "POST",
+    headers: {
+      ...PLATFORM_HEADER,
+      ...getAuthHeader(),
+    },
+  });
 }
 
 export async function expireSessionAndRedirect(): Promise<void> {

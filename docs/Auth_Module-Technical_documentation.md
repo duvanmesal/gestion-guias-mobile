@@ -1466,8 +1466,10 @@ Luego debe volver a ejecutarse `GET /users/me`.
 
 ## 27.6 Logout all
 
+* `POST /auth/logout-all/request`
+* backend envía código de 6 dígitos al correo del usuario autenticado
 * `POST /auth/logout-all`
-* body con verificación por contraseña
+* body con verificación por código: `{ verification: { method: "code", code } }`
 * limpiar refresh token
 * limpiar cache
 * `status` pasa a `guest`

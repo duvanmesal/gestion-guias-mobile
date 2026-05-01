@@ -21,8 +21,8 @@ export interface ChangePasswordRequest {
 
 export interface LogoutAllRequest {
   verification: {
-    method: "password";
-    password: string;
+    method: "code";
+    code: string;
   };
 }
 
@@ -53,6 +53,13 @@ export function logoutAll(payload: LogoutAllRequest): Promise<ApiResult<void>> {
   return authRequest<void>("/auth/logout-all", {
     method: "POST",
     body: payload,
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function requestLogoutAllCode(): Promise<ApiResult<{ message: string }>> {
+  return authRequest<{ message: string }>("/auth/logout-all/request", {
+    method: "POST",
     headers: { ...PLATFORM_HEADER },
   });
 }
