@@ -1,9 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'gestion-guias-mobile-1',
-  webDir: 'dist'
+  appId: 'com.gestionguias.app',
+  appName: 'Gestión de Guías',
+  webDir: 'dist',
+  server: {
+    allowNavigation: [],
+  },
 };
 
 export default config;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useThemeStore } from "../../../app/stores/themeStore";
 import { useHistory } from "react-router-dom";
 import LogoutAllModal from "./LogoutAllModal";
 import type { SessionUser } from "../../../core/auth/types";
@@ -68,6 +69,8 @@ interface ProfileCardProps {
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, onRefresh }) => {
   const history = useHistory();
+  const { mode, toggle } = useThemeStore();
+  const isDark = mode === "dark";
   const [busy, setBusy] = useState<null | "logout" | "logoutAll">(null);
   const [logoutAllOpen, setLogoutAllOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -251,6 +254,27 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
           ]}
         />
 
+        {/* Appearance */}
+        <div className="animate-fade-up" style={{
+          borderRadius: 20, marginBottom: 14,
+          background: P.surface,
+          border: "1px solid var(--color-glass-medium)",
+          overflow: "hidden",
+        }}>
+          <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 3, height: 13, borderRadius: 2, background: isDark ? "var(--color-primary)" : P.amber, opacity: 0.9 }} />
+            <span style={{ color: isDark ? "var(--color-primary)" : P.amber, display: "flex", opacity: 0.85 }}>
+              {isDark ? <MoonIcon /> : <SunIcon />}
+            </span>
+            <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: isDark ? "var(--color-primary)" : P.amber }}>
+              Apariencia
+            </span>
+          </div>
+          <div style={{ padding: "0.875rem 1rem" }}>
+            <ThemeToggleRow isDark={isDark} onToggle={toggle} />
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="animate-fade-up" style={{
           borderRadius: 20, marginBottom: 14,
@@ -414,6 +438,78 @@ const ActionBtn: React.FC<{
   >
     <span style={{ display: "flex", flexShrink: 0 }}>{icon}</span>
     <span>{label}</span>
+  </button>
+);
+
+const SunIcon: React.FC = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+const MoonIcon: React.FC = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+const ThemeToggleRow: React.FC<{ isDark: boolean; onToggle: () => void }> = ({ isDark, onToggle }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="w-full transition-all active:scale-[0.97]"
+    style={{
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "12px 14px", borderRadius: 16,
+      background: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(217, 119, 6, 0.07)",
+      border: `1px solid ${isDark ? "rgba(59, 130, 246, 0.2)" : "rgba(217, 119, 6, 0.2)"}`,
+      cursor: "pointer",
+    }}
+  >
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+        background: isDark ? "rgba(59, 130, 246, 0.12)" : "rgba(217, 119, 6, 0.12)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "background 0.3s ease",
+      }}>
+        {isDark
+          ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+          : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+        }
+      </div>
+
+      <div>
+        <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--color-fg-primary)", lineHeight: 1.2 }}>
+          {isDark ? "Modo Oscuro" : "Modo Claro"}
+        </p>
+        <p style={{ fontSize: "0.65rem", color: "var(--color-fg-muted)", marginTop: 2 }}>
+          Toca para {isDark ? "activar modo claro" : "activar modo oscuro"}
+        </p>
+      </div>
+    </div>
+
+    {/* Animated pill switch */}
+    <div style={{
+      width: 48, height: 28, borderRadius: 14, flexShrink: 0,
+      background: isDark ? "var(--color-primary)" : "var(--color-glass-medium)",
+      position: "relative",
+      transition: "background 0.3s ease",
+      border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "var(--color-glass-soft)"}`,
+    }}>
+      <div style={{
+        position: "absolute", top: 4,
+        left: isDark ? 22 : 4,
+        width: 18, height: 18, borderRadius: "50%",
+        background: isDark ? "white" : "var(--color-fg-muted)",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+        transition: "left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      }} />
+    </div>
   </button>
 );
 

@@ -15,7 +15,8 @@ function readLocalDebugFlag(): boolean {
 }
 
 export function isAdminDebugEnabled(): boolean {
-  return Boolean(import.meta.env.DEV) || readLocalDebugFlag();
+  // localStorage flag is only honoured in dev; ignored in production builds
+  return Boolean(import.meta.env.DEV) || (import.meta.env.DEV && readLocalDebugFlag());
 }
 
 function formatPrefix(scope: string) {

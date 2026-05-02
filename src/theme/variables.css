@@ -1702,3 +1702,135 @@ ion-router-outlet {
     1px 1px 4px rgba(0, 0, 0, 0.3),
     -1px -1px 3px rgba(255, 255, 255, 0.02);
 }
+
+/* =============================================
+   DARK MODE
+   ============================================= */
+.dark {
+  /* Base surfaces */
+  --color-bg-base:          #070E1A;
+  --color-bg-elevated:      #0D1B2A;
+  --color-bg-glass:         rgba(13, 27, 42, 0.8);
+  --color-bg-glass-hover:   rgba(13, 27, 42, 0.95);
+  --color-bg-glass-active:  #0D1B2A;
+
+  /* Primary — brighter blue for dark bg */
+  --color-primary:          #3B82F6;
+  --color-primary-hover:    #60A5FA;
+  --color-primary-active:   #2563EB;
+  --color-primary-dark:     #2563EB;
+  --color-primary-light:    #93C5FD;
+  --color-primary-glow:     rgba(59, 130, 246, 0.2);
+  --color-primary-soft:     rgba(59, 130, 246, 0.1);
+  --color-primary-muted:    rgba(59, 130, 246, 0.05);
+
+  /* Accent */
+  --color-accent:           #F59E0B;
+  --color-accent-hover:     #FBBF24;
+  --color-accent-active:    #D97706;
+  --color-accent-glow:      rgba(245, 158, 11, 0.2);
+  --color-accent-soft:      rgba(245, 158, 11, 0.1);
+  --color-accent-border:    rgba(245, 158, 11, 0.2);
+
+  /* Semantic */
+  --color-success:          #34D399;
+  --color-success-soft:     rgba(52, 211, 153, 0.12);
+  --color-success-border:   rgba(52, 211, 153, 0.2);
+  --color-danger:           #EF4444;
+  --color-danger-soft:      rgba(239, 68, 68, 0.12);
+  --color-danger-border:    rgba(239, 68, 68, 0.25);
+  --color-danger-muted:     #F87171;
+  --color-error-text:       #F87171;
+  --color-warning:          var(--color-accent);
+  --color-warning-soft:     rgba(245, 158, 11, 0.1);
+  --color-warning-border:   rgba(245, 158, 11, 0.2);
+  --color-info:             #38BDF8;
+  --color-info-soft:        rgba(56, 189, 248, 0.1);
+  --color-info-border:      rgba(56, 189, 248, 0.2);
+
+  /* Foreground hierarchy */
+  --color-fg-primary:       #F1F5F9;
+  --color-fg-secondary:     #94A3B8;
+  --color-fg-muted:         #64748B;
+  --color-fg-disabled:      #334155;
+
+  /* Borders */
+  --color-border-glass:       rgba(255, 255, 255, 0.05);
+  --color-border-glass-hover: rgba(255, 255, 255, 0.08);
+  --color-border-glow:        rgba(59, 130, 246, 0.2);
+  --color-border-focus:       rgba(59, 130, 246, 0.4);
+
+  /* Inputs */
+  --color-input-bg:           #0D1B2A;
+  --color-input-bg-focus:     #112236;
+  --color-input-border:       rgba(255, 255, 255, 0.1);
+  --color-input-border-focus: var(--color-primary);
+
+  /* Glass overlays */
+  --color-glass-subtle:  rgba(255, 255, 255, 0.02);
+  --color-glass-soft:    rgba(255, 255, 255, 0.04);
+  --color-glass-medium:  rgba(255, 255, 255, 0.07);
+
+  /* Neumorphic */
+  --color-neu-raised: linear-gradient(145deg, #0D1B2A 0%, #070E1A 100%);
+
+  /* Shadows */
+  --shadow-neu-raised:    0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-card:          0 10px 25px rgba(0, 0, 0, 0.45);
+  --shadow-glow-primary:  0 4px 12px rgba(59, 130, 246, 0.25);
+  --shadow-glow-accent:   0 4px 12px rgba(245, 158, 11, 0.2);
+
+  /* Gradients */
+  --gradient-primary:    linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  --gradient-hero-main:  linear-gradient(160deg, #0D1B2A 0%, #070E1A 100%);
+  --gradient-fade-up:    linear-gradient(180deg, rgba(7, 14, 26, 0) 0%, rgba(7, 14, 26, 0.88) 32%, #070E1A 100%);
+  --gradient-card:       linear-gradient(150deg, #0D1B2A 0%, #070E1A 100%);
+
+  /* Focus rings */
+  --focus-ring:         0 0 0 3px var(--color-primary-soft);
+  --focus-ring-strong:  0 0 0 4px var(--color-primary-glow);
+  --focus-ring-error:   0 0 0 3px var(--color-danger-soft);
+
+  /* Ionic component overrides */
+  --ion-background-color:     #070E1A;
+  --ion-background-color-rgb: 7, 14, 26;
+  --ion-text-color:           #F1F5F9;
+  --ion-text-color-rgb:       241, 245, 249;
+  --ion-border-color:         rgba(255, 255, 255, 0.06);
+  --ion-card-background:      #0D1B2A;
+  --ion-item-background:      transparent;
+  --ion-toolbar-background:   #0A1626;
+  --ion-tab-bar-background:   #0A1626;
+  --ion-tab-bar-border-color: rgba(255, 255, 255, 0.06);
+  --ion-color-step-50:        #0D1B2A;
+  --ion-color-step-100:       #0F1F30;
+  --ion-color-step-150:       #112338;
+}
+
+/* Bottom nav dark mode */
+.dark .app-bottom-nav {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 14, 26, 0) 0%,
+    rgba(7, 14, 26, 0.75) 28%,
+    rgba(7, 14, 26, 0.99) 100%
+  );
+}
+
+.dark .app-bottom-nav__inner {
+  background: #0D1B2A;
+  border-color: rgba(255, 255, 255, 0.07);
+  border-top-color: rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 -2px 16px rgba(0, 0, 0, 0.3),
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ion-content dark background */
+.dark ion-content {
+  --background: #070E1A;
+}
+
+.dark ion-router-outlet {
+  background: #070E1A;
+}

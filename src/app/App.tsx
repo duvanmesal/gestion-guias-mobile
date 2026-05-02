@@ -1,7 +1,9 @@
 import { IonApp, createAnimation, setupIonicReact } from "@ionic/react";
+import "./stores/themeStore";
 import { IonReactRouter } from "@ionic/react-router";
 import AppProviders from "./providers/AppProviders";
 import AppRoutes from "./routes";
+import { ErrorBoundary } from "../ui/ErrorBoundary";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -38,13 +40,15 @@ function fadeTransition(_: HTMLElement, opts: Parameters<typeof createAnimation>
 setupIonicReact({ navAnimation: fadeTransition });
 
 const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <AppProviders>
-        <AppRoutes />
-      </AppProviders>
-    </IonReactRouter>
-  </IonApp>
+  <ErrorBoundary>
+    <IonApp>
+      <IonReactRouter>
+        <AppProviders>
+          <AppRoutes />
+        </AppProviders>
+      </IonReactRouter>
+    </IonApp>
+  </ErrorBoundary>
 );
 
 export default App;

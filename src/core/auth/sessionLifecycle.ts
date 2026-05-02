@@ -33,6 +33,7 @@ export async function finalizeClientLogout(
   }
 
   try {
+    queryClient.cancelQueries();
     queryClient.clear();
   } catch {
     // fail safe

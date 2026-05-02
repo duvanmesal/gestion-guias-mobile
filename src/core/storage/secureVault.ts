@@ -19,13 +19,16 @@ function generateUUID(): string {
   throw new Error("No secure RNG available");
 }
 
+// On web, refresh tokens use localStorage (survives page reload) instead of
+// sessionStorage (cleared on tab close). The ideal solution is httpOnly cookies
+// set by the backend, which this client cannot access via JS at all.
 async function get(key: string): Promise<string | null> {
   try {
     if (isNative) {
       const { value } = await SecureStoragePlugin.get({ key });
       return value ?? null;
     }
-    return sessionStorage.getItem(key);
+    return localStorage.getItem(key);
   } catch {
     return null;
   }
@@ -37,7 +40,7 @@ async function set(key: string, value: string): Promise<void> {
       await SecureStoragePlugin.set({ key, value });
       return;
     }
-    sessionStorage.setItem(key, value);
+    localStorage.setItem(key, value);
   } catch {
     /* fail safe */
   }
@@ -49,7 +52,7 @@ async function remove(key: string): Promise<void> {
       await SecureStoragePlugin.remove({ key });
       return;
     }
-    sessionStorage.removeItem(key);
+    localStorage.removeItem(key);
   } catch {
     /* fail safe */
   }
