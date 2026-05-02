@@ -6,14 +6,20 @@ interface BottomNavItemProps {
   onNavigate: (href: string) => void;
 }
 
-/* ── Custom SVG icons per nav key ── */
+/* ── Colors ── */
+const INACTIVE_ICON  = "#94A3B8";
+const INACTIVE_LABEL = "#94A3B8";
+const ACTIVE_COLOR   = "#2563EB";
+const ACTIVE_GLOW    = "rgba(37,99,235,0.20)";
+
+/* ── SVG icons ── */
 const NavIcon: React.FC<{ navKey: string; active: boolean }> = ({ navKey, active }) => {
-  const s  = 21;
-  const sw = active ? "2.2" : "1.75";
   const props = {
-    width: s, height: s, viewBox: "0 0 24 24",
+    width: 20, height: 20, viewBox: "0 0 24 24",
     fill: "none", stroke: "currentColor",
-    strokeWidth: sw, strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
+    strokeWidth: active ? "2.2" : "1.8",
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
   };
 
   switch (navKey) {
@@ -31,8 +37,8 @@ const NavIcon: React.FC<{ navKey: string; active: boolean }> = ({ navKey, active
           <line x1="16" y1="2" x2="16" y2="6" />
           <line x1="8"  y1="2" x2="8"  y2="6" />
           <line x1="3"  y1="10" x2="21" y2="10" />
-          <line x1="8"  y1="14" x2="8.01" y2="14" strokeWidth="2.6" />
-          <line x1="12" y1="14" x2="12.01" y2="14" strokeWidth="2.6" />
+          <line x1="8"  y1="14" x2="8.01" y2="14" strokeWidth={active ? "2.6" : "2.2"} />
+          <line x1="12" y1="14" x2="12.01" y2="14" strokeWidth={active ? "2.6" : "2.2"} />
         </svg>
       );
     case "atenciones":
@@ -90,76 +96,88 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({ item, isActive, onNavigat
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: 4,
+      gap: 5,
       flex: 1,
       minWidth: 0,
-      padding: "5px 4px 3px",
+      padding: "4px 2px 2px",
       border: "none",
       background: "transparent",
       cursor: "pointer",
       WebkitTapHighlightColor: "transparent",
-      transition: "transform 130ms cubic-bezier(0.34,1.56,0.64,1)",
+      transition: "transform 120ms cubic-bezier(0.34,1.56,0.64,1)",
     }}
-    onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.88)"; }}
+    onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.86)"; }}
     onMouseUp={(e)   => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
-    onTouchStart={(e)=> { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.88)"; }}
+    onTouchStart={(e)=> { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.86)"; }}
     onTouchEnd={(e)  => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
   >
-    {/* Icon shell with pill shape when active */}
+    {/* Active top accent bar */}
+    {isActive && (
+      <span style={{
+        position: "absolute",
+        top: -1,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: 28,
+        height: 2,
+        borderRadius: 9999,
+        background: `linear-gradient(90deg, #2563EB, #3B82F6)`,
+        boxShadow: `0 0 10px ${ACTIVE_GLOW}`,
+      }} />
+    )}
+
+    {/* Icon container */}
     <span style={{
+      position: "relative",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      width: isActive ? 48 : 36,
-      height: isActive ? 34 : 30,
-      borderRadius: isActive ? 14 : 10,
+      width: 44,
+      height: 32,
+      borderRadius: isActive ? 14 : 12,
       background: isActive
-        ? "linear-gradient(135deg, rgba(139,92,246,0.22) 0%, rgba(109,40,217,0.14) 100%)"
+        ? "rgba(37,99,235,0.10)"
         : "transparent",
       border: isActive
-        ? "1px solid rgba(139,92,246,0.32)"
+        ? "1px solid rgba(37,99,235,0.25)"
         : "1px solid transparent",
       boxShadow: isActive
-        ? "0 4px 18px rgba(139,92,246,0.28), inset 0 1px 0 rgba(255,255,255,0.06)"
+        ? `0 2px 8px ${ACTIVE_GLOW}`
         : "none",
-      color: isActive ? "var(--color-primary-light)" : "var(--color-fg-muted)",
+      color: isActive ? ACTIVE_COLOR : INACTIVE_ICON,
       transition: "all 220ms cubic-bezier(0.34,1.56,0.64,1)",
       flexShrink: 0,
     }}>
       <NavIcon navKey={item.key} active={isActive} />
+
+      {/* Active glow behind icon */}
+      {isActive && (
+        <span style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 14,
+          background: `radial-gradient(circle at 50% 60%, rgba(37,99,235,0.12) 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+      )}
     </span>
 
     {/* Label */}
     <span style={{
-      fontSize: isActive ? "0.6rem" : "0.575rem",
+      fontSize: "0.585rem",
       fontWeight: isActive ? 800 : 500,
-      letterSpacing: isActive ? "0.05em" : "0.02em",
-      color: isActive ? "var(--color-primary-light)" : "var(--color-fg-muted)",
+      letterSpacing: isActive ? "0.04em" : "0.01em",
+      color: isActive ? ACTIVE_COLOR : INACTIVE_LABEL,
       textTransform: isActive ? "uppercase" : "none",
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
       maxWidth: "100%",
-      transition: "all 180ms ease",
-      lineHeight: 1.1,
+      transition: "color 180ms ease, font-weight 180ms ease",
+      lineHeight: 1,
     }}>
       {item.label}
     </span>
-
-    {/* Amber dot indicator at bottom when active */}
-    {isActive && (
-      <span style={{
-        position: "absolute",
-        bottom: -1,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: 14,
-        height: 2.5,
-        borderRadius: 9999,
-        background: "linear-gradient(90deg, #F59E0B, #8B5CF6)",
-        boxShadow: "0 0 8px rgba(245,158,11,0.5)",
-      }} />
-    )}
   </button>
 );
 

@@ -59,7 +59,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
               style={{
                 background: "var(--color-neu-raised)",
                 border: "1px solid var(--color-border-glass)",
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.05)",
               }}
             >
               {/* Spinning arc */}

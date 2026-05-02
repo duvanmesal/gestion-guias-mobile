@@ -14,27 +14,27 @@ import type {
    PALETTE
 ───────────────────────────────────────────── */
 const C = {
-  cyan:         "#38BDF8",
+  cyan:         "var(--color-info)",
   cyanFaint:    "rgba(56,189,248,0.10)",
   cyanBorder:   "rgba(56,189,248,0.26)",
-  amber:        "#F59E0B",
-  amberFaint:   "rgba(245,158,11,0.10)",
-  amberBorder:  "rgba(245,158,11,0.28)",
-  teal:         "#2DD4BF",
-  tealFaint:    "rgba(45,212,191,0.10)",
-  tealBorder:   "rgba(45,212,191,0.26)",
-  danger:       "#F43F5E",
-  dangerFaint:  "rgba(244,63,94,0.10)",
+  amber:        "var(--color-accent)",
+  amberFaint:   "var(--color-accent-glow)",
+  amberBorder:  "var(--color-accent-glow)",
+  teal:         "var(--color-success)",
+  tealFaint:    "var(--color-success-soft)",
+  tealBorder:   "var(--color-success-soft)",
+  danger:       "var(--color-danger)",
+  dangerFaint:  "var(--color-danger-soft)",
   dangerBorder: "rgba(244,63,94,0.26)",
-  violet:       "#8B5CF6",
-  violetFaint:  "rgba(139,92,246,0.11)",
-  violetBorder: "rgba(139,92,246,0.28)",
-  violetGlow:   "rgba(139,92,246,0.42)",
+  violet:       "var(--color-primary)",
+  violetFaint:  "var(--color-primary-glow)",
+  violetBorder: "var(--color-primary-glow)",
+  violetGlow:   "var(--color-primary-glow)",
   fg:           "var(--color-fg-primary)",
   fgSec:        "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
   bg:           "var(--color-bg-base)",
-  surface:      "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+  surface: "var(--color-bg-elevated)",
 };
 
 type StatusCfg = { color: string; faint: string; border: string; label: string };
@@ -109,11 +109,11 @@ const RecaladasListPage: React.FC = () => {
 
           {/* ── Hero ── */}
           <div className="relative overflow-hidden" style={{
-            background: "linear-gradient(160deg, #0A0C22 0%, #080820 60%, #0C0A22 100%)",
+            background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
             borderBottom: "1px solid rgba(56,189,248,0.13)",
           }}>
             <div style={{ position: "absolute", top: -70, left: -50, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(56,189,248,0.13) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", top: 0, right: -30, width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", top: 0, right: -30, width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(56,189,248,0.04) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
 
             <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "2.5rem 1.25rem 1.5rem" }}>
@@ -121,7 +121,7 @@ const RecaladasListPage: React.FC = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{
                     width: 48, height: 48, borderRadius: 16, flexShrink: 0,
-                    background: "linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)",
+                    background: "linear-gradient(135deg, var(--color-info) 0%, var(--color-info) 100%)",
                     boxShadow: "0 6px 22px rgba(56,189,248,0.42)",
                     display: "flex", alignItems: "center", justifyContent: "center", color: "white",
                   }}>
@@ -147,7 +147,7 @@ const RecaladasListPage: React.FC = () => {
                       style={{
                         display: "flex", alignItems: "center", gap: 6,
                         borderRadius: 13, padding: "9px 14px",
-                        background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)",
+                        background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
                         boxShadow: `0 4px 16px ${C.violetGlow}`,
                         border: "1px solid rgba(255,255,255,0.12)",
                         color: "white", fontSize: "0.78rem", fontWeight: 700,
@@ -166,7 +166,7 @@ const RecaladasListPage: React.FC = () => {
 
             {/* ── Search + filters ── */}
             <div className="animate-fade-up" style={{ animationFillMode: "backwards" }}>
-              <div style={{ borderRadius: 18, background: C.surface, border: "1px solid rgba(255,255,255,0.06)", padding: "0.875rem 1rem", marginBottom: "1rem" }}>
+              <div style={{ borderRadius: 18, background: C.surface, border: "1px solid var(--color-glass-medium)", padding: "0.875rem 1rem", marginBottom: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                   <span style={{ color: C.fgMuted }}>{Ico.filter()}</span>
                   <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.fgMuted }}>Búsqueda y filtros</span>
@@ -185,8 +185,8 @@ const RecaladasListPage: React.FC = () => {
                         style={{
                           flexShrink: 0, borderRadius: 9999, padding: "5px 13px",
                           fontSize: "0.72rem", fontWeight: active ? 700 : 500,
-                          border: `1px solid ${active && cfg ? cfg.border : "rgba(255,255,255,0.08)"}`,
-                          background: active && cfg ? cfg.faint : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${active && cfg ? cfg.border : "var(--color-glass-medium)"}`,
+                          background: active && cfg ? cfg.faint : "var(--color-glass-subtle)",
                           color: active && cfg ? cfg.color : C.fgSec,
                           transition: "all 160ms ease",
                         }}
@@ -211,8 +211,8 @@ const RecaladasListPage: React.FC = () => {
                       style={{
                         width: "100%", boxSizing: "border-box",
                         borderRadius: 13, padding: "11px 42px 11px 40px",
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "var(--color-glass-soft)",
+                        border: "1px solid var(--color-glass-medium)",
                         color: C.fg, fontSize: "0.875rem",
                         outline: "none",
                       }}
@@ -239,9 +239,9 @@ const RecaladasListPage: React.FC = () => {
 
             {/* ── Results ── */}
             <div className="animate-fade-up" style={{ animationDelay: "80ms", animationFillMode: "backwards" }}>
-              <div style={{ borderRadius: 20, background: C.surface, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
+              <div style={{ borderRadius: 20, background: C.surface, border: "1px solid var(--color-glass-medium)", overflow: "hidden" }}>
                 {/* Header */}
-                <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 3, height: 13, borderRadius: 2, background: C.cyan, opacity: 0.9 }} />
                   <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.cyan }}>Agenda operativa</span>
                   {total > 0 && (
@@ -253,7 +253,7 @@ const RecaladasListPage: React.FC = () => {
                   {isLoading ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="animate-pulse" style={{ height: 72, borderRadius: 16, background: "rgba(255,255,255,0.03)", animationDelay: `${i * 60}ms` }} />
+                        <div key={i} className="animate-pulse" style={{ height: 72, borderRadius: 16, background: "var(--color-glass-subtle)", animationDelay: `${i * 60}ms` }} />
                       ))}
                     </div>
                   ) : error ? (
@@ -304,7 +304,7 @@ const RecaladaRow: React.FC<{ recalada: RecaladaItem; onPress: () => void }> = (
       style={{
         borderRadius: 16, padding: "12px 13px",
         background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid var(--color-glass-medium)",
         borderLeft: `3px solid ${cfg.color}`,
         display: "flex", alignItems: "center", gap: 12,
       }}
@@ -364,7 +364,7 @@ const EmptyRecaladas: React.FC<{ hasFilters: boolean; isSupervisor: boolean; onN
         onClick={onNew}
         style={{
           marginTop: 4, borderRadius: 13, padding: "10px 20px",
-          background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)",
+          background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
           border: "1px solid rgba(255,255,255,0.12)",
           color: "white", fontSize: "0.825rem", fontWeight: 700, cursor: "pointer",
           boxShadow: `0 6px 18px ${C.violetGlow}`,
@@ -384,8 +384,8 @@ const PagBtn: React.FC<{ label: string; icon: React.ReactElement; iconRight?: bo
     style={{
       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
       padding: "10px 14px", borderRadius: 13,
-      background: disabled ? "rgba(255,255,255,0.02)" : C.cyanFaint,
-      border: `1px solid ${disabled ? "rgba(255,255,255,0.05)" : C.cyanBorder}`,
+      background: disabled ? "var(--color-glass-subtle)" : C.cyanFaint,
+      border: `1px solid ${disabled ? "var(--color-glass-soft)" : C.cyanBorder}`,
       color: disabled ? "rgba(255,255,255,0.18)" : C.cyan,
       fontSize: "0.78rem", fontWeight: 600,
       cursor: disabled ? "not-allowed" : "pointer",

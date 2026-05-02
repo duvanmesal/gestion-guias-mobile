@@ -103,26 +103,26 @@ const RecaladaEditPage: React.FC = () => {
 
           {/* ── Hero header ── */}
           <div className="relative overflow-hidden" style={{
-            background: "linear-gradient(160deg, #0A0C22 0%, #080820 60%, #0C0A22 100%)",
-            borderBottom: "1px solid rgba(245,158,11,0.14)",
+            background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
+            borderBottom: "1px solid var(--color-accent-glow)",
           }}>
-            <div style={{ position: "absolute", top: -60, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(139,92,246,0.04) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", top: -60, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, var(--color-accent-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
 
             <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.125rem" }}>
-                <button type="button" onClick={() => history.goBack()} style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <button type="button" onClick={() => history.goBack()} style={{ width: 34, height: 34, borderRadius: 11, background: "var(--color-glass-medium)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                   <BackIcon />
                 </button>
                 <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(255,255,255,0.32)" }}>Recaladas / Editar</span>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 15, background: "linear-gradient(135deg, #D97706 0%, #F59E0B 100%)", boxShadow: "0 6px 18px rgba(245,158,11,0.38)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", flexShrink: 0 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 15, background: "linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 100%)", boxShadow: "0 6px 18px var(--color-accent-glow)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", flexShrink: 0 }}>
                   <EditIcon />
                 </div>
                 <div>
-                  <p style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(245,158,11,0.8)" }}>Editar recalada</p>
+                  <p style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--color-accent-glow)" }}>Editar recalada</p>
                   <h1 style={{ fontFamily: "monospace", fontSize: "1.4rem", fontWeight: 900, color: "var(--color-fg-primary)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>{recalada.codigoRecalada}</h1>
                 </div>
               </div>

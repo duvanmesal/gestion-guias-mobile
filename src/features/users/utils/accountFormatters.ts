@@ -34,7 +34,7 @@ export function maskDocumentNumber(value?: string | null): string {
 export function getRoleLabel(role: SessionUser["role"]): string {
   switch (role) {
     case "SUPER_ADMIN":
-      return "Super administrador";
+      return "Super admin";
     case "SUPERVISOR":
       return "Supervisor";
     default:

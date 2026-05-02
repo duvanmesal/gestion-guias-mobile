@@ -286,7 +286,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error, notic
           borderRadius: "0.9375rem",
           border: "1px solid rgba(255,255,255,0.12)",
           background: isLoading
-            ? "linear-gradient(145deg, var(--color-primary-dark) 0%, #0d4a28 100%)"
+            ? "linear-gradient(145deg, var(--color-primary-dark) 0%, var(--color-bg-elevated) 100%)"
             : "linear-gradient(145deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%)",
           boxShadow: isLoading
             ? "none"

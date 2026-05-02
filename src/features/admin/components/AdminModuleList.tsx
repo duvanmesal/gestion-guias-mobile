@@ -20,51 +20,45 @@ interface AdminModuleListProps {
 }
 
 const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
-  <section
-    className="rounded-[24px] border p-4"
-    style={{
-      background: "var(--color-bg-elevated)",
-      borderColor: "var(--color-glass-soft)",
-      boxShadow:
-        "inset 1px 1px 0 rgba(255,255,255,0.03), inset -1px -1px 0 rgba(0,0,0,0.18)",
-    }}
-  >
-    <div className="mb-3 flex items-center gap-2">
-      <span
-        aria-hidden
-        style={{
-          width: 3, height: 13, borderRadius: 2,
-          background: "var(--color-primary)", opacity: 0.9,
-          flexShrink: 0,
-        }}
-      />
-      <h2
-        className="text-[11px] font-bold uppercase tracking-[0.18em]"
-        style={{ color: "var(--color-primary)" }}
-      >
+  <section>
+    {/* Section header */}
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, padding: "0 2px" }}>
+      <h2 style={{
+        fontSize: 11, fontWeight: 700, color: "var(--color-fg-muted)",
+        textTransform: "uppercase", letterSpacing: "0.13em",
+      }}>
         {title}
       </h2>
-      <span
-        className="ml-auto text-[11px] font-medium"
-        style={{ color: "var(--color-fg-muted)" }}
-      >
-        {items.length} accesos
+      <span style={{ fontSize: 11, color: "var(--color-fg-muted)" }}>
+        {items.length} módulos
       </span>
     </div>
 
-    <div className="grid grid-cols-2 gap-3 auto-rows-fr">
-      {items.map((item) => (
-        <AdminModuleRow
-          key={item.key}
-          title={item.title}
-          description={item.description}
-          onOpen={item.onOpen}
-          badge={item.badge}
-          helperText={item.helperText}
-          disabled={item.disabled}
-          tone={item.tone}
-          icon={item.icon}
-        />
+    {/* List card */}
+    <div style={{
+      background: "#FFFFFF",
+      borderRadius: 20,
+      border: "1px solid rgba(0,0,0,0.07)",
+      boxShadow: "0 2px 16px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03)",
+      overflow: "hidden",
+      padding: "0 18px",
+    }}>
+      {items.map((item, i) => (
+        <div key={item.key}>
+          <AdminModuleRow
+            title={item.title}
+            description={item.description}
+            onOpen={item.onOpen}
+            badge={item.badge}
+            helperText={item.helperText}
+            disabled={item.disabled}
+            tone={item.tone}
+            icon={item.icon}
+          />
+          {i < items.length - 1 && (
+            <div style={{ height: 1, background: "rgba(0,0,0,0.05)", marginLeft: 60 }} />
+          )}
+        </div>
       ))}
     </div>
   </section>

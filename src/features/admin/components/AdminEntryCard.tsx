@@ -4,88 +4,49 @@ interface AdminEntryCardProps {
   roleLabel: string;
 }
 
-const AdminEntryCard: React.FC<AdminEntryCardProps> = ({
-  title,
-  description,
-  roleLabel,
-}) => (
-  <section
-    className="relative overflow-hidden rounded-[24px] border px-5 py-5"
+const AdminEntryCard: React.FC<AdminEntryCardProps> = ({ title, roleLabel }) => (
+  <div
     style={{
-      background:
-        "linear-gradient(150deg, rgba(20,16,52,0.99) 0%, rgba(8,7,24,0.98) 100%)",
-      borderColor: "rgba(139,92,246,0.18)",
-      borderTopColor: "rgba(139,92,246,0.35)",
-      boxShadow:
-        "0 18px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(139,92,246,0.10)",
+      background: "linear-gradient(140deg, #2563EB 0%, #1D4ED8 60%, #1E40AF 100%)",
+      borderRadius: 24,
+      padding: "24px 22px 22px",
+      position: "relative",
+      overflow: "hidden",
     }}
   >
-    {/* Aurora accent */}
-    <div
-      aria-hidden
-      style={{
-        position: "absolute",
-        top: -60,
-        right: -40,
-        width: 200,
-        height: 200,
-        borderRadius: "50%",
-        background:
-          "radial-gradient(circle, rgba(245,158,11,0.14) 0%, transparent 65%)",
-        pointerEvents: "none",
-      }}
-    />
-    <div
-      aria-hidden
-      style={{
-        position: "absolute",
-        bottom: -50,
-        left: -30,
-        width: 180,
-        height: 180,
-        borderRadius: "50%",
-        background:
-          "radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 65%)",
-        pointerEvents: "none",
-      }}
-    />
+    {/* Decorative circles */}
+    <div style={{ position: "absolute", top: -40, right: -40, width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", bottom: -30, left: -30, width: 110, height: 110, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", top: 20, right: 80, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
 
-    <div className="relative z-10 flex items-start justify-between gap-4">
-      <div className="min-w-0">
-        <p
-          className="text-[10px] font-bold uppercase tracking-[0.24em]"
-          style={{ color: "var(--color-accent)" }}
-        >
-          Acceso administrativo
+    <div style={{ position: "relative", zIndex: 1 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+        <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+          Administración
         </p>
-        <h1
-          className="mt-2 text-2xl font-extrabold leading-tight"
-          style={{ color: "var(--color-fg-primary)", letterSpacing: "-0.01em" }}
-        >
-          {title}
-        </h1>
+        <span style={{
+          fontSize: 11, fontWeight: 700, color: "white",
+          background: "rgba(255,255,255,0.18)",
+          border: "1px solid rgba(255,255,255,0.25)",
+          borderRadius: 999, padding: "3px 10px",
+          whiteSpace: "nowrap", flexShrink: 0,
+        }}>
+          {roleLabel}
+        </span>
       </div>
 
-      <span
-        className="shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold"
-        style={{
-          color: "var(--color-primary-light)",
-          borderColor: "var(--color-border-glow)",
-          background: "var(--color-primary-soft)",
-          boxShadow: "0 0 12px var(--color-primary-glow)",
-        }}
-      >
-        {roleLabel}
-      </span>
-    </div>
+      <h1 style={{
+        fontSize: 26, fontWeight: 800, color: "white",
+        marginTop: 10, letterSpacing: "-0.02em", lineHeight: 1.18,
+      }}>
+        {title}
+      </h1>
 
-    <p
-      className="relative z-10 mt-3 text-sm leading-6"
-      style={{ color: "var(--color-fg-secondary)" }}
-    >
-      {description}
-    </p>
-  </section>
+      <p style={{ fontSize: 13, color: "rgba(255,255,255,0.62)", marginTop: 6, lineHeight: 1.5 }}>
+        Gestiona catálogos, usuarios y accesos desde aquí.
+      </p>
+    </div>
+  </div>
 );
 
 export default AdminEntryCard;

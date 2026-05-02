@@ -25,7 +25,7 @@ export function getDisplayName(user: SessionUser | null | undefined): string {
 export function getRoleLabel(role?: Role | null): string {
   switch (role) {
     case "SUPER_ADMIN":
-      return "Super administrador";
+      return "Super admin";
     case "SUPERVISOR":
       return "Supervisor";
     case "GUIA":

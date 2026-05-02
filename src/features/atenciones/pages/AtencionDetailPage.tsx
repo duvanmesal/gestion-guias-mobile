@@ -1,6 +1,6 @@
 import { IonContent, IonPage } from "@ionic/react";
 import { useMemo, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import Button from "../../../ui/components/Button";
 import EmptyStateCard from "../../../ui/components/EmptyStateCard";
@@ -116,12 +116,15 @@ function formatDate(iso: string | null | undefined): string {
 
 const AtencionDetailPage: React.FC = () => {
   const history = useHistory();
-  const { id } = useParams<RouteParams>();
+  const location = useLocation();
+  const { id: paramId } = useParams<RouteParams>();
   const user = useSessionStore((state) => state.user);
+
+  const id = paramId || location.pathname.match(/\/atenciones\/(\d+)/)?.[1];
 
   const atencionId = useMemo(() => {
     const parsed = Number(id);
-    return Number.isFinite(parsed) ? parsed : undefined;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
   }, [id]);
 
   const isSupervisor =
@@ -145,22 +148,7 @@ const AtencionDetailPage: React.FC = () => {
   const summary = summaryQuery.data;
   const turnos = turnosQuery.data ?? [];
 
-  if (!atencionId) {
-    return (
-      <IonPage>
-        <IonContent>
-          <div className="flex min-h-screen items-center justify-center px-5">
-            <ErrorState
-              title="ID inválido"
-              message="El identificador de la atención no es válido."
-              onRetry={() => history.push("/atenciones")}
-              retryLabel="Volver al listado"
-            />
-          </div>
-        </IonContent>
-      </IonPage>
-    );
-  }
+  if (!atencionId) return null;
 
   if (atencionQuery.isLoading && !atencion) {
     return <LoadingScreen message="Cargando atención..." />;

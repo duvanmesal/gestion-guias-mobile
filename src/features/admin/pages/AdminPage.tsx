@@ -51,21 +51,18 @@ const AdminPage: React.FC = () => {
       {
         key: "catalogos",
         title: "Catálogos",
-        description: "Países, buques y catálogos maestros del sistema.",
+        description: "Países, buques y catálogos maestros.",
         onOpen: () => history.push("/admin/catalogos"),
-        badge: "Activo",
         tone: "cyan" as const,
         icon: Icons.catalog,
       },
       {
         key: "invitaciones",
         title: "Invitaciones",
-        description: "Alta de usuarios por correo y seguimiento de accesos.",
+        description: "Alta de usuarios por correo y accesos.",
         onOpen: () => history.push("/admin/invitaciones"),
         badge: isSuperAdmin ? "S. Admin" : undefined,
-        helperText: !isSuperAdmin
-          ? "Solo Super Admin puede gestionar invitaciones."
-          : undefined,
+        helperText: !isSuperAdmin ? "Requiere rol Super Admin." : undefined,
         disabled: !isSuperAdmin,
         tone: "teal" as const,
         icon: Icons.mail,
@@ -73,12 +70,10 @@ const AdminPage: React.FC = () => {
       {
         key: "users",
         title: "Usuarios",
-        description: "Gestión global de usuarios, filtros y seguimiento.",
+        description: "Gestión global de usuarios y roles.",
         onOpen: () => history.push("/admin/usuarios"),
         badge: isSuperAdmin ? "S. Admin" : undefined,
-        helperText: !isSuperAdmin
-          ? "Solo Super Admin gestiona usuarios."
-          : undefined,
+        helperText: !isSuperAdmin ? "Requiere rol Super Admin." : undefined,
         disabled: !isSuperAdmin,
         tone: "amber" as const,
         icon: Icons.users,
@@ -86,9 +81,8 @@ const AdminPage: React.FC = () => {
       {
         key: "profile",
         title: "Mi cuenta",
-        description: "Datos del perfil, seguridad y sesión actual.",
+        description: "Perfil, seguridad y sesión actual.",
         onOpen: () => history.push("/profile"),
-        badge: "Cuenta",
         tone: "violet" as const,
         icon: Icons.user,
       },
@@ -113,11 +107,11 @@ const AdminPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)] px-5 pb-6 pt-8">
-          <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+        <div className="min-h-screen bg-[var(--color-bg-base)] px-4 pb-6 pt-8">
+          <div className="mx-auto flex w-full max-w-md flex-col gap-4">
             <AdminEntryCard
               title="Centro administrativo"
-              description="Catálogos, invitaciones y gestión de usuarios viven bajo /admin/* para mantener el bottom nav operativo limpio."
+              description=""
               roleLabel={roleLabel}
             />
 

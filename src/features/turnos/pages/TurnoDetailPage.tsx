@@ -1,6 +1,6 @@
 import { IonContent, IonPage } from "@ionic/react";
 import { useMemo, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useLocation, useParams } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import ErrorState from "../../../ui/components/ErrorState";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
@@ -20,29 +20,29 @@ import type { TurnoItem, TurnoStatus } from "../types/turnos.types";
    PALETTE
 ───────────────────────────────────────────── */
 const C = {
-  violet:       "#8B5CF6",
-  violetLight:  "#A78BFA",
-  violetGlow:   "rgba(139,92,246,0.42)",
-  violetFaint:  "rgba(139,92,246,0.11)",
-  violetBorder: "rgba(139,92,246,0.28)",
-  amber:        "#F59E0B",
-  amberGlow:    "rgba(245,158,11,0.38)",
-  amberFaint:   "rgba(245,158,11,0.10)",
-  amberBorder:  "rgba(245,158,11,0.28)",
-  cyan:         "#38BDF8",
+  violet:       "var(--color-primary)",
+  violetLight:  "var(--color-primary-light)",
+  violetGlow:   "var(--color-primary-glow)",
+  violetFaint:  "var(--color-primary-glow)",
+  violetBorder: "var(--color-primary-glow)",
+  amber:        "var(--color-accent)",
+  amberGlow:    "var(--color-accent-glow)",
+  amberFaint:   "var(--color-accent-glow)",
+  amberBorder:  "var(--color-accent-glow)",
+  cyan:         "var(--color-info)",
   cyanFaint:    "rgba(56,189,248,0.10)",
   cyanBorder:   "rgba(56,189,248,0.26)",
-  teal:         "#2DD4BF",
-  tealFaint:    "rgba(45,212,191,0.10)",
-  tealBorder:   "rgba(45,212,191,0.26)",
-  danger:       "#F43F5E",
-  dangerFaint:  "rgba(244,63,94,0.10)",
+  teal:         "var(--color-success)",
+  tealFaint:    "var(--color-success-soft)",
+  tealBorder:   "var(--color-success-soft)",
+  danger:       "var(--color-danger)",
+  dangerFaint:  "var(--color-danger-soft)",
   dangerBorder: "rgba(244,63,94,0.26)",
   fgPrimary:    "var(--color-fg-primary)",
   fgSecondary:  "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
   bg:           "var(--color-bg-base)",
-  surface:      "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+  surface: "var(--color-bg-elevated)",
 };
 
 /* ─────────────────────────────────────────────
@@ -53,9 +53,9 @@ const STATUS_CFG: Record<TurnoStatus, StatusCfg> = {
   AVAILABLE:   { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   glow: "rgba(56,189,248,0.35)",  label: "Disponible" },
   ASSIGNED:    { color: C.violet, faint: C.violetFaint,  border: C.violetBorder, glow: C.violetGlow,            label: "Asignado" },
   IN_PROGRESS: { color: C.amber,  faint: C.amberFaint,   border: C.amberBorder,  glow: C.amberGlow,             label: "En curso" },
-  COMPLETED:   { color: C.teal,   faint: C.tealFaint,    border: C.tealBorder,   glow: "rgba(45,212,191,0.35)", label: "Completado" },
+  COMPLETED:   { color: C.teal,   faint: C.tealFaint,    border: C.tealBorder,   glow: "var(--color-success-soft)", label: "Completado" },
   CANCELED:    { color: C.danger, faint: C.dangerFaint,  border: C.dangerBorder, glow: "rgba(244,63,94,0.35)",  label: "Cancelado" },
-  NO_SHOW:     { color: "#64748B",faint:"rgba(100,116,139,0.10)",border:"rgba(100,116,139,0.26)",glow:"rgba(100,116,139,0.2)",label:"No se presentó" },
+  NO_SHOW:     { color: "var(--color-fg-muted)",faint:"var(--color-glass-soft)",border:"var(--color-glass-medium)",glow:"var(--color-glass-medium)",label:"No se presentó" },
 };
 
 /* ─────────────────────────────────────────────
@@ -84,12 +84,15 @@ interface RouteParams { id: string; }
 
 const TurnoDetailPage: React.FC = () => {
   const history = useHistory();
-  const { id } = useParams<RouteParams>();
+  const location = useLocation();
+  const { id: paramId } = useParams<RouteParams>();
   const user = useSessionStore((s) => s.user);
+
+  const id = paramId || location.pathname.match(/\/turnos\/(\d+)/)?.[1];
 
   const turnoId = useMemo(() => {
     const n = Number(id);
-    return Number.isFinite(n) ? n : undefined;
+    return Number.isFinite(n) && n > 0 ? n : undefined;
   }, [id]);
 
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
@@ -296,14 +299,14 @@ const TurnoHero: React.FC<{
   turno: TurnoItem; cfg: StatusCfg; isLive: boolean; shipCode: string; onBack: () => void;
 }> = ({ turno, cfg, isLive, shipCode, onBack }) => (
   <div className="relative overflow-hidden" style={{
-    background: "linear-gradient(160deg, #0C0820 0%, #080720 60%, #0A0820 100%)",
+    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
     borderBottom: `1px solid ${cfg.border}`,
   }}>
     {/* Ambient orbs */}
     <div style={{ position: "absolute", top: -80, left: -60, width: 280, height: 280, borderRadius: "50%", background: `radial-gradient(circle, ${cfg.faint} 0%, transparent 65%)`, filter: "blur(12px)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", bottom: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: `radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 65%)`, pointerEvents: "none" }} />
+    <div style={{ position: "absolute", bottom: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: `radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)`, pointerEvents: "none" }} />
     {/* Dot grid */}
-    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(139,92,246,0.045) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
 
     <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem 1.5rem" }}>
 
@@ -315,7 +318,7 @@ const TurnoHero: React.FC<{
           style={{
             display: "flex", alignItems: "center", justifyContent: "center",
             width: 34, height: 34, borderRadius: 11,
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--color-glass-medium)", border: "1px solid rgba(255,255,255,0.1)",
             color: "rgba(255,255,255,0.7)", cursor: "pointer",
             flexShrink: 0,
           }}
@@ -383,7 +386,7 @@ const TimelineCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => {
     <div style={{
       borderRadius: 20,
       background: C.surface,
-      border: "1px solid rgba(255,255,255,0.06)",
+      border: "1px solid var(--color-glass-medium)",
       padding: "1.125rem 1.25rem",
     }}>
       <SectionLabel title="Cronología" color={C.violet} />
@@ -392,7 +395,7 @@ const TimelineCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => {
         {/* Connector line */}
         <div style={{
           position: "absolute", left: 15, top: 16, bottom: 16,
-          width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1,
+          width: 2, background: "var(--color-glass-medium)", borderRadius: 1,
         }} />
 
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -401,7 +404,7 @@ const TimelineCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => {
               {/* Dot */}
               <div style={{
                 width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-                background: step.done ? `${step.color}1A` : "rgba(255,255,255,0.04)",
+                background: step.done ? `${step.color}1A` : "var(--color-glass-soft)",
                 border: `2px solid ${step.done ? step.color : "rgba(255,255,255,0.1)"}`,
                 boxShadow: step.done ? `0 0 12px ${step.color}55` : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -446,7 +449,7 @@ const InfoCard: React.FC<{ turno: TurnoItem; guiaName: string; shipCode: string 
     <div style={{
       borderRadius: 20,
       background: C.surface,
-      border: "1px solid rgba(255,255,255,0.06)",
+      border: "1px solid var(--color-glass-medium)",
       padding: "1.125rem 1.25rem",
     }}>
       <SectionLabel title="Detalle del turno" color={C.amber} />
@@ -460,7 +463,7 @@ const InfoCard: React.FC<{ turno: TurnoItem; guiaName: string; shipCode: string 
           }}>
             <div style={{
               width: 30, height: 30, borderRadius: 9, flexShrink: 0,
-              background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.18)",
+              background: "var(--color-primary-glow)", border: "1px solid var(--color-primary-glow)",
               display: "flex", alignItems: "center", justifyContent: "center",
               color: C.violet,
             }}>
@@ -484,7 +487,7 @@ const NotesCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => (
   <div style={{
     borderRadius: 20,
     background: C.surface,
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid var(--color-glass-medium)",
     padding: "1.125rem 1.25rem",
   }}>
     <SectionLabel title="Notas" color={C.cyan} />
@@ -521,7 +524,7 @@ const CancelForm: React.FC<{
 }> = ({ value, onChange, isLoading, onConfirm, onCancel }) => (
   <div style={{
     borderRadius: 20,
-    background: "linear-gradient(145deg, rgba(18,8,22,0.99) 0%, rgba(10,4,14,0.98) 100%)",
+    background: "var(--color-bg-elevated)",
     border: `1px solid ${C.dangerBorder}`,
     borderTop: `2px solid ${C.danger}`,
     padding: "1.25rem",
@@ -540,7 +543,7 @@ const CancelForm: React.FC<{
       style={{
         width: "100%", resize: "none",
         borderRadius: 14, padding: "12px 14px",
-        background: "rgba(255,255,255,0.04)",
+        background: "var(--color-glass-soft)",
         border: `1px solid ${C.dangerBorder}`,
         color: "var(--color-fg-primary)",
         fontSize: "0.875rem", lineHeight: 1.55,
@@ -562,7 +565,7 @@ const CancelForm: React.FC<{
       <ActionBtn
         label="Volver"
         color="var(--color-fg-secondary)"
-        bg="rgba(255,255,255,0.04)"
+        bg="var(--color-glass-soft)"
         border="rgba(255,255,255,0.1)"
         glow="transparent"
         disabled={isLoading}
@@ -589,7 +592,7 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Tomar turno"
           color="white"
-          bg="linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #6D28D9 100%)"
+          bg="linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 55%, var(--color-primary-dark) 100%)"
           border="rgba(255,255,255,0.12)"
           glow={C.violetGlow}
           isLoading={p.isPendingClaim}
@@ -603,7 +606,7 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Registrar Check-in"
           color="white"
-          bg="linear-gradient(135deg, #D97706 0%, #F59E0B 55%, #B45309 100%)"
+          bg="linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 55%, var(--color-accent) 100%)"
           border="rgba(255,255,255,0.12)"
           glow={C.amberGlow}
           isLoading={p.isPendingCheckIn}
@@ -617,9 +620,9 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Registrar Check-out"
           color="white"
-          bg="linear-gradient(135deg, #0D9488 0%, #2DD4BF 55%, #0F766E 100%)"
+          bg="linear-gradient(135deg, var(--color-success) 0%, var(--color-success) 55%, var(--color-success) 100%)"
           border="rgba(255,255,255,0.12)"
-          glow="rgba(45,212,191,0.4)"
+          glow="var(--color-success-soft)"
           isLoading={p.isPendingCheckOut}
           disabled={p.isBusy}
           onClick={p.onCheckOut}
@@ -633,7 +636,7 @@ const ActionBar: React.FC<{
             <ActionBtn
               label="Desasignar"
               color={C.fgSecondary}
-              bg="rgba(255,255,255,0.05)"
+              bg="var(--color-glass-soft)"
               border="rgba(255,255,255,0.1)"
               glow="transparent"
               isLoading={p.isPendingUnassign}
@@ -646,7 +649,7 @@ const ActionBar: React.FC<{
             <ActionBtn
               label="No-show"
               color={C.fgSecondary}
-              bg="rgba(255,255,255,0.05)"
+              bg="var(--color-glass-soft)"
               border="rgba(255,255,255,0.1)"
               glow="transparent"
               isLoading={p.isPendingNoShow}
@@ -704,8 +707,8 @@ const ActionBtn: React.FC<{
       display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
       padding: solid ? "15px 20px" : "12px 16px",
       borderRadius: solid ? 18 : 14,
-      background: (disabled || isLoading) && !solid ? "rgba(255,255,255,0.03)" : bg,
-      border: `1px solid ${(disabled || isLoading) ? "rgba(255,255,255,0.06)" : border}`,
+      background: (disabled || isLoading) && !solid ? "var(--color-glass-subtle)" : bg,
+      border: `1px solid ${(disabled || isLoading) ? "var(--color-glass-medium)" : border}`,
       boxShadow: (disabled || isLoading) || !solid ? "none" : `0 8px 24px ${glow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
       color: (disabled || isLoading) && !solid ? "rgba(255,255,255,0.25)" : color,
       fontSize: "0.875rem", fontWeight: 700,

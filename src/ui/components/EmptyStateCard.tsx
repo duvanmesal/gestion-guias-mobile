@@ -36,10 +36,10 @@ const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
       aria-hidden="true"
       className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl text-[var(--color-fg-secondary)]"
       style={{
-        background: "rgba(255, 255, 255, 0.03)",
+        background: "var(--color-glass-subtle)",
         border: "1px solid var(--color-border-glass)",
         boxShadow:
-          "inset 2px 2px 5px rgba(0, 0, 0, 0.35), inset -2px -2px 5px rgba(255, 255, 255, 0.03)",
+          "inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px var(--color-glass-subtle)",
       }}
     >
       {icon}

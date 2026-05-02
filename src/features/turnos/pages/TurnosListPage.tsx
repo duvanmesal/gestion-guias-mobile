@@ -18,29 +18,29 @@ import type { TurnoItem, TurnoStatus } from "../types/turnos.types";
    PALETTE
 ───────────────────────────────────────────── */
 const C = {
-  violet:       "#8B5CF6",
-  violetLight:  "#A78BFA",
-  violetGlow:   "rgba(139,92,246,0.42)",
-  violetFaint:  "rgba(139,92,246,0.11)",
-  violetBorder: "rgba(139,92,246,0.28)",
-  amber:        "#F59E0B",
-  amberGlow:    "rgba(245,158,11,0.38)",
-  amberFaint:   "rgba(245,158,11,0.10)",
-  amberBorder:  "rgba(245,158,11,0.28)",
-  cyan:         "#38BDF8",
+  violet:       "var(--color-primary)",
+  violetLight:  "var(--color-primary-light)",
+  violetGlow:   "var(--color-primary-glow)",
+  violetFaint:  "var(--color-primary-glow)",
+  violetBorder: "var(--color-primary-glow)",
+  amber:        "var(--color-accent)",
+  amberGlow:    "var(--color-accent-glow)",
+  amberFaint:   "var(--color-accent-glow)",
+  amberBorder:  "var(--color-accent-glow)",
+  cyan:         "var(--color-info)",
   cyanFaint:    "rgba(56,189,248,0.10)",
   cyanBorder:   "rgba(56,189,248,0.26)",
-  teal:         "#2DD4BF",
-  tealFaint:    "rgba(45,212,191,0.10)",
-  tealBorder:   "rgba(45,212,191,0.26)",
-  danger:       "#F43F5E",
-  dangerFaint:  "rgba(244,63,94,0.10)",
+  teal:         "var(--color-success)",
+  tealFaint:    "var(--color-success-soft)",
+  tealBorder:   "var(--color-success-soft)",
+  danger:       "var(--color-danger)",
+  dangerFaint:  "var(--color-danger-soft)",
   dangerBorder: "rgba(244,63,94,0.26)",
   fgPrimary:    "var(--color-fg-primary)",
   fgSecondary:  "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
   bg:           "var(--color-bg-base)",
-  surface:      "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+  surface: "var(--color-bg-elevated)",
 };
 
 /* ─────────────────────────────────────────────
@@ -54,7 +54,7 @@ const STATUS_CONFIG: Record<TurnoStatus, { color: string; faint: string; border:
   IN_PROGRESS: { color: C.amber,  faint: C.amberFaint,   border: C.amberBorder,  label: "En curso",        icon: "●" },
   COMPLETED:   { color: C.teal,   faint: C.tealFaint,    border: C.tealBorder,   label: "Completado",      icon: "✓" },
   CANCELED:    { color: C.danger, faint: C.dangerFaint,  border: C.dangerBorder, label: "Cancelado",       icon: "✕" },
-  NO_SHOW:     { color: "#64748B",faint: "rgba(100,116,139,0.10)", border: "rgba(100,116,139,0.26)", label: "No se presentó", icon: "—" },
+  NO_SHOW:     { color: "var(--color-fg-muted)",faint: "var(--color-glass-soft)", border: "var(--color-glass-medium)", label: "No se presentó", icon: "—" },
 };
 
 /* ─────────────────────────────────────────────
@@ -103,7 +103,7 @@ const TurnosListPage: React.FC = () => {
   );
 
   const supervisorQuery = useTurnosList(isSupervisor ? queryParams : {});
-  const guiaQuery       = useMyTurnos(queryParams);
+  const guiaQuery       = useMyTurnos(queryParams, isGuia);
   const active          = useMyActiveTurno(isGuia);
   const next            = useMyNextTurno(isGuia);
 
@@ -193,15 +193,15 @@ const PageHeader: React.FC<{ isSupervisor: boolean; total: number; activeCount: 
   <div
     className="relative overflow-hidden"
     style={{
-      background: "linear-gradient(160deg, #0C0820 0%, #080720 60%, #0A0820 100%)",
-      borderBottom: "1px solid rgba(139,92,246,0.14)",
+      background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
+      borderBottom: "1px solid var(--color-primary-glow)",
     }}
   >
     {/* Orbs */}
-    <div style={{ position: "absolute", top: -60, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.16) 0%, transparent 65%)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", top: 0, right: -30, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", top: -60, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", top: 0, right: -30, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, var(--color-accent-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
     {/* Dot grid */}
-    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(139,92,246,0.045) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
+    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
 
     <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "2.5rem 1.25rem 1.5rem" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -209,7 +209,7 @@ const PageHeader: React.FC<{ isSupervisor: boolean; total: number; activeCount: 
           {/* Icon box */}
           <div style={{
             width: 48, height: 48, borderRadius: 16,
-            background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)",
+            background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
             boxShadow: `0 6px 22px ${C.violetGlow}`,
             display: "flex", alignItems: "center", justifyContent: "center",
             color: "white", flexShrink: 0,
@@ -257,10 +257,10 @@ const ActiveTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ 
       className="w-full text-left transition-all active:scale-[0.98]"
       style={{
         borderRadius: 22,
-        background: "linear-gradient(145deg, rgba(22,14,56,0.98) 0%, rgba(10,7,30,0.99) 100%)",
-        border: "1px solid rgba(245,158,11,0.22)",
-        borderLeft: "3px solid #F59E0B",
-        boxShadow: `0 12px 40px ${C.amberGlow}, 0 24px 52px rgba(0,0,0,0.42), inset 0 1px 0 rgba(245,158,11,0.1)`,
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-accent-glow)",
+        borderLeft: "3px solid var(--color-accent)",
+        boxShadow: `0 12px 40px ${C.amberGlow}, 0 24px 52px rgba(0,0,0,0.05), inset 0 1px 0 var(--color-accent-glow)`,
         position: "relative", overflow: "hidden",
         display: "block", width: "100%",
       }}
@@ -303,7 +303,7 @@ const ActiveTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ 
           </div>
         )}
 
-        <div style={{ marginTop: 14, height: 1, background: "rgba(245,158,11,0.14)" }} />
+        <div style={{ marginTop: 14, height: 1, background: "var(--color-accent-glow)" }} />
 
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontSize: "0.72rem", fontWeight: 700, color: C.amber, letterSpacing: "0.04em" }}>Ver detalle completo</span>
@@ -327,9 +327,9 @@ const NextTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ tu
       className="w-full text-left transition-all active:scale-[0.98]"
       style={{
         borderRadius: 20,
-        background: "linear-gradient(145deg, rgba(14,12,38,0.98) 0%, rgba(8,7,22,0.99) 100%)",
+        background: "var(--color-bg-elevated)",
         border: "1px solid rgba(56,189,248,0.18)",
-        borderLeft: "3px solid #38BDF8",
+        borderLeft: "3px solid var(--color-info)",
         boxShadow: "0 8px 28px rgba(56,189,248,0.12), inset 0 1px 0 rgba(56,189,248,0.06)",
         display: "block", width: "100%",
       }}
@@ -362,7 +362,7 @@ const FilterSection: React.FC<{ value: StatusFilter; onChange: (v: StatusFilter)
   <div style={{
     borderRadius: 18,
     background: C.surface,
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid var(--color-glass-medium)",
     padding: "0.875rem 1rem",
   }}>
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -391,8 +391,8 @@ const FilterSection: React.FC<{ value: StatusFilter; onChange: (v: StatusFilter)
               fontSize: "0.72rem",
               fontWeight: isActive ? 700 : 500,
               letterSpacing: isActive ? "0.02em" : "0.01em",
-              border: `1px solid ${isActive ? activeBorder : "rgba(255,255,255,0.08)"}`,
-              background: isActive ? activeFaint : "rgba(255,255,255,0.03)",
+              border: `1px solid ${isActive ? activeBorder : "var(--color-glass-medium)"}`,
+              background: isActive ? activeFaint : "var(--color-glass-subtle)",
               color: isActive ? activeColor : C.fgSecondary,
               transition: "all 160ms ease",
             }}
@@ -427,11 +427,11 @@ const ListSection: React.FC<{
   <div style={{
     borderRadius: 20,
     background: C.surface,
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid var(--color-glass-medium)",
     overflow: "hidden",
   }}>
     {/* Section header */}
-    <div style={{ padding: "1rem 1.25rem 0.75rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+    <div style={{ padding: "1rem 1.25rem 0.75rem", borderBottom: "1px solid var(--color-glass-soft)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div style={{ width: 3, height: 13, borderRadius: 2, background: C.violet, opacity: 0.9 }} />
         <span style={{ fontSize: "0.575rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.violet }}>
@@ -507,7 +507,7 @@ const TurnoRow: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ turno, 
       style={{
         borderRadius: 16,
         background: "rgba(255,255,255,0.025)",
-        border: `1px solid rgba(255,255,255,0.06)`,
+        border: `1px solid var(--color-glass-medium)`,
         borderLeft: `3px solid ${cfg.color}`,
         display: "flex", alignItems: "center", gap: 12,
         padding: "11px 12px",
@@ -577,7 +577,7 @@ const TimePill: React.FC<{ label: string; value: string; color?: string }> = ({ 
   <div style={{
     display: "inline-flex", alignItems: "center", gap: 5,
     borderRadius: 8, padding: "4px 9px",
-    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
+    background: "var(--color-glass-soft)", border: "1px solid var(--color-glass-medium)",
   }}>
     <span style={{ fontSize: "0.52rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: color ?? C.fgMuted }}>{label}</span>
     <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: color ?? C.fgPrimary }}>{value}</span>
@@ -589,8 +589,8 @@ const SkeletonRow: React.FC<{ delay: number }> = ({ delay }) => (
     className="animate-pulse"
     style={{
       height: 62, borderRadius: 16,
-      background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.05)",
+      background: "var(--color-glass-subtle)",
+      border: "1px solid var(--color-glass-soft)",
       animationDelay: `${delay}ms`,
     }}
   />
@@ -618,8 +618,8 @@ const PaginationBtn: React.FC<{ label: string; icon: React.ReactElement; iconRig
     style={{
       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
       padding: "10px 14px", borderRadius: 14,
-      background: disabled ? "rgba(255,255,255,0.02)" : "rgba(139,92,246,0.08)",
-      border: `1px solid ${disabled ? "rgba(255,255,255,0.05)" : "rgba(139,92,246,0.22)"}`,
+      background: disabled ? "var(--color-glass-subtle)" : "var(--color-primary-glow)",
+      border: `1px solid ${disabled ? "var(--color-glass-soft)" : "var(--color-primary-glow)"}`,
       color: disabled ? "rgba(255,255,255,0.2)" : C.violet,
       fontSize: "0.78rem", fontWeight: 600,
       cursor: disabled ? "not-allowed" : "pointer",

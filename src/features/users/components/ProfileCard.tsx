@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { IonAlert } from "@ionic/react";
 import { useHistory } from "react-router-dom";
+import LogoutAllModal from "./LogoutAllModal";
 import type { SessionUser } from "../../../core/auth/types";
 import {
   logoutCurrentSession,
@@ -71,6 +71,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
   const [busy, setBusy] = useState<null | "logout" | "logoutAll">(null);
   const [logoutAllOpen, setLogoutAllOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const fullName   = buildFullName(user);
   const roleLabel  = getRoleLabel(user.role);
@@ -93,6 +94,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
 
   const handleOpenLogoutAll = async () => {
     setLocalError(null);
+    setModalError(null);
     setBusy("logoutAll");
     try {
       await requestLogoutAllCode();
@@ -105,18 +107,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
   };
 
   const handleConfirmLogoutAll = async (code: string) => {
-    setLocalError(null);
+    setModalError(null);
     setBusy("logoutAll");
     try {
-      const cleanCode = code.trim();
-      if (!/^\d{6}$/.test(cleanCode)) {
-        setLocalError("Debes ingresar el código de 6 dígitos.");
-        return;
-      }
-      await logoutAllSessions({ code: cleanCode });
+      await logoutAllSessions({ code });
       history.replace("/login");
     } catch (error) {
-      setLocalError(error instanceof Error ? error.message : "No pude cerrar todas las sesiones.");
+      setModalError(error instanceof Error ? error.message : "No pude cerrar todas las sesiones.");
     } finally {
       setBusy(null);
     }
@@ -315,22 +312,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
         </div>
       </div>
 
-      <IonAlert
+      <LogoutAllModal
         isOpen={logoutAllOpen}
-        onDidDismiss={() => setLogoutAllOpen(false)}
-        header="Cerrar todas las sesiones"
-        message="Ingresa el código de 6 dígitos que enviamos a tu correo para cerrar sesión en todos tus dispositivos."
-        inputs={[{ name: "code", type: "tel", placeholder: "Código de 6 dígitos", attributes: { maxlength: 6, inputmode: "numeric" } }]}
-        buttons={[
-          { text: "Cancelar", role: "cancel" },
-          {
-            text: "Confirmar",
-            handler: (values) => {
-              void handleConfirmLogoutAll(values.code ?? "");
-              return false;
-            },
-          },
-        ]}
+        isLoading={busy === "logoutAll"}
+        error={modalError}
+        onConfirm={(code) => void handleConfirmLogoutAll(code)}
+        onCancel={() => { setLogoutAllOpen(false); setModalError(null); }}
       />
     </>
   );

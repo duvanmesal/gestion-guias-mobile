@@ -15,6 +15,7 @@ import TurnosListPage from "../../features/turnos/pages/TurnosListPage";
 import RecaladaDetailPage from "../../features/recaladas/pages/RecaladaDetailPage";
 import RecaladaEditPage from "../../features/recaladas/pages/RecaladaEditPage";
 import RecaladasListPage from "../../features/recaladas/pages/RecaladasListPage";
+import EditProfilePage from "../../features/users/pages/EditProfilePage";
 import ProfilePage from "../../features/users/pages/ProfilePage";
 import RoleGuard from "../routes/guards/RoleGuard";
 import { filterNavigationItems } from "../routes/access";
@@ -48,6 +49,10 @@ const AppTabsShell: React.FC = () => {
 
         <Route path="/profile" exact>
           <ProfilePage />
+        </Route>
+
+        <Route path="/profile/edit" exact>
+          <EditProfilePage />
         </Route>
 
         <Route path="/turnos/:id(\d+)" exact>

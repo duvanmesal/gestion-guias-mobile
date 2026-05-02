@@ -18,8 +18,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   >
     {showHeader ? (
       <div className="flex items-center justify-between gap-3">
-        <div className="animate-shimmer h-4 w-28 rounded-full bg-[rgba(255,255,255,0.06)]" />
-        <div className="animate-shimmer h-7 w-20 rounded-full bg-[rgba(255,255,255,0.05)]" />
+        <div className="animate-shimmer h-4 w-28 rounded-full bg-[var(--color-glass-medium)]" />
+        <div className="animate-shimmer h-7 w-20 rounded-full bg-[var(--color-glass-soft)]" />
       </div>
     ) : null}
 
@@ -27,7 +27,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
       {Array.from({ length: lines }).map((_, index) => (
         <div
           key={index}
-          className={`animate-shimmer h-3 rounded-full bg-[rgba(255,255,255,0.05)] ${
+          className={`animate-shimmer h-3 rounded-full bg-[var(--color-glass-soft)] ${
             index === lines - 1 ? "w-2/3" : "w-full"
           }`}
         />
@@ -35,8 +35,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
     </div>
 
     <div className="grid grid-cols-2 gap-2.5">
-      <div className="animate-shimmer h-16 rounded-[18px] bg-[rgba(255,255,255,0.05)]" />
-      <div className="animate-shimmer h-16 rounded-[18px] bg-[rgba(255,255,255,0.05)]" />
+      <div className="animate-shimmer h-16 rounded-[18px] bg-[var(--color-glass-soft)]" />
+      <div className="animate-shimmer h-16 rounded-[18px] bg-[var(--color-glass-soft)]" />
     </div>
   </SurfaceCard>
 );

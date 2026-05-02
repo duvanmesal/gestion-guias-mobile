@@ -55,17 +55,17 @@ const LoginPage: React.FC = () => {
           {/* ── Decorative aurora backgrounds ── */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
-            background: "radial-gradient(ellipse 100% 55% at 50% -5%, rgba(139,92,246,0.18) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse 100% 55% at 50% -5%, var(--color-primary-glow) 0%, transparent 65%)",
           }} />
           {/* Subtle amber glow at bottom */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
-            background: "radial-gradient(ellipse 80% 40% at 50% 105%, rgba(245,158,11,0.10) 0%, transparent 65%)",
+            background: "radial-gradient(ellipse 80% 40% at 50% 105%, var(--color-accent-glow) 0%, transparent 65%)",
           }} />
           {/* Dot grid */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
-            backgroundImage: "radial-gradient(circle, rgba(139,92,246,0.04) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)",
             backgroundSize: "26px 26px",
           }} />
           {/* Floating orbs */}
@@ -106,7 +106,7 @@ const LoginPage: React.FC = () => {
                   position: "absolute",
                   inset: "var(--login-mid-ring)",
                   borderRadius: "calc(var(--login-icon-radius) + 4px)",
-                  border: "1px solid rgba(245,158,11,0.22)",
+                  border: "1px solid var(--color-accent-glow)",
                 }} />
 
                 {/* Blur glow */}
@@ -114,7 +114,7 @@ const LoginPage: React.FC = () => {
                   position: "absolute",
                   inset: "var(--login-blur-inset)",
                   borderRadius: "var(--login-icon-radius)",
-                  background: "rgba(139,92,246,0.35)",
+                  background: "var(--color-primary-glow)",
                   filter: "blur(14px)",
                 }} />
 
@@ -124,9 +124,9 @@ const LoginPage: React.FC = () => {
                   width: "var(--login-icon-size)",
                   height: "var(--login-icon-size)",
                   borderRadius: "var(--login-icon-radius)",
-                  background: "linear-gradient(135deg, #A78BFA 0%, #7C3AED 60%, #5B21B6 100%)",
+                  background: "linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%)",
                   boxShadow:
-                    "0 12px 36px rgba(139,92,246,0.55), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -1px 0 rgba(0,0,0,0.12)",
+                    "0 12px 36px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -1px 0 rgba(0,0,0,0.12)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   <AnchorIcon />
@@ -153,7 +153,7 @@ const LoginPage: React.FC = () => {
                     fontWeight: 800,
                     letterSpacing: "0.24em",
                     textTransform: "uppercase",
-                    background: "linear-gradient(90deg, #8B5CF6, #F59E0B)",
+                    background: "linear-gradient(90deg, var(--color-primary), var(--color-accent))",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
@@ -170,25 +170,25 @@ const LoginPage: React.FC = () => {
               className="login-divider items-center gap-3 animate-fade-up delay-100"
               style={{ width: "100%", maxWidth: 280 }}
             >
-              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.3))" }} />
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, var(--color-primary-glow))" }} />
               <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(245,158,11,0.6)" }} />
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(139,92,246,0.7)" }} />
-                <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(245,158,11,0.6)" }} />
+                <div style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--color-accent-glow)" }} />
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--color-primary-glow)" }} />
+                <div style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--color-accent-glow)" }} />
               </div>
-              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(139,92,246,0.3), transparent)" }} />
+              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, var(--color-primary-glow), transparent)" }} />
             </div>
 
             {/* ── Login card ── */}
             <div
               className="login-card-wrap animate-fade-up delay-200"
               style={{
-                background: "linear-gradient(168deg, rgba(14,12,40,0.99) 0%, rgba(8,7,24,0.98) 100%)",
-                border: "1px solid rgba(139,92,246,0.14)",
-                borderTopColor: "rgba(139,92,246,0.32)",
+                background: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-primary-glow)",
+                borderTopColor: "var(--color-primary-glow)",
                 borderRadius: "1.375rem",
                 boxShadow:
-                  "0 24px 52px rgba(0,0,0,0.55), 0 0 0 1px rgba(139,92,246,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
+                  "0 24px 52px rgba(0,0,0,0.05), 0 0 0 1px var(--color-primary-glow), inset 0 1px 0 var(--color-glass-soft)",
               }}
             >
               {/* Card header */}
@@ -236,7 +236,7 @@ const LoginPage: React.FC = () => {
               />
 
               {/* Separator */}
-              <div style={{ margin: "14px 0 10px", height: 1, background: "rgba(139,92,246,0.08)" }} />
+              <div style={{ margin: "14px 0 10px", height: 1, background: "var(--color-primary-glow)" }} />
 
               {/* Trust row */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>

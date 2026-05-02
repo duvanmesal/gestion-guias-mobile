@@ -4,7 +4,7 @@ import * as turnosApi from "../data/turnos.api";
 import { turnosKeys } from "../data/turnos.keys";
 import type { ListTurnosMeParams } from "../types/turnos.types";
 
-export function useMyTurnos(params: ListTurnosMeParams) {
+export function useMyTurnos(params: ListTurnosMeParams, enabled = true) {
   return useQuery({
     queryKey: turnosKeys.meList(params),
     queryFn: async ({ signal }) => {
@@ -16,6 +16,7 @@ export function useMyTurnos(params: ListTurnosMeParams) {
       }
       return { items: res.data ?? [], meta: res.meta };
     },
+    enabled,
     staleTime: 20_000,
     refetchOnWindowFocus: false,
   });

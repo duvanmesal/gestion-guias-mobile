@@ -26,58 +26,116 @@ const EditProfilePage: React.FC = () => {
         apellidos: values.apellidos,
         telefono: values.telefono,
       });
-
       goToProfile();
     } catch {
       // El error ya se muestra desde el hook
     }
   };
 
+  const initials = user
+    ? `${user.nombres?.[0] ?? ""}${user.apellidos?.[0] ?? ""}`.toUpperCase()
+    : "?";
+
   return (
     <IonPage>
       <IonContent scrollY={true}>
-        <div className="min-h-screen bg-[var(--color-bg-base)]">
-          <div className="px-6 py-10 animate-fade-up">
-            {/* Header with back button */}
-            <header className="mb-6 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={goToProfile}
-                className="flex h-10 w-10 items-center justify-center rounded-xl transition-all active:scale-95"
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "var(--color-bg-base)",
+            paddingBottom: 40,
+          }}
+        >
+          {/* ── Header ── */}
+          <div
+            style={{
+              padding: "52px 20px 24px",
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            {/* Back button */}
+            <button
+              type="button"
+              onClick={goToProfile}
+              aria-label="Volver al perfil"
+              style={{
+                flexShrink: 0,
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                border: "1px solid rgba(0,0,0,0.08)",
+                background: "#FFFFFF",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--color-fg-primary)",
+                cursor: "pointer",
+                transition: "transform 0.1s",
+              }}
+              onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.93)"; }}
+              onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
+            >
+              <svg style={{ width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Avatar circle */}
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                background: "linear-gradient(140deg, #2563EB 0%, #1D4ED8 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 2px 10px rgba(37,99,235,0.25)",
+              }}
+            >
+              <span
                 style={{
-                  background: "var(--color-neu-raised)",
-                  boxShadow: "3px 3px 6px rgba(0,0,0,0.35), -2px -2px 5px rgba(255,255,255,0.03)",
-                  border: "1px solid var(--color-glass-subtle)",
-                  color: "var(--color-fg-primary)",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: "#FFFFFF",
+                  letterSpacing: "0.03em",
                 }}
-                aria-label="Volver al perfil"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+                {initials}
+              </span>
+            </div>
 
-              <div>
-                <h1 className="text-xl font-bold text-[var(--color-fg-primary)]">
-                  Editar perfil
-                </h1>
-                <p className="text-xs text-[var(--color-fg-muted)]">
-                  Actualiza tus datos basicos
-                </p>
-              </div>
-            </header>
+            {/* Title */}
+            <div>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: "var(--color-fg-primary)",
+                  lineHeight: 1.2,
+                }}
+              >
+                Editar perfil
+              </h1>
+              <p
+                style={{
+                  margin: "2px 0 0",
+                  fontSize: 12,
+                  color: "var(--color-fg-muted)",
+                }}
+              >
+                {user ? `${user.nombres} ${user.apellidos}` : "Actualiza tus datos"}
+              </p>
+            </div>
+          </div>
 
-            {/* Form content */}
+          {/* ── Content ── */}
+          <div style={{ padding: "0 16px" }}>
             {user ? (
               <EditProfileForm
                 initialValues={{
@@ -94,32 +152,42 @@ const EditProfilePage: React.FC = () => {
                 }
               />
             ) : (
-              <NeuCard className="p-5 text-center">
+              <div
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: 20,
+                  border: "1px solid rgba(0,0,0,0.07)",
+                  boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
+                  padding: "32px 20px",
+                  textAlign: "center",
+                }}
+              >
                 <svg
-                  className="mx-auto h-10 w-10 mb-3"
-                  style={{ color: "var(--color-fg-muted)" }}
+                  style={{ width: 40, height: 40, color: "var(--color-fg-muted)", margin: "0 auto 12px" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-sm text-[var(--color-fg-secondary)]">
+                <p style={{ fontSize: 14, color: "var(--color-fg-secondary)", margin: "0 0 16px" }}>
                   No pude cargar la informacion del perfil.
                 </p>
                 <button
                   type="button"
                   onClick={goToProfile}
-                  className="mt-4 text-sm font-medium text-[var(--color-primary)]"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "var(--color-primary)",
+                    cursor: "pointer",
+                  }}
                 >
                   Volver al perfil
                 </button>
-              </NeuCard>
+              </div>
             )}
           </div>
         </div>
@@ -127,25 +195,5 @@ const EditProfilePage: React.FC = () => {
     </IonPage>
   );
 };
-
-/* ================================
-   NEUMORPHIC COMPONENTS
-   ================================ */
-
-const NeuCard: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = "" }) => (
-  <div
-    className={`rounded-xl ${className}`}
-    style={{
-      background: "var(--color-neu-raised)",
-      boxShadow: "var(--shadow-neu-raised)",
-      border: "1px solid var(--color-glass-subtle)",
-    }}
-  >
-    {children}
-  </div>
-);
 
 export default EditProfilePage;

@@ -52,24 +52,24 @@ interface RecaladaFormProps {
    PALETTE
 ───────────────────────────────────────────── */
 const C = {
-  violet:       "#8B5CF6",
-  violetFaint:  "rgba(139,92,246,0.10)",
-  violetBorder: "rgba(139,92,246,0.28)",
-  violetGlow:   "rgba(139,92,246,0.42)",
-  amber:        "#F59E0B",
-  amberFaint:   "rgba(245,158,11,0.09)",
-  amberBorder:  "rgba(245,158,11,0.26)",
-  cyan:         "#38BDF8",
+  violet:       "var(--color-primary)",
+  violetFaint:  "var(--color-primary-glow)",
+  violetBorder: "var(--color-primary-glow)",
+  violetGlow:   "var(--color-primary-glow)",
+  amber:        "var(--color-accent)",
+  amberFaint:   "var(--color-accent-glow)",
+  amberBorder:  "var(--color-accent-glow)",
+  cyan:         "var(--color-info)",
   cyanFaint:    "rgba(56,189,248,0.09)",
   cyanBorder:   "rgba(56,189,248,0.25)",
-  danger:       "#F43F5E",
-  dangerFaint:  "rgba(244,63,94,0.10)",
+  danger:       "var(--color-danger)",
+  dangerFaint:  "var(--color-danger-soft)",
   dangerBorder: "rgba(244,63,94,0.26)",
-  teal:         "#2DD4BF",
+  teal:         "var(--color-success)",
   fg:           "var(--color-fg-primary)",
   fgSec:        "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
-  surface:      "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+  surface: "var(--color-bg-elevated)",
 };
 
 /* ─────────────────────────────────────────────
@@ -119,8 +119,8 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
   const inputBase: React.CSSProperties = {
     width: "100%", boxSizing: "border-box",
     borderRadius: 13, padding: "11px 14px",
-    background: "rgba(255,255,255,0.04)",
-    border: `1px solid rgba(139,92,246,0.18)`,
+    background: "var(--color-glass-soft)",
+    border: `1px solid var(--color-primary-glow)`,
     color: C.fg, fontSize: "0.875rem", outline: "none",
     transition: "border-color 150ms ease, box-shadow 150ms ease",
   };
@@ -217,7 +217,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
       </FormSection>
 
       {/* ── Actions ── */}
-      <div style={{ borderRadius: 18, background: C.surface, border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", display: "flex", flexDirection: "column", gap: 9 }}>
+      <div style={{ borderRadius: 18, background: C.surface, border: "1px solid var(--color-glass-medium)", padding: "1rem", display: "flex", flexDirection: "column", gap: 9 }}>
         <button
           type="submit"
           disabled={isLoading || (isEdit && !isDirty)}
@@ -225,8 +225,8 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             padding: "15px 20px", borderRadius: 16, width: "100%",
             background: (isLoading || (isEdit && !isDirty))
-              ? "rgba(139,92,246,0.25)"
-              : "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #6D28D9 100%)",
+              ? "var(--color-primary-glow)"
+              : "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 55%, var(--color-primary-dark) 100%)",
             border: "1px solid rgba(255,255,255,0.12)",
             boxShadow: (isLoading || (isEdit && !isDirty)) ? "none" : `0 8px 24px ${C.violetGlow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
             color: "white", fontSize: "0.9rem", fontWeight: 800,
@@ -245,7 +245,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
           onClick={onCancel}
           style={{
             padding: "13px 20px", borderRadius: 14, width: "100%",
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--color-glass-soft)", border: "1px solid rgba(255,255,255,0.1)",
             color: C.fgSec, fontSize: "0.875rem", fontWeight: 600,
             cursor: isLoading ? "not-allowed" : "pointer",
           }}
@@ -267,7 +267,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
    SUB-COMPONENTS
 ───────────────────────────────────────────── */
 const FormSection: React.FC<{ title: string; color: string; children: React.ReactNode }> = ({ title, color, children }) => (
-  <div style={{ borderRadius: 18, background: "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)", border: "1px solid rgba(255,255,255,0.06)", padding: "1.125rem 1.125rem" }}>
+  <div style={{ borderRadius: 18, background: "var(--color-bg-elevated)", border: "1px solid var(--color-glass-medium)", padding: "1.125rem 1.125rem" }}>
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.875rem" }}>
       <div style={{ width: 3, height: 13, borderRadius: 2, background: color, opacity: 0.9, flexShrink: 0 }} />
       <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color }}>{title}</span>
@@ -286,7 +286,7 @@ const Field: React.FC<{ label: string; error?: string; children: React.ReactNode
     </label>
     {children}
     {error && (
-      <p style={{ fontSize: "0.72rem", color: "#F43F5E", fontWeight: 500 }}>{error}</p>
+      <p style={{ fontSize: "0.72rem", color: "var(--color-danger)", fontWeight: 500 }}>{error}</p>
     )}
   </div>
 );

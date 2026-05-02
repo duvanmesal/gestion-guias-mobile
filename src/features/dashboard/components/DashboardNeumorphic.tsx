@@ -61,7 +61,7 @@ const P = {
   dangerFaint:  "var(--color-danger-soft)",
   /* Surfaces */
   bg:           "var(--color-bg-base)",
-  bgSurface:    "linear-gradient(150deg, rgba(12,14,42,0.99) 0%, rgba(7,8,22,0.98) 100%)",
+  bgSurface:    "var(--color-bg-elevated)",
   /* Text */
   fgPrimary:    "var(--color-fg-primary)",
   fgSecondary:  "var(--color-fg-secondary)",
@@ -84,6 +84,17 @@ const MILESTONE_COLOR: Record<string, string> = {
   ATENCION_START:     "var(--color-primary)",
   ATENCION_END:       "var(--color-accent)",
   RECALADA_DEPARTURE: "var(--color-fg-muted)",
+};
+
+/* ── New palette raw values for inline styles ── */
+const RAW = {
+  primary:     "var(--color-primary)",
+  primaryDark: "var(--color-primary-dark)",
+  primaryRgba: (a: number) => `var(--color-primary-glow)`,
+  accent:      "var(--color-accent)",
+  accentRgba:  (a: number) => `var(--color-accent-glow)`,
+  info:        "var(--color-info)",
+  success:     "var(--color-success)",
 };
 
 /* ══════════════════════════════════════════════
@@ -208,8 +219,8 @@ const SyncBanner: React.FC = () => (
     className="flex items-center justify-center gap-2 animate-fade-in"
     style={{
       height: 36,
-      background: "linear-gradient(90deg, rgba(139,92,246,0.08), rgba(245,158,11,0.06), rgba(139,92,246,0.08))",
-      borderBottom: `1px solid rgba(139,92,246,0.22)`,
+      background: `linear-gradient(90deg, ${RAW.primaryRgba(0.08)}, ${RAW.accentRgba(0.06)}, ${RAW.primaryRgba(0.08)})`,
+      borderBottom: `1px solid ${RAW.primaryRgba(0.20)}`,
     }}
   >
     <div className="animate-spin" style={{ color: P.violet }}>{Ico.refresh()}</div>
@@ -233,7 +244,7 @@ const HeroOrb: React.FC<{ top?: number; left?: number; right?: number; bottom?: 
   }} />
 );
 
-const HeroDotGrid: React.FC<{ color?: string }> = ({ color = "rgba(139,92,246,0.04)" }) => (
+const HeroDotGrid: React.FC<{ color?: string }> = ({ color = "var(--color-primary-glow)" }) => (
   <div style={{
     position: "absolute", inset: 0,
     backgroundImage: `radial-gradient(circle, ${color} 1px, transparent 1px)`,
@@ -286,8 +297,8 @@ const HeroQuickBtn: React.FC<{ icon: React.ReactElement; label: string; color: s
   <button
     type="button"
     onClick={onClick}
-    className="flex flex-1 items-center justify-center gap-2 transition-all active:scale-[0.95]"
-    style={{ padding: "10px 12px", borderRadius: 16, background: bg, border: `1px solid ${border}`, color }}
+    className="flex shrink-0 items-center justify-center gap-2 transition-all active:scale-[0.95]"
+    style={{ padding: "10px 14px", borderRadius: 16, background: bg, border: `1px solid ${border}`, color, minWidth: 108 }}
   >
     <span style={{ display: "flex", opacity: 0.9 }}>{icon}</span>
     <span style={{ fontSize: "0.73rem", fontWeight: 700, letterSpacing: "0.01em" }}>{label}</span>
@@ -304,12 +315,12 @@ const GuideHero: React.FC<{
   role: SessionUser["role"]; turno: TurnoLite | null;
 }> = ({ availableCount, dateLabel, displayName, greeting, onNavigate, role, turno }) => (
   <div className="relative overflow-hidden" style={{
-    background: "linear-gradient(160deg, #0C0820 0%, #08071C 55%, #0A0820 100%)",
-    borderBottom: "1px solid rgba(139,92,246,0.14)",
+    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 55%, var(--color-bg-base) 100%)",
+    borderBottom: `1px solid ${RAW.primaryRgba(0.14)}`,
   }}>
     {/* Aurora background layers */}
-    <HeroOrb top={-90} left={-70} size={320} color="rgba(139,92,246,0.14)" />
-    <HeroOrb top={-30} right={-40} size={200} color="rgba(245,158,11,0.07)" />
+    <HeroOrb top={-90} left={-70} size={320} color={RAW.primaryRgba(0.13)} />
+    <HeroOrb top={-30} right={-40} size={200} color={RAW.accentRgba(0.07)} />
     <HeroDotGrid />
     <HeroWatermark />
 
@@ -321,7 +332,7 @@ const GuideHero: React.FC<{
           <span style={{ fontSize: "0.57rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: P.violet }}>
             {greeting}
           </span>
-          {turno && <LiveBadge color={P.violet} label="En turno" bg="rgba(139,92,246,0.11)" border="rgba(139,92,246,0.3)" />}
+          {turno && <LiveBadge color={P.violet} label="En turno" bg={RAW.primaryRgba(0.10)} border={RAW.primaryRgba(0.28)} />}
         </div>
         <RoleBadge role={role} />
       </div>
@@ -330,9 +341,9 @@ const GuideHero: React.FC<{
       <div className="flex items-center gap-4">
         <HeroAvatar
           name={displayName}
-          gradient="linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)"
-          shadow="0 6px 22px rgba(139,92,246,0.45), 0 2px 6px rgba(0,0,0,0.45)"
-          border="rgba(139,92,246,0.32)"
+          gradient={`linear-gradient(135deg, ${RAW.primary} 0%, ${RAW.primaryDark} 100%)`}
+          shadow={`0 6px 22px ${RAW.primaryRgba(0.40)}, 0 2px 6px rgba(0,0,0,0.05)`}
+          border={RAW.primaryRgba(0.30)}
         />
         <div className="min-w-0 flex-1">
           <h1 className="font-extrabold leading-tight truncate" style={{ fontSize: "1.55rem", color: P.fgPrimary, letterSpacing: "-0.02em" }}>
@@ -366,7 +377,7 @@ const GuideHero: React.FC<{
         />
       </div>
 
-      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, rgba(139,92,246,0.3), transparent 70%)` }} />
+      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, ${RAW.primaryRgba(0.28)}, transparent 70%)` }} />
     </div>
   </div>
 );
@@ -381,12 +392,12 @@ const SupervisorHero: React.FC<{
   role: SessionUser["role"]; summary: string;
 }> = ({ counts, dateLabel, displayName, isRefreshing, lastUpdatedAt, onNavigate, role, summary }) => (
   <div className="relative overflow-hidden" style={{
-    background: "linear-gradient(160deg, #0A0720 0%, #08071C 55%, #0C0826 100%)",
-    borderBottom: "1px solid rgba(245,158,11,0.12)",
+    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 55%, var(--color-bg-elevated) 100%)",
+    borderBottom: `1px solid ${RAW.accentRgba(0.12)}`,
   }}>
-    <HeroOrb top={-80} left={-60} size={300} color="rgba(245,158,11,0.10)" />
-    <HeroOrb top={-20} right={-30} size={200} color="rgba(139,92,246,0.08)" />
-    <HeroDotGrid color="rgba(245,158,11,0.03)" />
+    <HeroOrb top={-80} left={-60} size={300} color={RAW.accentRgba(0.09)} />
+    <HeroOrb top={-20} right={-30} size={200} color={RAW.primaryRgba(0.08)} />
+    <HeroDotGrid color={RAW.accentRgba(0.03)} />
     <HeroWatermark color={P.amber} />
 
     <div className="relative mx-auto max-w-[440px] px-5 pt-10 pb-6">
@@ -394,7 +405,7 @@ const SupervisorHero: React.FC<{
       {/* Top bar */}
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2">
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: P.amber, boxShadow: `0 0 10px ${P.amberGlow}`, display: "inline-block" }} />
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: RAW.accent, boxShadow: `0 0 10px ${RAW.accentRgba(0.4)}`, display: "inline-block" }} />
           <span style={{ fontSize: "0.57rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: P.amber }}>
             Centro operativo
           </span>
@@ -411,9 +422,9 @@ const SupervisorHero: React.FC<{
       <div className="flex items-center gap-4">
         <HeroAvatar
           name={displayName}
-          gradient="linear-gradient(135deg, #F59E0B 0%, #D97706 100%)"
-          shadow="0 6px 22px rgba(245,158,11,0.45), 0 2px 6px rgba(0,0,0,0.45)"
-          border="rgba(245,158,11,0.35)"
+          gradient={`linear-gradient(135deg, ${RAW.accent} 0%, var(--color-accent-active) 100%)`}
+          shadow={`0 6px 22px ${RAW.accentRgba(0.40)}, 0 2px 6px rgba(0,0,0,0.05)`}
+          border={RAW.accentRgba(0.32)}
         />
         <div className="min-w-0 flex-1">
           <h1 className="font-extrabold leading-tight truncate" style={{ fontSize: "1.55rem", color: P.fgPrimary, letterSpacing: "-0.02em" }}>
@@ -432,15 +443,15 @@ const SupervisorHero: React.FC<{
       {/* Mini stat strip */}
       {counts && (
         <div className="flex gap-2 mt-4">
-          <HeroStatPill value={counts.recaladas}             label="Recaladas"  color="#38BDF8" />
-          <HeroStatPill value={counts.atenciones}            label="Atenciones" color="#F59E0B" />
-          <HeroStatPill value={counts.turnos}                label="Turnos"     color="#2DD4BF" />
-          <HeroStatPill value={counts.turnosInProgress ?? 0} label="En curso"   color="#8B5CF6" />
+          <HeroStatPill value={counts.recaladas}             label="Recaladas"  color={RAW.info} />
+          <HeroStatPill value={counts.atenciones}            label="Atenciones" color={RAW.accent} />
+          <HeroStatPill value={counts.turnos}                label="Turnos"     color={RAW.success} />
+          <HeroStatPill value={counts.turnosInProgress ?? 0} label="En curso"   color={RAW.primary} />
         </div>
       )}
 
       {/* Quick nav */}
-      <div className="flex gap-2 mt-4">
+      <div className="flex gap-2 mt-4" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <HeroQuickBtn
           icon={<>{Ico.ticket()}</>}
           label="Turnero"
@@ -461,7 +472,7 @@ const SupervisorHero: React.FC<{
         />
       </div>
 
-      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, rgba(245,158,11,0.3), transparent 70%)` }} />
+      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, ${RAW.accentRgba(0.28)}, transparent 70%)` }} />
     </div>
   </div>
 );
@@ -506,23 +517,23 @@ const GuideFocusCard: React.FC<{ onNavigate?: (path: string) => void; turno: Tur
   return (
     <div className="relative overflow-hidden" style={{
       borderRadius: 22,
-      background: "linear-gradient(145deg, rgba(22,16,58,0.97) 0%, rgba(10,8,30,0.99) 100%)",
-      border: "1px solid rgba(139,92,246,0.22)",
-      borderLeft: "3px solid #8B5CF6",
-      boxShadow: "0 12px 40px rgba(139,92,246,0.14), 0 24px 56px rgba(0,0,0,0.4), inset 0 1px 0 rgba(139,92,246,0.10)",
+      background: "var(--color-bg-elevated)",
+      border: `1px solid ${RAW.primaryRgba(0.20)}`,
+      borderLeft: `3px solid ${RAW.primary}`,
+      boxShadow: `0 12px 40px ${RAW.primaryRgba(0.12)}, 0 24px 56px rgba(0,0,0,0.05), inset 0 1px 0 ${RAW.primaryRgba(0.08)}`,
     }}>
-      <HeroOrb top={-50} right={-30} size={200} color="rgba(139,92,246,0.10)" />
+      <HeroOrb top={-50} right={-30} size={200} color={RAW.primaryRgba(0.09)} />
 
       <div className="relative p-5">
         <div className="flex items-center justify-between gap-3">
-          <LiveBadge color={P.violet} label="Turno activo" bg="rgba(139,92,246,0.12)" border="rgba(139,92,246,0.26)" />
+          <LiveBadge color={P.violet} label="Turno activo" bg={RAW.primaryRgba(0.11)} border={RAW.primaryRgba(0.24)} />
           <StatusChip tone={getTurnoTone(turno.status)}>{formatTurnoStatus(turno.status)}</StatusChip>
         </div>
 
         <p className="font-mono leading-none tracking-tight mt-5" style={{
           fontSize: "3.5rem", fontWeight: 900, color: P.violet,
           letterSpacing: "-0.04em",
-          textShadow: `0 0 40px ${P.violetGlow}`,
+          textShadow: `0 0 36px ${RAW.primaryRgba(0.35)}`,
         }}>
           #{formatTurnoNumber(turno.numero)}
         </p>
@@ -539,7 +550,7 @@ const GuideFocusCard: React.FC<{ onNavigate?: (path: string) => void; turno: Tur
           <InfoPill label="Check-in" value={turno.checkInAt ? formatTime(turno.checkInAt) : "Pendiente"} accent={P.amber} />
         </div>
 
-        <div style={{ height: 1, background: "rgba(139,92,246,0.15)", margin: "18px 0" }} />
+        <div style={{ height: 1, background: RAW.primaryRgba(0.14), margin: "18px 0" }} />
 
         <VioletBtn onClick={() => onNavigate?.("/turnos")} icon={<>{Ico.arrowRight()}</>}>
           Registrar check-in
@@ -596,7 +607,7 @@ const GuideAtencionesCard: React.FC<{
             key={item.id} type="button"
             onClick={() => onNavigate?.("/atenciones")}
             className="flex w-full items-center gap-3 text-left transition-all active:scale-[0.98]"
-            style={{ borderRadius: 16, padding: "11px 13px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ borderRadius: 16, padding: "11px 13px", background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)" }}
           >
             <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: P.amberFaint, border: `1px solid ${P.amberBorder}`, color: P.amber }}>
               {Ico.ship()}
@@ -711,10 +722,10 @@ const Card: React.FC<{ children: React.ReactNode; className?: string; style?: Re
     className={className}
     style={{
       background: P.bgSurface,
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderTop: "1px solid rgba(255,255,255,0.08)",
+      border: "1px solid var(--color-glass-medium)",
+      borderTop: "1px solid var(--color-glass-medium)",
       borderRadius: 22,
-      boxShadow: "0 24px 56px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      boxShadow: "0 24px 56px rgba(0,0,0,0.05), inset 0 1px 0 var(--color-glass-soft)",
       ...style,
     }}
   >
@@ -736,8 +747,8 @@ const InfoPill: React.FC<{ label: string; value?: string; accent?: string }> = (
   <div
     className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5"
     style={{
-      background: accent ? `${accent}10` : "rgba(255,255,255,0.05)",
-      border: `1px solid ${accent ? `${accent}28` : "rgba(255,255,255,0.08)"}`,
+      background: accent ? `${accent}10` : "var(--color-glass-soft)",
+      border: `1px solid ${accent ? `${accent}28` : "var(--color-glass-medium)"}`,
     }}
   >
     <span style={{ fontSize: "0.54rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: accent ?? P.fgMuted }}>{label}</span>
@@ -795,7 +806,7 @@ const CapacityRow: React.FC<{ label: string; value: number; total: number; pct: 
           <span className="font-mono" style={{ fontSize: "0.8125rem", fontWeight: 800, color: P.fgPrimary }}>{value}</span>
         </div>
       </div>
-      <div style={{ height: 5, borderRadius: 4, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+      <div style={{ height: 5, borderRadius: 4, background: "var(--color-glass-medium)", overflow: "hidden" }}>
         <div style={{
           height: "100%",
           width: `${Math.min(100, pct)}%`,
@@ -811,11 +822,11 @@ const CapacityRow: React.FC<{ label: string; value: number; total: number; pct: 
 const MilestoneTimeline: React.FC<{ items: DashboardMilestone[] }> = ({ items }) => (
   <div style={{ position: "relative", paddingLeft: 24 }}>
     {items.length > 1 && (
-      <div style={{ position: "absolute", left: 5, top: 10, bottom: 10, width: 2, background: `linear-gradient(180deg, rgba(139,92,246,0.3), rgba(139,92,246,0.03))`, borderRadius: 1 }} />
+      <div style={{ position: "absolute", left: 5, top: 10, bottom: 10, width: 2, background: `linear-gradient(180deg, ${RAW.primaryRgba(0.28)}, ${RAW.primaryRgba(0.03)})`, borderRadius: 1 }} />
     )}
     <div className="flex flex-col gap-4">
       {items.map((item) => {
-        const color = MILESTONE_COLOR[item.kind] ?? "#64748B";
+        const color = MILESTONE_COLOR[item.kind] ?? "var(--color-fg-muted)";
         return (
           <div key={getMilestoneKey(item)} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
             <div style={{
@@ -844,7 +855,7 @@ const MilestoneTimeline: React.FC<{ items: DashboardMilestone[] }> = ({ items })
 );
 
 const FooterUpdated: React.FC<{ lastUpdatedAt: string | null }> = ({ lastUpdatedAt }) => (
-  <div className="rounded-[12px] px-3 py-2.5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+  <div className="rounded-[12px] px-3 py-2.5" style={{ background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-soft)" }}>
     <LastUpdatedRow label="Última actualización" statusLabel={formatTime(lastUpdatedAt)} statusTone="info" />
   </div>
 );
@@ -858,8 +869,8 @@ const VioletBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; ico
     className="w-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
     style={{
       padding: "15px 20px", borderRadius: 18,
-      background: "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 55%, #6D28D9 100%)",
-      boxShadow: "0 8px 28px rgba(139,92,246,0.48), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+      background: `linear-gradient(135deg, ${RAW.primaryDark} 0%, ${RAW.primary} 55%, var(--color-primary-dark) 100%)`,
+      boxShadow: `0 8px 28px ${RAW.primaryRgba(0.42)}, 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.18)`,
       border: "1px solid rgba(255,255,255,0.12)",
       color: "white", fontSize: "0.9rem", fontWeight: 800, letterSpacing: "0.015em",
     }}
@@ -875,8 +886,8 @@ const AmberBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; icon
     className="w-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
     style={{
       padding: "14px 20px", borderRadius: 18,
-      background: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(252,211,77,0.08) 100%)",
-      boxShadow: "0 4px 18px rgba(245,158,11,0.2), 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(245,158,11,0.14)",
+      background: `linear-gradient(135deg, ${RAW.accentRgba(0.12)} 0%, ${RAW.accentRgba(0.06)} 100%)`,
+      boxShadow: `0 4px 18px ${RAW.accentRgba(0.18)}, 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 ${RAW.accentRgba(0.12)}`,
       border: `1px solid ${P.amberBorder}`,
       color: P.amber, fontSize: "0.9rem", fontWeight: 700, letterSpacing: "0.015em",
     }}
