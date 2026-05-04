@@ -490,9 +490,9 @@ const AtencionDetailPage: React.FC = () => {
                             ) : (
                               (guidesQuery.data ?? []).map((g) => (
                                 <button
-                                  key={g.id}
+                                  key={g.guiaId}
                                   disabled={assign.isPending}
-                                  onClick={() => void handleAssign(turno.id, g.id)}
+                                  onClick={() => void handleAssign(turno.id, g.guiaId)}
                                   className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors"
                                   style={{
                                     background: "var(--color-bg-elevated)",
@@ -500,7 +500,7 @@ const AtencionDetailPage: React.FC = () => {
                                     color: "var(--color-fg-primary)",
                                   }}
                                 >
-                                  {g.nombre || g.email}
+                                  {[g.nombres, g.apellidos].filter(Boolean).join(" ") || g.email}
                                 </button>
                               ))
                             )}

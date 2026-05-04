@@ -43,9 +43,11 @@ export interface UpdateMeResponse {
 }
 
 export interface GuideLookupItem {
-  id: string;
-  nombre?: string;
-  email?: string;
+  guiaId: string;
+  nombres: string;
+  apellidos: string;
+  email: string;
+  activo: boolean;
 }
 
 export interface UserMeResponse {

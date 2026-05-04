@@ -125,15 +125,16 @@ const RecaladaDetailPage: React.FC = () => {
 
   const canEdit    = isSupervisor && (opStatus === "SCHEDULED" || opStatus === "ARRIVED");
   const canArrive  = isSupervisor && opStatus === "SCHEDULED";
-  const canDepart  = isSupervisor && opStatus === "ARRIVED";
   const canCancel  = isSupervisor && opStatus !== "DEPARTED" && opStatus !== "CANCELED" && (opStatus === "SCHEDULED" || isSuperAdmin);
   const canDelete  = isSupervisor && opStatus === "SCHEDULED";
-  const isBusy     = arrive.isPending || depart.isPending || cancel.isPending || deleteRec.isPending;
-  const hasActions = canArrive || canDepart || canEdit || canCancel || canDelete;
 
   const supervisorName = [recalada.supervisor?.usuario?.nombres, recalada.supervisor?.usuario?.apellidos].filter(Boolean).join(" ") || recalada.supervisor?.usuario?.email || "—";
   const atenciones     = atencionesQuery.data ?? [];
+  const openAtencionesCount = atenciones.filter((at) => at.operationalStatus === "OPEN").length;
+  const canDepart = isSupervisor && opStatus === "ARRIVED" && !atencionesQuery.isLoading && openAtencionesCount === 0;
   const canAddAtencion = isSupervisor && opStatus !== "CANCELED" && opStatus !== "DEPARTED";
+  const isBusy     = arrive.isPending || depart.isPending || cancel.isPending || deleteRec.isPending;
+  const hasActions = canArrive || canDepart || canEdit || canCancel || canDelete;
 
   async function runAction<T>(fn: () => Promise<T>, successMsg: string, fallback: string) {
     setActionError(null); setActionSuccess(null);
@@ -272,6 +273,27 @@ const RecaladaDetailPage: React.FC = () => {
                 onNavigate={(path) => history.push(path)}
               />
             </div>
+
+            {opStatus === "ARRIVED" && !atencionesQuery.isLoading && openAtencionesCount > 0 && (
+              <div
+                className="animate-fade-up"
+                style={{
+                  marginTop: "1rem",
+                  borderRadius: 16,
+                  padding: "12px 14px",
+                  background: C.amberFaint,
+                  border: `1px solid ${C.amberBorder}`,
+                  color: C.amber,
+                }}
+              >
+                <p style={{ fontSize: "0.8rem", fontWeight: 700, marginBottom: 4 }}>
+                  No se puede marcar la salida todavía
+                </p>
+                <p style={{ fontSize: "0.75rem", lineHeight: 1.5, color: C.fgSec }}>
+                  Hay {openAtencionesCount} atención(es) abiertas. Cierra o cancela esas atenciones primero y luego podrás registrar la salida.
+                </p>
+              </div>
+            )}
 
             {/* ── Cancel form ── */}
             {showCancel && (
