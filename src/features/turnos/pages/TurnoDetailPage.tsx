@@ -13,6 +13,7 @@ import {
   useNoShowTurno,
   useUnassignTurno,
 } from "../hooks/useTurnoActions";
+import { useTurnoSocket } from "../hooks/useTurnoSocket";
 import { formatTurnoDate, getTurnoLabel } from "../lib/turnoStatus";
 import type { TurnoItem, TurnoStatus } from "../types/turnos.types";
 
@@ -97,6 +98,7 @@ const TurnoDetailPage: React.FC = () => {
 
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isGuia       = user?.role === "GUIA";
+  useTurnoSocket();
 
   const turnoQuery = useTurno(turnoId);
   const claim    = useClaimTurno();

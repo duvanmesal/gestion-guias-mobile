@@ -10,6 +10,7 @@ import { useDeleteRecalada } from "../hooks/useDeleteRecalada";
 import { useDepartRecalada } from "../hooks/useDepartRecalada";
 import { useRecalada } from "../hooks/useRecalada";
 import { useRecaladaAtenciones } from "../hooks/useRecaladaAtenciones";
+import { useRecaladaSocket } from "../hooks/useRecaladaSocket";
 import type { RecaladaAtencionItem, RecaladaItem, RecaladaOperationalStatus } from "../types/recaladas.types";
 
 /* ─────────────────────────────────────────────
@@ -95,6 +96,7 @@ const RecaladaDetailPage: React.FC = () => {
 
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
+  useRecaladaSocket();
 
   const recaladaQuery   = useRecalada(recaladaId ?? undefined);
   const atencionesQuery = useRecaladaAtenciones(recaladaId ?? undefined);

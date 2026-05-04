@@ -7,6 +7,7 @@ import { useMyActiveTurno } from "../hooks/useMyActiveTurno";
 import { useMyNextTurno } from "../hooks/useMyNextTurno";
 import { useMyTurnos } from "../hooks/useMyTurnos";
 import { useTurnosList } from "../hooks/useTurnosList";
+import { useTurnoSocket } from "../hooks/useTurnoSocket";
 import {
   formatTurnoDate,
   getTurnoLabel,
@@ -93,6 +94,8 @@ const TurnosListPage: React.FC = () => {
   const user = useSessionStore((state) => state.user);
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isGuia = user?.role === "GUIA";
+
+  useTurnoSocket()
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [page, setPage] = useState(1);

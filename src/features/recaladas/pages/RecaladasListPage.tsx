@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import ErrorState from "../../../ui/components/ErrorState";
 import { useRecaladasList } from "../hooks/useRecaladasList";
+import { useRecaladaSocket } from "../hooks/useRecaladaSocket";
 import type {
   ListRecaladasParams,
   RecaladaItem,
@@ -78,6 +79,7 @@ const RecaladasListPage: React.FC = () => {
   const history = useHistory();
   const user = useSessionStore((s) => s.user);
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
+  useRecaladaSocket();
 
   const [draft,        setDraft]        = useState("");
   const [search,       setSearch]       = useState("");
