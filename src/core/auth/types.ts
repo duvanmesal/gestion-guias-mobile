@@ -1,7 +1,7 @@
 export type Role = "GUIA" | "SUPERVISOR" | "SUPER_ADMIN";
 export type ProfileStatus = "INCOMPLETE" | "COMPLETE";
 export type SessionStatus = "loading" | "guest" | "authed";
-export type UserDocumentType = "CC" | "CE" | "PASSPORT" | "TI";
+export type UserDocumentType = "CC" | "CE" | "PAS" | "NIT" | "OTRO";
 
 export type AuthNoticeKind = "info" | "success" | "warning" | "danger";
 

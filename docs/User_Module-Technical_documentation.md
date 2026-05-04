@@ -142,7 +142,6 @@ Aunque pertenezcan a otras capas, Users se apoya en:
 * `src/core/http/authInterceptor.ts`
 * `src/core/http/getErrorMessage.ts`
 * `src/core/auth/sessionStore.ts`
-* `src/features/auth/hooks/useChangePassword.ts`
 
 ---
 
@@ -285,6 +284,8 @@ export interface UpdateProfileRequest {
   telefono: string;
   documentType: DocumentType;
   documentNumber: string;
+  currentPassword: string;
+  newPassword: string;
 }
 ```
 
@@ -486,9 +487,9 @@ No basta con renderizar el nuevo usuario localmente. La sesión global debe ente
 2. si falla, lanza error normalizado
 3. si funciona:
 
-   * vuelve a llamar `GET /users/me`
-   * transforma la respuesta con el mapper
-   * actualiza el store global
+   * el backend marca el perfil como completo
+   * el backend cambia la contraseña
+   * el backend revoca las sesiones activas
    * invalida `usersKeys.me()`
 
 ---
@@ -504,7 +505,7 @@ El backend puede:
 * ajustar campos
 * enriquecer la respuesta
 
-El re-fetch garantiza consistencia real.
+En onboarding, la app no mantiene la sesión activa después del cambio: limpia el estado local y envía al usuario a login.
 
 ---
 
@@ -541,10 +542,9 @@ Aunque el control de acceso lo decide Auth, la **pantalla y la lógica de perfil
 
 ## 13.3 Flujo funcional actual
 
-El onboarding ejecuta dos pasos encadenados:
+El onboarding ejecuta un único paso contractual:
 
-1. actualización de perfil
-2. cambio de contraseña
+1. `PATCH /users/me/profile` con datos de perfil, contraseña actual y contraseña nueva
 
 ---
 
@@ -554,10 +554,8 @@ Users se encarga de:
 
 * renderizar el formulario
 * validar y enviar datos del perfil
-* sincronizar el usuario resultante
-* dejar listo el estado de perfil en el store
-
-El cambio de contraseña pertenece al módulo Auth, aunque sea invocado desde la misma pantalla.
+* validar y enviar la contraseña actual y la nueva contraseña
+* limpiar la sesión local cuando el backend completa onboarding y revoca sesiones
 
 ---
 
@@ -565,9 +563,10 @@ El cambio de contraseña pertenece al módulo Auth, aunque sea invocado desde la
 
 Si el perfil se actualiza correctamente y la contraseña cambia con éxito:
 
-* el usuario queda listo para entrar al módulo interno real
-* la navegación pasa a `/`
-* Auth resuelve finalmente el entry hacia `/profile` u otra pantalla permitida
+* el usuario queda con `profileStatus = "COMPLETE"`
+* las sesiones activas quedan revocadas por seguridad
+* la navegación pasa a `/login`
+* el siguiente login resuelve el entry interno normal
 
 ---
 
@@ -684,8 +683,9 @@ Traduce valores internos como:
 
 * `CC`
 * `CE`
-* `TI`
-* `PASSPORT`
+* `PAS`
+* `NIT`
+* `OTRO`
 
 a labels amigables para la UI.
 
@@ -900,9 +900,10 @@ Verificar:
 Verificar:
 
 * `PATCH /users/me/profile`
+* el payload incluye datos de perfil, `currentPassword` y `newPassword`
 * la respuesta no falla
-* luego se ejecuta nuevamente `GET /users/me`
-* el store queda actualizado
+* la app limpia la sesión local
+* la navegación vuelve a `/login`
 * `profileStatus` cambia cuando corresponde
 
 ---

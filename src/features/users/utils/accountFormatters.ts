@@ -3,8 +3,9 @@ import type { SessionUser, UserDocumentType } from "../../../core/auth/types";
 const DOCUMENT_TYPE_LABELS: Record<UserDocumentType, string> = {
   CC: "Cédula de ciudadanía",
   CE: "Cédula de extranjería",
-  TI: "Tarjeta de identidad",
-  PASSPORT: "Pasaporte",
+  PAS: "Pasaporte",
+  NIT: "NIT",
+  OTRO: "Otro",
 };
 
 export function buildFullName(

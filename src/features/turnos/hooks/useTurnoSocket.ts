@@ -7,6 +7,7 @@ import { useSessionStore } from "../../../core/auth/sessionStore"
 interface TurnoSocketPayload {
   turnoId: number
   atencionId: number
+  recaladaId?: number | null
   status: string
   guiaId?: string | null
 }
@@ -26,7 +27,7 @@ async function showToast(message: string, color: "success" | "danger" | "warning
   await toast.present()
 }
 
-export function useTurnoSocket() {
+export function useTurnoSocket(atencionId?: number) {
   const queryClient = useQueryClient()
   const user = useSessionStore((s) => s.user)
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN"
@@ -35,6 +36,10 @@ export function useTurnoSocket() {
     const socket = socketClient.getSocket()
     if (!socket) return
 
+    if (atencionId) {
+      socket.emit("join:atencion", { atencionId })
+    }
+
     const invalidateTurnos = (payload: TurnoSocketPayload) => {
       queryClient.invalidateQueries({ queryKey: ["turnos"] })
       queryClient.invalidateQueries({ queryKey: ["turno", payload.turnoId] })
@@ -42,11 +47,23 @@ export function useTurnoSocket() {
       queryClient.invalidateQueries({ queryKey: ["myNextTurno"] })
       queryClient.invalidateQueries({ queryKey: ["myActiveTurno"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+      queryClient.invalidateQueries({ queryKey: ["atencion-turnos", payload.atencionId] })
+      queryClient.invalidateQueries({ queryKey: ["atencion-summary", payload.atencionId] })
+      if (payload.recaladaId) {
+        queryClient.invalidateQueries({ queryKey: ["recalada", payload.recaladaId] })
+        queryClient.invalidateQueries({ queryKey: ["recalada", payload.recaladaId, "atenciones"] })
+      }
     }
 
     const invalidateAtencion = (payload: AtencionSocketPayload) => {
       queryClient.invalidateQueries({ queryKey: ["atenciones"] })
       queryClient.invalidateQueries({ queryKey: ["atencion", payload.atencionId] })
+      queryClient.invalidateQueries({ queryKey: ["atencion-turnos", payload.atencionId] })
+      queryClient.invalidateQueries({ queryKey: ["atencion-summary", payload.atencionId] })
+      if (payload.recaladaId) {
+        queryClient.invalidateQueries({ queryKey: ["recalada", payload.recaladaId] })
+        queryClient.invalidateQueries({ queryKey: ["recalada", payload.recaladaId, "atenciones"] })
+      }
     }
 
     const onAssigned = (p: TurnoSocketPayload) => {
@@ -81,6 +98,9 @@ export function useTurnoSocket() {
     socket.on("atencion:updated", invalidateAtencion)
 
     return () => {
+      if (atencionId) {
+        socket.emit("leave:atencion", { atencionId })
+      }
       socket.off("turno:assigned", onAssigned)
       socket.off("turno:claimed", invalidateTurnos)
       socket.off("turno:checkedIn", invalidateTurnos)
@@ -93,5 +113,5 @@ export function useTurnoSocket() {
       socket.off("atencion:created", onAtencionCreated)
       socket.off("atencion:updated", invalidateAtencion)
     }
-  }, [queryClient, isSupervisor])
+  }, [queryClient, isSupervisor, atencionId])
 }

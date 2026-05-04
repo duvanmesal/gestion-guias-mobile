@@ -1,9 +1,12 @@
 import QueryProvider from "./QueryProvider";
 import AuthProvider from "./AuthProvider";
+import RealtimeProvider from "./RealtimeProvider";
 
 const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <QueryProvider>
-    <AuthProvider>{children}</AuthProvider>
+    <AuthProvider>
+      <RealtimeProvider>{children}</RealtimeProvider>
+    </AuthProvider>
   </QueryProvider>
 );
 

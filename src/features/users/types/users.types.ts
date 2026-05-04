@@ -12,6 +12,8 @@ export interface CompleteProfileRequest {
   telefono: string;
   documentType: DocumentType;
   documentNumber: string;
+  currentPassword: string;
+  newPassword: string;
 }
 
 export type CompleteProfileResponse = {
@@ -66,3 +68,18 @@ export interface UserMeResponse {
 }
 
 export type GuidesLookupResponse = GuideLookupItem[];
+
+export interface UserSessionItem {
+  id: string;
+  userId: string;
+  platform: "WEB" | "MOBILE";
+  deviceId?: string | null;
+  userAgent?: string | null;
+  ip?: string | null;
+  createdAt: string;
+  lastRotatedAt?: string | null;
+  lastActivityAt?: string | null;
+  isCurrent?: boolean;
+}
+
+export type SessionsResponse = UserSessionItem[] | { sessions?: UserSessionItem[] };

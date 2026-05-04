@@ -132,7 +132,7 @@ const AtencionDetailPage: React.FC = () => {
   const isSupervisor =
     user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isGuia = user?.role === "GUIA";
-  useTurnoSocket();
+  useTurnoSocket(atencionId);
 
   const atencionQuery = useAtencion(atencionId);
   const summaryQuery = useAtencionSummary(atencionId);

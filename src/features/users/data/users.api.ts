@@ -4,6 +4,7 @@ import type {
   CompleteProfileRequest,
   CompleteProfileResponse,
   GuidesLookupResponse,
+  SessionsResponse,
   UpdateMeRequest,
   UpdateMeResponse,
   UserMeResponse,
@@ -42,5 +43,19 @@ export function getMe(): Promise<ApiResult<UserMeResponse>> {
     headers: {
       "X-Client-Platform": "MOBILE",
     },
+  });
+}
+
+export function getSessions(): Promise<ApiResult<SessionsResponse>> {
+  return authRequest<SessionsResponse>("/auth/sessions", {
+    method: "GET",
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function revokeSession(sessionId: string): Promise<ApiResult<void>> {
+  return authRequest<void>(`/auth/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: { ...PLATFORM_HEADER },
   });
 }

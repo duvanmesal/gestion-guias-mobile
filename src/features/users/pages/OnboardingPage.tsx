@@ -2,15 +2,14 @@ import { IonPage, IonContent } from "@ionic/react";
 import { useHistory } from "react-router-dom";
 import OnboardingForm, { type OnboardingFormValues } from "../components/OnboardingForm";
 import { useCompleteProfile } from "../hooks/useCompleteProfile";
-import { useChangePassword } from "../../auth/hooks/useChangePassword";
+import { finalizeClientLogout } from "../../../core/auth/sessionLifecycle";
 
 const OnboardingPage: React.FC = () => {
   const history = useHistory();
   const completeProfile = useCompleteProfile();
-  const changePassword = useChangePassword();
 
-  const isLoading = completeProfile.isPending || changePassword.isPending;
-  const error = completeProfile.error?.message ?? changePassword.error?.message ?? null;
+  const isLoading = completeProfile.isPending;
+  const error = completeProfile.error?.message ?? null;
 
   const handleSubmit = async (values: OnboardingFormValues) => {
     try {
@@ -20,13 +19,16 @@ const OnboardingPage: React.FC = () => {
         telefono: values.telefono,
         documentType: values.documentType,
         documentNumber: values.documentNumber,
-      });
-
-      await changePassword.mutateAsync({
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
 
+      await finalizeClientLogout({
+        notice: {
+          kind: "success",
+          message: "Perfil activado. Inicia sesión con tu nueva contraseña.",
+        },
+      });
       history.replace("/login");
     } catch {
       // Errors are exposed by hooks

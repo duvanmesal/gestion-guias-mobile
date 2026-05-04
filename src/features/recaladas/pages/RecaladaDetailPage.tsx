@@ -96,7 +96,7 @@ const RecaladaDetailPage: React.FC = () => {
 
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
-  useRecaladaSocket();
+  useRecaladaSocket(recaladaId ?? undefined);
 
   const recaladaQuery   = useRecalada(recaladaId ?? undefined);
   const atencionesQuery = useRecaladaAtenciones(recaladaId ?? undefined);

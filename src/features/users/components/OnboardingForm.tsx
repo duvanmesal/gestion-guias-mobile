@@ -14,7 +14,7 @@ const schema = z
     nombres: z.string().min(1, "Ingresa tus nombres"),
     apellidos: z.string().min(1, "Ingresa tus apellidos"),
     telefono: z.string().min(7, "Ingresa un teléfono válido"),
-    documentType: z.enum(["CC", "CE", "PASSPORT", "TI"]),
+    documentType: z.enum(["CC", "CE", "PAS", "NIT", "OTRO"]),
     documentNumber: z.string().min(6, "Ingresa un número de documento válido"),
     currentPassword: z.string().min(1, "Ingresa tu contraseña actual"),
     newPassword: z
@@ -50,8 +50,9 @@ const STEPS = [
 const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
   { value: "CC", label: "Cédula de ciudadanía" },
   { value: "CE", label: "Cédula de extranjería" },
-  { value: "TI", label: "Tarjeta de identidad" },
-  { value: "PASSPORT", label: "Pasaporte" },
+  { value: "PAS", label: "Pasaporte" },
+  { value: "NIT", label: "NIT" },
+  { value: "OTRO", label: "Otro" },
 ];
 
 const OnboardingForm: React.FC<OnboardingFormProps> = ({

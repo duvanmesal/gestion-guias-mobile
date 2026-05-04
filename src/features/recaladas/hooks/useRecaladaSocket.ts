@@ -18,12 +18,16 @@ async function showToast(message: string, color: "success" | "danger" | "warning
   await toast.present()
 }
 
-export function useRecaladaSocket() {
+export function useRecaladaSocket(recaladaId?: number) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
     const socket = socketClient.getSocket()
     if (!socket) return
+
+    if (recaladaId) {
+      socket.emit("join:recalada", { recaladaId })
+    }
 
     const invalidate = (payload: RecaladaSocketPayload) => {
       queryClient.invalidateQueries({ queryKey: recaladasKeys.all })
@@ -55,11 +59,14 @@ export function useRecaladaSocket() {
     socket.on("recalada:canceled", onCanceled)
 
     return () => {
+      if (recaladaId) {
+        socket.emit("leave:recalada", { recaladaId })
+      }
       socket.off("recalada:created", onCreated)
       socket.off("recalada:updated", invalidate)
       socket.off("recalada:arrived", onArrived)
       socket.off("recalada:departed", invalidate)
       socket.off("recalada:canceled", onCanceled)
     }
-  }, [queryClient])
+  }, [queryClient, recaladaId])
 }

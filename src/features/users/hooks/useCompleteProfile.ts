@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as usersApi from "../data/users.api";
-import { mapUserMeToSessionUser } from "../data/users.mappers";
 import { usersKeys } from "../data/users.keys";
-import { useSessionStore } from "../../../core/auth/sessionStore";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 import type {
   CompleteProfileRequest,

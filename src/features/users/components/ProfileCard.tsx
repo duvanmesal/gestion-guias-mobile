@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useThemeStore } from "../../../app/stores/themeStore";
 import { useHistory } from "react-router-dom";
 import LogoutAllModal from "./LogoutAllModal";
+import SessionsPanel from "./SessionsPanel";
 import type { SessionUser } from "../../../core/auth/types";
 import {
   logoutCurrentSession,
@@ -253,6 +254,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
             { label: "Perfil",       value: profLabel },
           ]}
         />
+
+        <SessionsPanel />
 
         {/* Appearance */}
         <div className="animate-fade-up" style={{
