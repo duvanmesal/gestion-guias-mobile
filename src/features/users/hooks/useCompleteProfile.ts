@@ -22,18 +22,6 @@ export function useCompleteProfile() {
         );
       }
 
-      const meRes = await usersApi.getMe();
-
-      if (meRes.ok) {
-        const user = mapUserMeToSessionUser(meRes.data);
-        const token = useSessionStore.getState().accessToken ?? "";
-
-        useSessionStore.getState().setAuthedSession({
-          user,
-          accessToken: token,
-        });
-      }
-
       return res.data;
     },
     onSuccess: () => {

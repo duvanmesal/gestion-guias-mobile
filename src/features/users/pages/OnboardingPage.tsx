@@ -27,7 +27,7 @@ const OnboardingPage: React.FC = () => {
         newPassword: values.newPassword,
       });
 
-      history.replace("/");
+      history.replace("/login");
     } catch {
       // Errors are exposed by hooks
     }
