@@ -10,10 +10,14 @@ import { useSessionStore } from "../../../core/auth/sessionStore";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
 import DashboardNeumorphic from "../components/DashboardNeumorphic";
 import { useDashboardOverview } from "../hooks/useDashboardOverview";
+import { useTurnoSocket } from "../../turnos/hooks/useTurnoSocket";
+import { useRecaladaSocket } from "../../recaladas/hooks/useRecaladaSocket";
 
 const HomePage: React.FC = () => {
   const history = useHistory();
   const user = useSessionStore((state) => state.user);
+  useTurnoSocket();
+  useRecaladaSocket();
   const { data, isLoading, isFetching, error, refetch } =
     useDashboardOverview();
 
