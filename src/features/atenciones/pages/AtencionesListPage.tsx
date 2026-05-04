@@ -10,6 +10,7 @@ import PageSectionHeader from "../../../ui/components/PageSectionHeader";
 import StatusChip from "../../../ui/components/StatusChip";
 import SurfaceCard from "../../../ui/components/SurfaceCard";
 import { useAtencionesList } from "../hooks/useAtencionesList";
+import { useTurnoSocket } from "../../turnos/hooks/useTurnoSocket";
 import type {
   AtencionOperationalStatus,
   ListAtencionesParams,
@@ -83,6 +84,7 @@ const AtencionesListPage: React.FC = () => {
   const user = useSessionStore((state) => state.user);
   const isSupervisor =
     user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
+  useTurnoSocket();
 
   const [statusFilter, setStatusFilter] = useState<OpStatusFilter>("");
   const [page, setPage] = useState(1);

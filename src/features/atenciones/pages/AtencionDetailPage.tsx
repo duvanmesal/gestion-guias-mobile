@@ -10,7 +10,6 @@ import LoadingScreen from "../../../ui/components/LoadingScreen";
 import OperationalAlertBanner from "../../../ui/components/OperationalAlertBanner";
 import PageSectionHeader from "../../../ui/components/PageSectionHeader";
 import StatusChip from "../../../ui/components/StatusChip";
-import StickyBottomActions from "../../../ui/components/StickyBottomActions";
 import SurfaceCard from "../../../ui/components/SurfaceCard";
 import { useAtencion } from "../hooks/useAtencion";
 import { useAtencionSummary } from "../hooks/useAtencionSummary";
@@ -18,6 +17,9 @@ import { useAtencionTurnos } from "../hooks/useAtencionTurnos";
 import { useCancelAtencion } from "../hooks/useCancelAtencion";
 import { useClaimAtencionTurno } from "../hooks/useClaimAtencionTurno";
 import { useCloseAtencion } from "../hooks/useCloseAtencion";
+import { useTurnoSocket } from "../../turnos/hooks/useTurnoSocket";
+import { useAssignTurno } from "../../turnos/hooks/useTurnoActions";
+import { useGuidesLookup } from "../../users/hooks/useGuidesLookup";
 import type {
   AtencionOperationalStatus,
   TurnoStatus,
@@ -130,6 +132,7 @@ const AtencionDetailPage: React.FC = () => {
   const isSupervisor =
     user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isGuia = user?.role === "GUIA";
+  useTurnoSocket();
 
   const atencionQuery = useAtencion(atencionId);
   const summaryQuery = useAtencionSummary(atencionId);
@@ -138,11 +141,14 @@ const AtencionDetailPage: React.FC = () => {
   const claim = useClaimAtencionTurno();
   const cancel = useCancelAtencion();
   const close = useCloseAtencion();
+  const assign = useAssignTurno();
+  const guidesQuery = useGuidesLookup();
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [assigningTurnoId, setAssigningTurnoId] = useState<number | null>(null);
 
   const atencion = atencionQuery.data;
   const summary = summaryQuery.data;
@@ -188,7 +194,18 @@ const AtencionDetailPage: React.FC = () => {
   const canCancel = isSupervisor && opStatus !== "CANCELED" && opStatus !== "CLOSED";
   const canClose = isSupervisor && isActive;
 
-  const isBusy = claim.isPending || cancel.isPending || close.isPending;
+  const isBusy = claim.isPending || cancel.isPending || close.isPending || assign.isPending;
+
+  async function handleAssign(turnoId: number, guiaId: string) {
+    setActionError(null);
+    try {
+      await assign.mutateAsync({ id: turnoId, guiaId });
+      setAssigningTurnoId(null);
+      setActionMessage(`Turno #${turnoId} asignado.`);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "No pude asignar el turno");
+    }
+  }
 
   async function handleClaim() {
     setActionError(null);
@@ -433,10 +450,12 @@ const AtencionDetailPage: React.FC = () => {
                         .join(" ") ||
                       turno.guia?.usuario?.email ||
                       (turno.guiaId ? "Asignado" : "Sin asignar");
+                    const isAssigning = assigningTurnoId === turno.id;
+                    const canAssignThis = isSupervisor && isActive && turno.status === "AVAILABLE";
                     return (
                       <SurfaceCard
                         key={turno.id}
-                        className="gap-1 px-3 py-3"
+                        className="gap-2 px-3 py-3"
                         radius="lg"
                         variant="inset"
                       >
@@ -451,112 +470,147 @@ const AtencionDetailPage: React.FC = () => {
                         <p className="text-[0.6875rem] text-[var(--color-fg-secondary)]">
                           {guiaName}
                         </p>
+                        {canAssignThis && !isAssigning && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            fullWidth={false}
+                            disabled={isBusy}
+                            onClick={() => setAssigningTurnoId(turno.id)}
+                          >
+                            Asignar guía
+                          </Button>
+                        )}
+                        {isAssigning && (
+                          <div className="flex flex-col gap-2 pt-1">
+                            {guidesQuery.isLoading ? (
+                              <p className="text-xs text-[var(--color-fg-muted)]">Cargando guías...</p>
+                            ) : (guidesQuery.data ?? []).length === 0 ? (
+                              <p className="text-xs text-[var(--color-fg-muted)]">No hay guías disponibles.</p>
+                            ) : (
+                              (guidesQuery.data ?? []).map((g) => (
+                                <button
+                                  key={g.id}
+                                  disabled={assign.isPending}
+                                  onClick={() => void handleAssign(turno.id, g.id)}
+                                  className="w-full rounded-xl px-3 py-2 text-left text-sm transition-colors"
+                                  style={{
+                                    background: "var(--color-bg-elevated)",
+                                    border: "1px solid var(--color-border-glass)",
+                                    color: "var(--color-fg-primary)",
+                                  }}
+                                >
+                                  {g.nombre || g.email}
+                                </button>
+                              ))
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              fullWidth={false}
+                              onClick={() => setAssigningTurnoId(null)}
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        )}
                       </SurfaceCard>
                     );
                   })}
                 </div>
               )}
             </SurfaceCard>
+            {(canClaim || canEdit || canCancel || canClose) && (
+              <div className="flex flex-col gap-2">
+                {canClaim && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    isLoading={claim.isPending}
+                    disabled={isBusy}
+                    onClick={() => void handleClaim()}
+                  >
+                    Tomar turno disponible
+                  </Button>
+                )}
+                {canEdit && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    disabled={isBusy}
+                    onClick={() => history.push(`/atenciones/${atencionId}/editar`)}
+                  >
+                    Editar
+                  </Button>
+                )}
+                {canClose && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    isLoading={close.isPending}
+                    disabled={isBusy}
+                    onClick={() => void handleClose()}
+                  >
+                    Cerrar atención
+                  </Button>
+                )}
+                {canCancel && !showCancelForm && (
+                  <Button
+                    variant="danger"
+                    size="md"
+                    disabled={isBusy}
+                    onClick={() => setShowCancelForm(true)}
+                  >
+                    Cancelar atención
+                  </Button>
+                )}
+                {showCancelForm && (
+                  <SurfaceCard className="gap-3 p-4" radius="xl" variant="raised">
+                    <p className="text-sm font-semibold text-[var(--color-fg-primary)]">
+                      Cancelar atención
+                    </p>
+                    <textarea
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      rows={3}
+                      placeholder="Motivo de cancelación (mín. 3 caracteres)..."
+                      maxLength={500}
+                      className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none"
+                      style={{
+                        background: "var(--color-glass-subtle)",
+                        borderColor: "var(--color-border-glass)",
+                        color: "var(--color-fg-primary)",
+                        boxShadow: "var(--shadow-neu-inset)",
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="danger"
+                        size="md"
+                        isLoading={cancel.isPending}
+                        onClick={() => void handleCancel()}
+                      >
+                        Confirmar
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        disabled={cancel.isPending}
+                        onClick={() => {
+                          setShowCancelForm(false);
+                          setCancelReason("");
+                          setActionError(null);
+                        }}
+                      >
+                        Volver
+                      </Button>
+                    </div>
+                  </SurfaceCard>
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {showCancelForm ? (
-          <StickyBottomActions>
-            <SurfaceCard className="gap-3 p-4" radius="xl" variant="raised">
-              <p className="text-sm font-semibold text-[var(--color-fg-primary)]">
-                Cancelar atención
-              </p>
-              <textarea
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                rows={3}
-                placeholder="Motivo de cancelación (mín. 3 caracteres)..."
-                maxLength={500}
-                className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none"
-                style={{
-                  background: "var(--color-glass-subtle)",
-                  borderColor: "var(--color-border-glass)",
-                  color: "var(--color-fg-primary)",
-                  boxShadow: "var(--shadow-neu-inset)",
-                }}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="danger"
-                  size="md"
-                  isLoading={cancel.isPending}
-                  onClick={() => void handleCancel()}
-                >
-                  Confirmar
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  disabled={cancel.isPending}
-                  onClick={() => {
-                    setShowCancelForm(false);
-                    setCancelReason("");
-                    setActionError(null);
-                  }}
-                >
-                  Volver
-                </Button>
-              </div>
-            </SurfaceCard>
-          </StickyBottomActions>
-        ) : canClaim || canEdit || canCancel || canClose ? (
-          <StickyBottomActions>
-            <div className="flex flex-col gap-2">
-              {canClaim ? (
-                <Button
-                  variant="primary"
-                  size="md"
-                  isLoading={claim.isPending}
-                  disabled={isBusy}
-                  onClick={() => void handleClaim()}
-                >
-                  Tomar turno disponible
-                </Button>
-              ) : null}
-
-              {canEdit ? (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  disabled={isBusy}
-                  onClick={() =>
-                    history.push(`/atenciones/${atencionId}/editar`)
-                  }
-                >
-                  Editar
-                </Button>
-              ) : null}
-
-              {canClose ? (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  isLoading={close.isPending}
-                  disabled={isBusy}
-                  onClick={() => void handleClose()}
-                >
-                  Cerrar atención
-                </Button>
-              ) : null}
-
-              {canCancel ? (
-                <Button
-                  variant="danger"
-                  size="md"
-                  disabled={isBusy}
-                  onClick={() => setShowCancelForm(true)}
-                >
-                  Cancelar atención
-                </Button>
-              ) : null}
-            </div>
-          </StickyBottomActions>
-        ) : null}
       </IonContent>
     </IonPage>
   );
