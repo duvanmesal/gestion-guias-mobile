@@ -2,6 +2,7 @@ import { queryClient } from "../../app/providers/QueryProvider";
 import { request } from "../http/apiClient";
 import { tokenService } from "./tokenService";
 import { useSessionStore } from "./sessionStore";
+import { socketClient } from "../socket/socketClient";
 import type { AuthNotice } from "./types";
 
 const PLATFORM_HEADER = { "X-Client-Platform": "MOBILE" } as const;
@@ -39,6 +40,7 @@ export async function finalizeClientLogout(
     // fail safe
   }
 
+  socketClient.disconnect();
   useSessionStore.getState().hardLogout();
   useSessionStore.getState().setAuthNotice(notice);
 }

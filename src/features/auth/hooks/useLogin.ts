@@ -5,6 +5,7 @@ import * as userApi from "../../users/data/users.api";
 import { mapUserMeToSessionUser } from "../../users/data/users.mappers";
 import { tokenService } from "../../../core/auth/tokenService";
 import { useSessionStore } from "../../../core/auth/sessionStore";
+import { socketClient } from "../../../core/socket/socketClient";
 import type { ProfileStatus } from "../../../core/auth/types";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 
@@ -62,6 +63,7 @@ export function useLogin() {
           user,
           accessToken,
         });
+        socketClient.connect(accessToken);
 
         return {
           profileStatus: user.profileStatus,

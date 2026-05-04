@@ -1,6 +1,7 @@
 import { request } from "./apiClient";
 import { tokenService } from "../auth/tokenService";
 import { useSessionStore } from "../auth/sessionStore";
+import { socketClient } from "../socket/socketClient";
 import type { RefreshResponse } from "../../features/auth/types/auth.types";
 
 const PLATFORM_HEADER = { "X-Client-Platform": "MOBILE" } as const;
@@ -25,6 +26,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     const { accessToken, refreshToken } = res.data.tokens;
 
     useSessionStore.getState().setAccessToken(accessToken);
+    socketClient.connect(accessToken);
 
     if (refreshToken) {
       await tokenService.setRefreshToken(refreshToken);
