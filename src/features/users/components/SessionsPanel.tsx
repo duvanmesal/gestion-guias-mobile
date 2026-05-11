@@ -116,7 +116,7 @@ const SessionsPanel: React.FC = () => {
               style={{
                 borderRadius: 16,
                 padding: "12px",
-                background: "rgba(255,255,255,0.025)",
+                background: "var(--color-glass-subtle)",
                 border: "1px solid var(--color-glass-soft)",
               }}
             >

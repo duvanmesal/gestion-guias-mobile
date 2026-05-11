@@ -252,6 +252,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error, notic
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             autoComplete="current-password"
+            data-lpignore="true"
+            data-1p-ignore="true"
             style={passwordInputStyle}
             onFocus={() => setPasswordFocus(true)}
             onBlur={() => setPasswordFocus(false)}
@@ -284,13 +286,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error, notic
           padding: "0.8125rem 1.5rem",
           marginTop: 4,
           borderRadius: "0.9375rem",
-          border: "1px solid rgba(255,255,255,0.12)",
+          border: "none",
           background: isLoading
-            ? "linear-gradient(145deg, var(--color-primary-dark) 0%, var(--color-bg-elevated) 100%)"
-            : "linear-gradient(145deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%)",
-          boxShadow: isLoading
-            ? "none"
-            : "0 6px 24px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.2)",
+            ? "var(--color-primary-soft)"
+            : "var(--color-primary)",
+          boxShadow: "none",
           color: "white",
           fontSize: "0.9375rem",
           fontWeight: 700,

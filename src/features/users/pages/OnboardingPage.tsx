@@ -38,19 +38,8 @@ const OnboardingPage: React.FC = () => {
   return (
     <IonPage className="premium-page">
       <IonContent scrollY={true}>
-        <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
-          {/* Subtle floating orbs */}
-          <div
-            className="orb orb-primary animate-float-orb"
-            style={{ width: 220, height: 220, top: "-5%", right: "-8%", opacity: 0.4 }}
-          />
-          <div
-            className="orb orb-accent animate-float-orb-delayed"
-            style={{ width: 160, height: 160, bottom: "10%", left: "-6%", opacity: 0.3 }}
-          />
-
-          {/* Main content - centered both ways */}
-          <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-5 py-10 safe-area-inset">
+        <div className="min-h-screen" style={{ background: "var(--color-bg-base)" }}>
+          <div className="flex flex-col items-center justify-center min-h-screen px-5 py-10 safe-area-inset">
             <OnboardingForm
               onSubmit={handleSubmit}
               isLoading={isLoading}

@@ -13,30 +13,24 @@ export interface SurfaceCardProps {
 
 const surfaceStyles: Record<SurfaceCardVariant, CSSProperties> = {
   raised: {
-    background:
-      "linear-gradient(145deg, var(--color-bg-elevated) 0%, var(--color-bg-glass) 100%)",
-    border: "1px solid var(--color-border-glass)",
-    boxShadow:
-      "10px 10px 24px rgba(0,0,0,0.05), -6px -6px 18px var(--color-glass-subtle)",
+    background: "var(--color-bg-elevated)",
+    border: "1px solid var(--color-border-hairline)",
+    boxShadow: "var(--shadow-card)",
   },
   inset: {
-    background: "var(--color-bg-base)",
-    border: "1px solid var(--color-border-glass)",
-    boxShadow:
-      "inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px var(--color-glass-subtle)",
+    background: "var(--color-bg-subtle)",
+    border: "1px solid var(--color-border-hairline)",
   },
   accent: {
-    background:
-      "linear-gradient(145deg, var(--color-primary-soft) 0%, var(--color-bg-elevated) 100%)",
+    background: "var(--color-bg-elevated)",
     border: "1px solid var(--color-border-glow)",
-    boxShadow:
-      "0 10px 24px var(--color-primary-glow), 10px 10px 24px rgba(0,0,0,0.05), -6px -6px 18px var(--color-glass-subtle)",
+    boxShadow: "var(--shadow-card)",
   },
 };
 
 const radiusClasses: Record<SurfaceCardRadius, string> = {
-  lg: "rounded-[18px]",
-  xl: "rounded-3xl",
+  lg: "rounded-[12px]",
+  xl: "rounded-[16px]",
 };
 
 const SurfaceCard: React.FC<SurfaceCardProps> = ({

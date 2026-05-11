@@ -6,18 +6,15 @@ interface BottomNavItemProps {
   onNavigate: (href: string) => void;
 }
 
-/* ── Colors ── */
-const INACTIVE_ICON  = "#94A3B8";
-const INACTIVE_LABEL = "#94A3B8";
-const ACTIVE_COLOR   = "#2563EB";
-const ACTIVE_GLOW    = "rgba(37,99,235,0.20)";
-
-/* ── SVG icons ── */
+/* ── SVG icons (stroke-only, react to active state) ── */
 const NavIcon: React.FC<{ navKey: string; active: boolean }> = ({ navKey, active }) => {
   const props = {
-    width: 20, height: 20, viewBox: "0 0 24 24",
-    fill: "none", stroke: "currentColor",
-    strokeWidth: active ? "2.2" : "1.8",
+    width: 22,
+    height: 22,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: active ? "2" : "1.6",
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
   };
@@ -35,10 +32,10 @@ const NavIcon: React.FC<{ navKey: string; active: boolean }> = ({ navKey, active
         <svg {...props}>
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
           <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8"  y1="2" x2="8"  y2="6" />
-          <line x1="3"  y1="10" x2="21" y2="10" />
-          <line x1="8"  y1="14" x2="8.01" y2="14" strokeWidth={active ? "2.6" : "2.2"} />
-          <line x1="12" y1="14" x2="12.01" y2="14" strokeWidth={active ? "2.6" : "2.2"} />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+          <line x1="8" y1="14" x2="8.01" y2="14" strokeWidth={active ? "2.4" : "2"} />
+          <line x1="12" y1="14" x2="12.01" y2="14" strokeWidth={active ? "2.4" : "2"} />
         </svg>
       );
     case "atenciones":
@@ -83,102 +80,79 @@ const NavIcon: React.FC<{ navKey: string; active: boolean }> = ({ navKey, active
   }
 };
 
-/* ── Component ── */
-const BottomNavItem: React.FC<BottomNavItemProps> = ({ item, isActive, onNavigate }) => (
-  <button
-    type="button"
-    onClick={() => onNavigate(item.href)}
-    aria-current={isActive ? "page" : undefined}
-    aria-label={item.label}
-    style={{
-      position: "relative",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 5,
-      flex: 1,
-      minWidth: 0,
-      padding: "4px 2px 2px",
-      border: "none",
-      background: "transparent",
-      cursor: "pointer",
-      WebkitTapHighlightColor: "transparent",
-      transition: "transform 120ms cubic-bezier(0.34,1.56,0.64,1)",
-    }}
-    onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.86)"; }}
-    onMouseUp={(e)   => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
-    onTouchStart={(e)=> { (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.86)"; }}
-    onTouchEnd={(e)  => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
-  >
-    {/* Active top accent bar */}
-    {isActive && (
-      <span style={{
-        position: "absolute",
-        top: -1,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: 28,
-        height: 2,
-        borderRadius: 9999,
-        background: `linear-gradient(90deg, #2563EB, #3B82F6)`,
-        boxShadow: `0 0 10px ${ACTIVE_GLOW}`,
-      }} />
-    )}
+const BottomNavItem: React.FC<BottomNavItemProps> = ({ item, isActive, onNavigate }) => {
+  const color = isActive ? "var(--color-primary)" : "var(--color-fg-muted)";
 
-    {/* Icon container */}
-    <span style={{
-      position: "relative",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: 44,
-      height: 32,
-      borderRadius: isActive ? 14 : 12,
-      background: isActive
-        ? "rgba(37,99,235,0.10)"
-        : "transparent",
-      border: isActive
-        ? "1px solid rgba(37,99,235,0.25)"
-        : "1px solid transparent",
-      boxShadow: isActive
-        ? `0 2px 8px ${ACTIVE_GLOW}`
-        : "none",
-      color: isActive ? ACTIVE_COLOR : INACTIVE_ICON,
-      transition: "all 220ms cubic-bezier(0.34,1.56,0.64,1)",
-      flexShrink: 0,
-    }}>
-      <NavIcon navKey={item.key} active={isActive} />
-
-      {/* Active glow behind icon */}
-      {isActive && (
-        <span style={{
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(item.href)}
+      aria-current={isActive ? "page" : undefined}
+      aria-label={item.label}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 3,
+        flex: 1,
+        minWidth: 0,
+        padding: "8px 4px 6px",
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent",
+        transition: "background 120ms ease",
+      }}
+    >
+      {/* Top indicator: 3px primary bar that spans the inner column */}
+      <span
+        aria-hidden="true"
+        style={{
           position: "absolute",
-          inset: 0,
-          borderRadius: 14,
-          background: `radial-gradient(circle at 50% 60%, rgba(37,99,235,0.12) 0%, transparent 70%)`,
-          pointerEvents: "none",
-        }} />
-      )}
-    </span>
+          top: 0,
+          left: 12,
+          right: 12,
+          height: 3,
+          borderRadius: "0 0 3px 3px",
+          background: isActive ? "var(--color-primary)" : "transparent",
+          transition: "background 160ms ease",
+        }}
+      />
 
-    {/* Label */}
-    <span style={{
-      fontSize: "0.585rem",
-      fontWeight: isActive ? 800 : 500,
-      letterSpacing: isActive ? "0.04em" : "0.01em",
-      color: isActive ? ACTIVE_COLOR : INACTIVE_LABEL,
-      textTransform: isActive ? "uppercase" : "none",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      maxWidth: "100%",
-      transition: "color 180ms ease, font-weight 180ms ease",
-      lineHeight: 1,
-    }}>
-      {item.label}
-    </span>
-  </button>
-);
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 24,
+          height: 24,
+          color,
+          transition: "color 160ms ease",
+        }}
+      >
+        <NavIcon navKey={item.key} active={isActive} />
+      </span>
+
+      <span
+        style={{
+          fontSize: "var(--text-eyebrow)",
+          fontWeight: isActive ? 700 : 500,
+          letterSpacing: "0.02em",
+          color,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "100%",
+          lineHeight: 1.1,
+          transition: "color 160ms ease, font-weight 160ms ease",
+        }}
+      >
+        {item.label}
+      </span>
+    </button>
+  );
+};
 
 export default BottomNavItem;

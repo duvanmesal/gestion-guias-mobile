@@ -38,8 +38,7 @@ const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
       style={{
         background: "var(--color-glass-subtle)",
         border: "1px solid var(--color-border-glass)",
-        boxShadow:
-          "inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px var(--color-glass-subtle)",
+        boxShadow: "var(--shadow-neu-inset-full)",
       }}
     >
       {icon}

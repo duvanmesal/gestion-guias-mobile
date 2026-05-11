@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { toastController } from "@ionic/core"
 import { socketClient } from "./socketClient"
 import { useSessionStore } from "../auth/sessionStore"
 import { finalizeClientLogout } from "../auth/sessionLifecycle"
@@ -33,6 +34,19 @@ interface UserSocketPayload {
 interface CatalogSocketPayload {
   paisId?: number
   buqueId?: number
+}
+
+interface AtencionNuevaPayload {
+  atencionId: number
+  recaladaId?: number
+  fechaInicio?: string
+  fechaFin?: string
+}
+
+interface DisponibilidadPenalizadoPayload {
+  turnoId?: number
+  atencionId?: number
+  mensaje: string
 }
 
 export function useGlobalRealtime() {
@@ -135,6 +149,32 @@ export function useGlobalRealtime() {
       }
     }
 
+    const showToast = async (
+      message: string,
+      color: "success" | "danger" | "warning" | "primary"
+    ) => {
+      const toast = await toastController.create({
+        message,
+        duration: 4000,
+        position: "top",
+        color,
+      })
+      await toast.present()
+    }
+
+    const handleAtencionNueva = (payload: AtencionNuevaPayload) => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+      queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
+      void showToast("Nueva atención disponible", "primary")
+    }
+
+    const handleDisponibilidadPenalizado = (payload: DisponibilidadPenalizadoPayload) => {
+      void showToast(
+        payload.mensaje || "Fuiste penalizado por no presentarte al turno.",
+        "warning"
+      )
+    }
+
     socket.on("auth:sessionRevoked", forceLogout)
     socket.on("auth:sessionsChanged", invalidateSessions)
 
@@ -150,6 +190,8 @@ export function useGlobalRealtime() {
     socket.on("atencion:updated", invalidateAtenciones)
     socket.on("atencion:canceled", invalidateAtenciones)
     socket.on("atencion:closed", invalidateAtenciones)
+    socket.on("atencion:nueva", handleAtencionNueva)
+    socket.on("disponibilidad:penalizado", handleDisponibilidadPenalizado)
 
     socket.on("recalada:created", invalidateRecaladas)
     socket.on("recalada:updated", invalidateRecaladas)
@@ -192,6 +234,8 @@ export function useGlobalRealtime() {
       socket.off("atencion:updated", invalidateAtenciones)
       socket.off("atencion:canceled", invalidateAtenciones)
       socket.off("atencion:closed", invalidateAtenciones)
+      socket.off("atencion:nueva", handleAtencionNueva)
+      socket.off("disponibilidad:penalizado", handleDisponibilidadPenalizado)
 
       socket.off("recalada:created", invalidateRecaladas)
       socket.off("recalada:updated", invalidateRecaladas)

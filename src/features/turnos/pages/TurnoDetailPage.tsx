@@ -31,14 +31,14 @@ const C = {
   amberFaint:   "var(--color-accent-glow)",
   amberBorder:  "var(--color-accent-glow)",
   cyan:         "var(--color-info)",
-  cyanFaint:    "rgba(56,189,248,0.10)",
-  cyanBorder:   "rgba(56,189,248,0.26)",
+  cyanFaint:    "var(--color-info-soft)",
+  cyanBorder:   "var(--color-info-border)",
   teal:         "var(--color-success)",
   tealFaint:    "var(--color-success-soft)",
   tealBorder:   "var(--color-success-soft)",
   danger:       "var(--color-danger)",
   dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "rgba(244,63,94,0.26)",
+  dangerBorder: "var(--color-danger-border)",
   fgPrimary:    "var(--color-fg-primary)",
   fgSecondary:  "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
@@ -51,11 +51,11 @@ const C = {
 ───────────────────────────────────────────── */
 type StatusCfg = { color: string; faint: string; border: string; glow: string; label: string };
 const STATUS_CFG: Record<TurnoStatus, StatusCfg> = {
-  AVAILABLE:   { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   glow: "rgba(56,189,248,0.35)",  label: "Disponible" },
+  AVAILABLE:   { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   glow: "var(--color-info-glow)",  label: "Disponible" },
   ASSIGNED:    { color: C.violet, faint: C.violetFaint,  border: C.violetBorder, glow: C.violetGlow,            label: "Asignado" },
   IN_PROGRESS: { color: C.amber,  faint: C.amberFaint,   border: C.amberBorder,  glow: C.amberGlow,             label: "En curso" },
   COMPLETED:   { color: C.teal,   faint: C.tealFaint,    border: C.tealBorder,   glow: "var(--color-success-soft)", label: "Completado" },
-  CANCELED:    { color: C.danger, faint: C.dangerFaint,  border: C.dangerBorder, glow: "rgba(244,63,94,0.35)",  label: "Cancelado" },
+  CANCELED:    { color: C.danger, faint: C.dangerFaint,  border: C.dangerBorder, glow: "var(--color-danger-glow)",  label: "Cancelado" },
   NO_SHOW:     { color: "var(--color-fg-muted)",faint:"var(--color-glass-soft)",border:"var(--color-glass-medium)",glow:"var(--color-glass-medium)",label:"No se presentó" },
 };
 
@@ -300,17 +300,11 @@ const TurnoDetailPage: React.FC = () => {
 const TurnoHero: React.FC<{
   turno: TurnoItem; cfg: StatusCfg; isLive: boolean; shipCode: string; onBack: () => void;
 }> = ({ turno, cfg, isLive, shipCode, onBack }) => (
-  <div className="relative overflow-hidden" style={{
-    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
-    borderBottom: `1px solid ${cfg.border}`,
+  <div style={{
+    background: "var(--color-bg-elevated)",
+    borderBottom: "1px solid var(--color-glass-medium)",
   }}>
-    {/* Ambient orbs */}
-    <div style={{ position: "absolute", top: -80, left: -60, width: 280, height: 280, borderRadius: "50%", background: `radial-gradient(circle, ${cfg.faint} 0%, transparent 65%)`, filter: "blur(12px)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", bottom: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: `radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)`, pointerEvents: "none" }} />
-    {/* Dot grid */}
-    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
-
-    <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem 1.5rem" }}>
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem" }}>
 
       {/* Back button + breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
@@ -320,16 +314,14 @@ const TurnoHero: React.FC<{
           style={{
             display: "flex", alignItems: "center", justifyContent: "center",
             width: 34, height: 34, borderRadius: 11,
-            background: "var(--color-glass-medium)", border: "1px solid rgba(255,255,255,0.1)",
-            color: "rgba(255,255,255,0.7)", cursor: "pointer",
+            background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)",
+            color: "var(--color-fg-primary)", cursor: "pointer",
             flexShrink: 0,
           }}
         >
           {Ico.back()}
         </button>
-        <div>
-          <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(255,255,255,0.35)" }}>Turnos</span>
-        </div>
+        <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: C.fgMuted }}>Turnos</span>
       </div>
 
       {/* Status badge row */}
@@ -340,21 +332,20 @@ const TurnoHero: React.FC<{
           background: cfg.faint, border: `1px solid ${cfg.border}`,
         }}>
           {isLive && <span className="live-pulse-dot" style={{ background: cfg.color }} />}
-          <span style={{ fontSize: "0.58rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.14em", color: cfg.color }}>
+          <span style={{ fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: cfg.color }}>
             {cfg.label}
           </span>
         </span>
       </div>
 
-      {/* Turno number — the hero element */}
+      {/* Turno number */}
       <p style={{
         fontFamily: "monospace",
-        fontSize: "clamp(3rem, 12vw, 4.5rem)",
+        fontSize: "clamp(2.8rem, 12vw, 4rem)",
         fontWeight: 900,
         letterSpacing: "-0.05em",
         lineHeight: 1,
         color: cfg.color,
-        textShadow: `0 0 50px ${cfg.glow}`,
       }}>
         #{pad(turno.numero)}
       </p>
@@ -364,11 +355,9 @@ const TurnoHero: React.FC<{
         <span style={{ color: cfg.color, opacity: 0.7 }}>{Ico.ship()}</span>
         <div>
           <p style={{ fontSize: "0.9375rem", fontWeight: 700, color: "var(--color-fg-primary)" }}>{shipCode}</p>
-          <p style={{ fontSize: "0.65rem", color: "var(--color-fg-muted)", marginTop: 2 }}>Atención #{turno.atencionId}</p>
+          <p style={{ fontSize: "0.6875rem", color: "var(--color-fg-muted)", marginTop: 2 }}>Atención #{turno.atencionId}</p>
         </div>
       </div>
-
-      <div style={{ marginTop: "1.25rem", height: 1, background: `linear-gradient(90deg, ${cfg.border}, transparent 70%)` }} />
     </div>
   </div>
 );
@@ -407,14 +396,14 @@ const TimelineCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => {
               <div style={{
                 width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
                 background: step.done ? `${step.color}1A` : "var(--color-glass-soft)",
-                border: `2px solid ${step.done ? step.color : "rgba(255,255,255,0.1)"}`,
+                border: `2px solid ${step.done ? step.color : "var(--color-glass-medium)"}`,
                 boxShadow: step.done ? `0 0 12px ${step.color}55` : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 position: "relative", zIndex: 1,
               }}>
                 {step.done
                   ? <span style={{ color: step.color }}>{Ico.check(12)}</span>
-                  : <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
+                  : <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-fg-disabled)" }} />
                 }
               </div>
 
@@ -461,7 +450,7 @@ const InfoCard: React.FC<{ turno: TurnoItem; guiaName: string; shipCode: string 
           <div key={row.label} style={{
             display: "flex", alignItems: "center", gap: 10,
             padding: "10px 12px", borderRadius: 12,
-            background: "rgba(255,255,255,0.025)",
+            background: "var(--color-glass-subtle)",
           }}>
             <div style={{
               width: 30, height: 30, borderRadius: 9, flexShrink: 0,
@@ -472,7 +461,7 @@ const InfoCard: React.FC<{ turno: TurnoItem; guiaName: string; shipCode: string 
               {row.icon}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: C.fgMuted }}>{row.label}</p>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: C.fgMuted }}>{row.label}</p>
               <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: row.color ?? C.fgPrimary, marginTop: 1 }} className="truncate">{row.value}</p>
             </div>
           </div>
@@ -530,7 +519,7 @@ const CancelForm: React.FC<{
     border: `1px solid ${C.dangerBorder}`,
     borderTop: `2px solid ${C.danger}`,
     padding: "1.25rem",
-    boxShadow: `0 12px 32px rgba(244,63,94,0.16)`,
+    boxShadow: `0 12px 32px var(--color-danger-soft)`,
   }}>
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1rem" }}>
       <span style={{ color: C.danger }}>{Ico.trash()}</span>
@@ -557,9 +546,9 @@ const CancelForm: React.FC<{
       <ActionBtn
         label="Confirmar"
         color={C.danger}
-        bg="rgba(244,63,94,0.15)"
+        bg={C.dangerFaint}
         border={C.dangerBorder}
-        glow="rgba(244,63,94,0.3)"
+        glow="var(--color-danger-glow)"
         isLoading={isLoading}
         onClick={onConfirm}
         icon={Ico.trash()}
@@ -568,7 +557,7 @@ const CancelForm: React.FC<{
         label="Volver"
         color="var(--color-fg-secondary)"
         bg="var(--color-glass-soft)"
-        border="rgba(255,255,255,0.1)"
+        border="var(--color-glass-medium)"
         glow="transparent"
         disabled={isLoading}
         onClick={onCancel}
@@ -594,8 +583,8 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Tomar turno"
           color="white"
-          bg="linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 55%, var(--color-primary-dark) 100%)"
-          border="rgba(255,255,255,0.12)"
+          bg="var(--color-primary)"
+          border="var(--color-primary)"
           glow={C.violetGlow}
           isLoading={p.isPendingClaim}
           disabled={p.isBusy}
@@ -608,8 +597,8 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Registrar Check-in"
           color="white"
-          bg="linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 55%, var(--color-accent) 100%)"
-          border="rgba(255,255,255,0.12)"
+          bg="var(--color-accent)"
+          border="var(--color-accent)"
           glow={C.amberGlow}
           isLoading={p.isPendingCheckIn}
           disabled={p.isBusy}
@@ -622,8 +611,8 @@ const ActionBar: React.FC<{
         <ActionBtn
           label="Registrar Check-out"
           color="white"
-          bg="linear-gradient(135deg, var(--color-success) 0%, var(--color-success) 55%, var(--color-success) 100%)"
-          border="rgba(255,255,255,0.12)"
+          bg="var(--color-success)"
+          border="var(--color-success)"
           glow="var(--color-success-soft)"
           isLoading={p.isPendingCheckOut}
           disabled={p.isBusy}
@@ -639,7 +628,7 @@ const ActionBar: React.FC<{
               label="Desasignar"
               color={C.fgSecondary}
               bg="var(--color-glass-soft)"
-              border="rgba(255,255,255,0.1)"
+              border="var(--color-glass-medium)"
               glow="transparent"
               isLoading={p.isPendingUnassign}
               disabled={p.isBusy}
@@ -652,7 +641,7 @@ const ActionBar: React.FC<{
               label="No-show"
               color={C.fgSecondary}
               bg="var(--color-glass-soft)"
-              border="rgba(255,255,255,0.1)"
+              border="var(--color-glass-medium)"
               glow="transparent"
               isLoading={p.isPendingNoShow}
               disabled={p.isBusy}
@@ -711,8 +700,8 @@ const ActionBtn: React.FC<{
       borderRadius: solid ? 18 : 14,
       background: (disabled || isLoading) && !solid ? "var(--color-glass-subtle)" : bg,
       border: `1px solid ${(disabled || isLoading) ? "var(--color-glass-medium)" : border}`,
-      boxShadow: (disabled || isLoading) || !solid ? "none" : `0 8px 24px ${glow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
-      color: (disabled || isLoading) && !solid ? "rgba(255,255,255,0.25)" : color,
+      boxShadow: "none",
+      color: (disabled || isLoading) && !solid ? "var(--color-fg-disabled)" : color,
       fontSize: "0.875rem", fontWeight: 700,
       cursor: (disabled || isLoading) ? "not-allowed" : "pointer",
       width: "100%",

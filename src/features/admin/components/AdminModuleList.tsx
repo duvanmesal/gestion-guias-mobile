@@ -24,22 +24,22 @@ const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
     {/* Section header */}
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, padding: "0 2px" }}>
       <h2 style={{
-        fontSize: 11, fontWeight: 700, color: "var(--color-fg-muted)",
-        textTransform: "uppercase", letterSpacing: "0.13em",
+        fontSize: "0.6875rem", fontWeight: 700, color: "var(--color-fg-muted)",
+        textTransform: "uppercase", letterSpacing: "0.1em",
       }}>
         {title}
       </h2>
-      <span style={{ fontSize: 11, color: "var(--color-fg-muted)" }}>
+      <span style={{ fontSize: "0.6875rem", color: "var(--color-fg-muted)" }}>
         {items.length} módulos
       </span>
     </div>
 
     {/* List card */}
     <div style={{
-      background: "#FFFFFF",
+      background: "var(--color-bg-elevated)",
       borderRadius: 20,
-      border: "1px solid rgba(0,0,0,0.07)",
-      boxShadow: "0 2px 16px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03)",
+      border: "1px solid var(--color-glass-medium)",
+      boxShadow: "0 1px 3px var(--color-shadow-sm)",
       overflow: "hidden",
       padding: "0 18px",
     }}>
@@ -56,7 +56,7 @@ const AdminModuleList: React.FC<AdminModuleListProps> = ({ title, items }) => (
             icon={item.icon}
           />
           {i < items.length - 1 && (
-            <div style={{ height: 1, background: "rgba(0,0,0,0.05)", marginLeft: 60 }} />
+            <div style={{ height: 1, background: "var(--color-glass-soft)", marginLeft: 60 }} />
           )}
         </div>
       ))}

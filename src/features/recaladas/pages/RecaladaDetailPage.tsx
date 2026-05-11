@@ -18,9 +18,9 @@ import type { RecaladaAtencionItem, RecaladaItem, RecaladaOperationalStatus } fr
 ───────────────────────────────────────────── */
 const C = {
   cyan:         "var(--color-info)",
-  cyanFaint:    "rgba(56,189,248,0.10)",
-  cyanBorder:   "rgba(56,189,248,0.26)",
-  cyanGlow:     "rgba(56,189,248,0.42)",
+  cyanFaint:    "var(--color-info-soft)",
+  cyanBorder:   "var(--color-info-border)",
+  cyanGlow:     "var(--color-info-glow)",
   amber:        "var(--color-accent)",
   amberFaint:   "var(--color-accent-glow)",
   amberBorder:  "var(--color-accent-glow)",
@@ -31,8 +31,8 @@ const C = {
   tealGlow:     "var(--color-success-soft)",
   danger:       "var(--color-danger)",
   dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "rgba(244,63,94,0.26)",
-  dangerGlow:   "rgba(244,63,94,0.32)",
+  dangerBorder: "var(--color-danger-border)",
+  dangerGlow:   "var(--color-danger-glow)",
   violet:       "var(--color-primary)",
   violetFaint:  "var(--color-primary-glow)",
   violetBorder: "var(--color-primary-glow)",
@@ -170,50 +170,44 @@ const RecaladaDetailPage: React.FC = () => {
       <IonContent scrollY={true}>
         <div style={{ minHeight: "100vh", background: C.bg, paddingBottom: "1.5rem" }}>
 
-          {/* ── Hero ── */}
-          <div className="relative overflow-hidden" style={{
-            background: "var(--gradient-hero-main) 100%)",
-            borderBottom: `1px solid ${cfg.border}`,
+          {/* ── Page Header ── */}
+          <div style={{
+            background: "var(--color-bg-elevated)",
+            borderBottom: "1px solid var(--color-glass-medium)",
           }}>
-            <div style={{ position: "absolute", top: -80, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${cfg.faint} 0%, transparent 65%)`, filter: "blur(14px)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", bottom: -40, right: -30, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(56,189,248,0.04) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
-
-            <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem 1.5rem" }}>
+            <div style={{ maxWidth: 480, margin: "0 auto", padding: "1.5rem 1.25rem" }}>
               {/* Back */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
-                <button type="button" onClick={() => history.goBack()} style={{ width: 34, height: 34, borderRadius: 11, background: "var(--color-glass-medium)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <button type="button" onClick={() => history.goBack()} style={{ width: 34, height: 34, borderRadius: 11, background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)", color: "var(--color-fg-primary)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                   {Ico.back()}
                 </button>
-                <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(255,255,255,0.32)" }}>Recaladas</span>
+                <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: C.fgMuted }}>Recaladas</span>
               </div>
 
               {/* Status badge */}
               <div style={{ marginBottom: "0.875rem" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 9999, padding: "4px 11px", background: cfg.faint, border: `1px solid ${cfg.border}` }}>
                   {isLive && <span className="live-pulse-dot" style={{ background: cfg.color }} />}
-                  <span style={{ fontSize: "0.575rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.14em", color: cfg.color }}>{cfg.label}</span>
+                  <span style={{ fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: cfg.color }}>{cfg.label}</span>
                 </span>
               </div>
 
-              {/* Ship name — hero element */}
-              <h1 style={{ fontSize: "clamp(1.6rem, 7vw, 2.4rem)", fontWeight: 900, color: C.fg, letterSpacing: "-0.025em", lineHeight: 1.05 }}>
+              {/* Ship name */}
+              <h1 style={{ fontSize: "clamp(1.5rem, 7vw, 2.2rem)", fontWeight: 800, color: C.fg, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
                 {recalada.buque.nombre}
               </h1>
 
               {/* Code + country */}
               <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, padding: "5px 10px", background: "var(--color-glass-soft)", border: "1px solid var(--color-glass-medium)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, padding: "5px 10px", background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)" }}>
                   <span style={{ color: cfg.color }}>{Ico.hash()}</span>
-                  <span style={{ fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700, color: cfg.color }}>{recalada.codigoRecalada}</span>
+                  <span style={{ fontFamily: "monospace", fontSize: "0.8125rem", fontWeight: 700, color: cfg.color }}>{recalada.codigoRecalada}</span>
                 </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, padding: "5px 10px", background: "var(--color-glass-soft)", border: "1px solid var(--color-glass-medium)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, padding: "5px 10px", background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)" }}>
                   <span style={{ color: C.fgMuted }}>{Ico.globe()}</span>
-                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: C.fgSec }}>{recalada.paisOrigen.codigo} · {recalada.paisOrigen.nombre}</span>
+                  <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: C.fgSec }}>{recalada.paisOrigen.codigo} · {recalada.paisOrigen.nombre}</span>
                 </span>
               </div>
-
-              <div style={{ marginTop: "1.25rem", height: 1, background: `linear-gradient(90deg, ${cfg.border}, transparent 70%)` }} />
             </div>
           </div>
 
@@ -247,7 +241,7 @@ const RecaladaDetailPage: React.FC = () => {
             {recalada.cancelReason && (
               <div className="animate-fade-up" style={{ animationDelay: "140ms", animationFillMode: "backwards", marginTop: "1rem" }}>
                 <div style={{ borderRadius: 16, padding: "12px 14px", background: C.dangerFaint, border: `1px solid ${C.dangerBorder}` }}>
-                  <p style={{ fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: C.danger, marginBottom: 5 }}>Motivo de cancelación</p>
+                  <p style={{ fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: C.danger, marginBottom: 5 }}>Motivo de cancelación</p>
                   <p style={{ fontSize: "0.8125rem", color: C.fgSec, lineHeight: 1.55 }}>{recalada.cancelReason}</p>
                 </div>
               </div>
@@ -257,7 +251,7 @@ const RecaladaDetailPage: React.FC = () => {
             {recalada.observaciones && (
               <div className="animate-fade-up" style={{ animationDelay: "160ms", animationFillMode: "backwards", marginTop: "1rem" }}>
                 <div style={{ borderRadius: 16, padding: "12px 14px", background: C.violetFaint, border: `1px solid ${C.violetBorder}` }}>
-                  <p style={{ fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: C.violet, marginBottom: 5 }}>Observaciones</p>
+                  <p style={{ fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: C.violet, marginBottom: 5 }}>Observaciones</p>
                   <p style={{ fontSize: "0.8125rem", color: C.fgSec, lineHeight: 1.55 }}>{recalada.observaciones}</p>
                 </div>
               </div>
@@ -298,7 +292,7 @@ const RecaladaDetailPage: React.FC = () => {
             {/* ── Cancel form ── */}
             {showCancel && (
               <div className="animate-fade-up" style={{ marginTop: "1rem" }}>
-                <div style={{ borderRadius: 20, background: "var(--color-bg-elevated)", border: `1px solid ${C.dangerBorder}`, borderTop: `2px solid ${C.danger}`, padding: "1.25rem", boxShadow: `0 12px 32px rgba(244,63,94,0.14)` }}>
+                <div style={{ borderRadius: 20, background: "var(--color-bg-elevated)", border: `1px solid ${C.dangerBorder}`, borderTop: `2px solid ${C.danger}`, padding: "1.25rem", boxShadow: `0 12px 32px var(--color-danger-soft)` }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.875rem" }}>
                     <span style={{ color: C.danger }}>{Ico.cancel()}</span>
                     <p style={{ fontSize: "0.875rem", fontWeight: 800, color: C.danger }}>Cancelar recalada</p>
@@ -312,7 +306,7 @@ const RecaladaDetailPage: React.FC = () => {
                   />
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
                     <ActionBtn label="Confirmar" color={C.danger} bg={C.dangerFaint} border={C.dangerBorder} glow="transparent" isLoading={cancel.isPending} onClick={() => void handleCancel()} />
-                    <ActionBtn label="Volver" color={C.fgSec} bg="var(--color-glass-soft)" border="rgba(255,255,255,0.1)" glow="transparent" disabled={cancel.isPending} onClick={() => { setShowCancel(false); setCancelReason(""); setActionError(null); }} />
+                    <ActionBtn label="Volver" color={C.fgSec} bg="var(--color-glass-soft)" border="var(--color-glass-medium)" glow="transparent" disabled={cancel.isPending} onClick={() => { setShowCancel(false); setCancelReason(""); setActionError(null); }} />
                   </div>
                 </div>
               </div>
@@ -322,10 +316,10 @@ const RecaladaDetailPage: React.FC = () => {
             {!showCancel && hasActions && (
               <div className="animate-fade-up" style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: 9 }}>
                 {canArrive && (
-                  <ActionBtn label="Marcar llegada" color="white" bg="linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 55%, var(--color-accent) 100%)" border="rgba(255,255,255,0.12)" glow={C.amberGlow} isLoading={arrive.isPending} disabled={isBusy} onClick={() => void handleArrive()} icon={Ico.arrive()} solid />
+                  <ActionBtn label="Marcar llegada" color="white" bg="var(--color-accent)" border="var(--color-accent)" glow={C.amberGlow} isLoading={arrive.isPending} disabled={isBusy} onClick={() => void handleArrive()} icon={Ico.arrive()} solid />
                 )}
                 {canDepart && (
-                  <ActionBtn label="Marcar salida" color="white" bg="linear-gradient(135deg, var(--color-success) 0%, var(--color-success) 55%, var(--color-success) 100%)" border="rgba(255,255,255,0.12)" glow={C.tealGlow} isLoading={depart.isPending} disabled={isBusy} onClick={() => void handleDepart()} icon={Ico.depart()} solid />
+                  <ActionBtn label="Marcar salida" color="white" bg="var(--color-success)" border="var(--color-success)" glow={C.tealGlow} isLoading={depart.isPending} disabled={isBusy} onClick={() => void handleDepart()} icon={Ico.depart()} solid />
                 )}
                 {(canEdit || canCancel || canDelete) && (
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${[canEdit, canCancel, canDelete].filter(Boolean).length}, 1fr)`, gap: 9 }}>
@@ -336,7 +330,7 @@ const RecaladaDetailPage: React.FC = () => {
                       <ActionBtn label="Cancelar" color={C.danger} bg={C.dangerFaint} border={C.dangerBorder} glow="transparent" disabled={isBusy} onClick={() => setShowCancel(true)} icon={Ico.cancel()} />
                     )}
                     {canDelete && (
-                      <ActionBtn label="Eliminar" color={C.fgSec} bg="var(--color-glass-soft)" border="rgba(255,255,255,0.1)" glow="transparent" isLoading={deleteRec.isPending} disabled={isBusy} onClick={() => void handleDelete()} icon={Ico.trash()} />
+                      <ActionBtn label="Eliminar" color={C.fgSec} bg="var(--color-glass-soft)" border="var(--color-glass-medium)" glow="transparent" isLoading={deleteRec.isPending} disabled={isBusy} onClick={() => void handleDelete()} icon={Ico.trash()} />
                     )}
                   </div>
                 )}
@@ -380,14 +374,14 @@ const OperationalTimeline: React.FC<{ recalada: RecaladaItem }> = ({ recalada })
               <div style={{
                 width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
                 background: step.done ? `${step.color}1A` : "var(--color-glass-soft)",
-                border: `2px solid ${step.done ? step.color : "rgba(255,255,255,0.1)"}`,
+                border: `2px solid ${step.done ? step.color : "var(--color-glass-medium)"}`,
                 boxShadow: step.done ? `0 0 14px ${step.color}55` : "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 position: "relative", zIndex: 1,
               }}>
                 {step.done
                   ? <span style={{ color: step.color }}>{Ico.check(11)}</span>
-                  : <span style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
+                  : <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-fg-disabled)" }} />
                 }
               </div>
               <div style={{ paddingTop: 4 }}>
@@ -424,7 +418,7 @@ const InfoCard: React.FC<{ recalada: RecaladaItem; supervisorName: string }> = (
       <SectionLabel title="Detalle operativo" color={C.amber} />
       <div style={{ marginTop: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         {rows.map((row) => (
-          <div key={row.label} style={{ borderRadius: 12, padding: "10px 11px", background: "rgba(255,255,255,0.025)" }}>
+          <div key={row.label} style={{ borderRadius: 12, padding: "10px 11px", background: "var(--color-glass-subtle)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
               <span style={{ color: C.amber, opacity: 0.7 }}>{row.icon}</span>
               <p style={{ fontSize: "0.565rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: C.fgMuted }}>{row.label}</p>
@@ -479,7 +473,7 @@ const AtencionesCard: React.FC<{
         <p style={{ fontSize: "0.72rem", color: C.fgMuted, textAlign: "center" }}>No hay atenciones asociadas aún.</p>
         {canAdd && (
           <button type="button" onClick={() => onNavigate(`/atenciones/nueva?recaladaId=${recaladaId}`)}
-            style={{ marginTop: 4, borderRadius: 12, padding: "9px 18px", background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)", border: "1px solid rgba(255,255,255,0.12)", color: "white", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", boxShadow: `0 6px 18px ${C.violetGlow}` }}>
+            style={{ marginTop: 4, borderRadius: 12, padding: "9px 18px", background: "var(--color-primary)", border: "none", color: "white", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}>
             Crear atención
           </button>
         )}
@@ -495,12 +489,12 @@ const AtencionesCard: React.FC<{
           return (
             <button key={at.id} type="button" onClick={() => onNavigate(`/atenciones/${at.id}`)}
               className="w-full text-left transition-all active:scale-[0.98]"
-              style={{ borderRadius: 15, padding: "11px 13px", background: "rgba(255,255,255,0.025)", border: `1px solid var(--color-glass-medium)`, borderLeft: `3px solid ${atOpCfg.color}`, display: "block" }}>
+              style={{ borderRadius: 15, padding: "11px 13px", background: "var(--color-glass-subtle)", border: `1px solid var(--color-glass-medium)`, borderLeft: `3px solid ${atOpCfg.color}`, display: "block" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
                 <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: C.fg }}>Atención #{at.id}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                   <span style={{ display: "inline-flex", borderRadius: 9999, padding: "2px 8px", background: atOpCfg.faint, border: `1px solid ${atOpCfg.border}`, fontSize: "0.565rem", fontWeight: 700, color: atOpCfg.color }}>{at.operationalStatus}</span>
-                  <span style={{ color: "rgba(255,255,255,0.2)" }}>{Ico.chevron()}</span>
+                  <span style={{ color: "var(--color-fg-disabled)" }}>{Ico.chevron()}</span>
                 </div>
               </div>
               <p style={{ fontSize: "0.65rem", color: C.fgMuted, marginBottom: 8 }}>{shortDt(at.fechaInicio)} → {shortDt(at.fechaFin)}</p>
@@ -525,7 +519,7 @@ const AtencionesCard: React.FC<{
 const SectionLabel: React.FC<{ title: string; color: string }> = ({ title, color }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
     <div style={{ width: 3, height: 13, borderRadius: 2, background: color, opacity: 0.9, flexShrink: 0 }} />
-    <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color }}>{title}</span>
+    <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color }}>{title}</span>
     <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${color}30, transparent)` }} />
   </div>
 );
@@ -545,8 +539,8 @@ const ActionBtn: React.FC<{
       borderRadius: solid ? 18 : 13,
       background: (disabled || isLoading) && !solid ? "var(--color-glass-subtle)" : bg,
       border: `1px solid ${(disabled || isLoading) ? "var(--color-glass-medium)" : border}`,
-      boxShadow: (disabled || isLoading) || !solid ? "none" : `0 8px 24px ${glow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
-      color: (disabled || isLoading) && !solid ? "rgba(255,255,255,0.25)" : color,
+      boxShadow: "none",
+      color: (disabled || isLoading) && !solid ? "var(--color-fg-disabled)" : color,
       fontSize: "0.875rem", fontWeight: 700,
       cursor: (disabled || isLoading) ? "not-allowed" : "pointer",
       width: "100%",

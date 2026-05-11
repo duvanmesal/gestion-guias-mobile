@@ -78,8 +78,8 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
             display: "flex",
             alignItems: "center",
             gap: 10,
-            background: "rgba(239,68,68,0.06)",
-            border: "1px solid rgba(239,68,68,0.2)",
+            background: "var(--color-danger-soft)",
+            border: "1px solid var(--color-danger-border)",
             borderRadius: 14,
             padding: "12px 16px",
           }}
@@ -87,17 +87,17 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           <svg style={{ width: 16, height: 16, color: "var(--color-danger)", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span style={{ fontSize: 13, color: "var(--color-danger)", fontWeight: 500 }}>{error}</span>
+          <span style={{ fontSize: "0.8125rem", color: "var(--color-danger)", fontWeight: 500 }}>{error}</span>
         </div>
       )}
 
       {/* Fields card */}
       <div
         style={{
-          background: "#FFFFFF",
+          background: "var(--color-bg-elevated)",
           borderRadius: 20,
-          border: "1px solid rgba(0,0,0,0.07)",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
+          border: "1px solid var(--color-glass-medium)",
+          boxShadow: "var(--shadow-neu-raised)",
           padding: "20px",
           display: "flex",
           flexDirection: "column",
@@ -106,7 +106,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
       >
         <p
           style={{
-            fontSize: 11,
+            fontSize: "0.6875rem",
             fontWeight: 600,
             color: "var(--color-fg-muted)",
             textTransform: "uppercase",
@@ -155,7 +155,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           <p
             style={{
               textAlign: "center",
-              fontSize: 12,
+              fontSize: "0.75rem",
               color: "var(--color-fg-muted)",
               margin: 0,
             }}
@@ -172,7 +172,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
             background: "none",
             border: "none",
             padding: "10px",
-            fontSize: 14,
+            fontSize: "0.875rem",
             fontWeight: 500,
             color: "var(--color-fg-secondary)",
             cursor: isLoading ? "not-allowed" : "pointer",
@@ -208,7 +208,7 @@ const FormField = ({
       <label
         htmlFor={id}
         style={{
-          fontSize: 12,
+          fontSize: "0.75rem",
           fontWeight: 500,
           color: "var(--color-fg-secondary)",
         }}
@@ -222,17 +222,17 @@ const FormField = ({
         onBlur={() => setFocused(false)}
         style={{
           width: "100%",
-          background: error ? "rgba(239,68,68,0.03)" : "var(--color-bg-base)",
+          background: error ? "var(--color-danger-soft)" : "var(--color-bg-base)",
           border: `1.5px solid ${
             error
-              ? "rgba(239,68,68,0.5)"
+              ? "var(--color-danger)"
               : focused
               ? "var(--color-primary)"
-              : "rgba(0,0,0,0.1)"
+              : "var(--color-input-border)"
           }`,
           borderRadius: 12,
           padding: "12px 14px",
-          fontSize: 15,
+          fontSize: "0.9375rem",
           color: "var(--color-fg-primary)",
           outline: "none",
           transition: "border-color 0.15s",
@@ -244,7 +244,7 @@ const FormField = ({
       {error && (
         <p
           style={{
-            fontSize: 11,
+            fontSize: "0.6875rem",
             color: "var(--color-danger)",
             margin: 0,
             display: "flex",
@@ -270,12 +270,12 @@ const SaveButton: React.FC<{ isDirty: boolean; isLoading: boolean }> = ({ isDirt
     disabled={isLoading || !isDirty}
     style={{
       width: "100%",
-      background: isDirty && !isLoading ? "var(--color-primary)" : "rgba(37,99,235,0.35)",
-      color: "#FFFFFF",
+      background: isDirty && !isLoading ? "var(--color-primary)" : "var(--color-primary-glow)",
+      color: "white",
       border: "none",
       borderRadius: 14,
       padding: "15px 20px",
-      fontSize: 15,
+      fontSize: "0.9375rem",
       fontWeight: 600,
       cursor: isDirty && !isLoading ? "pointer" : "not-allowed",
       display: "flex",

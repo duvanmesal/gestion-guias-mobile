@@ -186,38 +186,14 @@ const VerifyEmailPage: React.FC = () => {
   return (
     <IonPage className="premium-page">
       <IonContent scrollY={true}>
-        <div className="relative min-h-screen overflow-hidden" style={{ background: "var(--color-bg-base)" }}>
-          {/* Background orbs */}
-          <div
-            className="orb orb-primary animate-float-orb"
-            style={{ width: 280, height: 280, top: "-8%", left: "-15%" }}
-          />
-          <div
-            className="orb orb-accent animate-float-orb-delayed"
-            style={{ width: 220, height: 220, bottom: "12%", right: "-10%" }}
-          />
-          <div
-            className="orb orb-primary"
-            style={{
-              width: 140,
-              height: 140,
-              top: "35%",
-              right: "8%",
-              opacity: 0.4,
-              animation: "float-orb 16s ease-in-out infinite",
-              animationDelay: "-8s",
-            }}
-          />
-
-          {/* Main content */}
-          <div className="relative z-10 flex flex-col min-h-screen px-5 py-10 safe-area-inset">
+        <div className="min-h-screen" style={{ background: "var(--color-bg-base)" }}>
+          <div className="flex flex-col min-h-screen px-5 py-10 safe-area-inset">
             {/* Header */}
             <div className="text-center mb-6 animate-fade-up">
               <div
                 className="mx-auto mb-4 w-14 h-14 rounded-xl flex items-center justify-center"
                 style={{
                   background: "var(--color-primary-soft)",
-                  boxShadow: "0 0 20px var(--color-primary-glow)",
                 }}
               >
                 <svg
@@ -249,8 +225,8 @@ const VerifyEmailPage: React.FC = () => {
               <div
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{
-                  background: "var(--color-bg-glass)",
-                  border: "1px solid var(--color-border-glass)",
+                  background: "var(--color-glass-subtle)",
+                  border: "1px solid var(--color-glass-medium)",
                 }}
               >
                 <svg

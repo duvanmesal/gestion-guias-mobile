@@ -71,21 +71,17 @@ const ForgotPasswordPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent scrollY={false} fullscreen>
-        <div className="relative min-h-screen w-full overflow-hidden flex flex-col"
+        <div className="min-h-screen w-full flex flex-col"
           style={{ background: "var(--color-bg-base)" }}>
 
-          {/* Background orb */}
-          <div className="orb orb-primary animate-float-orb"
-            style={{ width: 340, height: 340, top: "-12%", left: "50%", transform: "translateX(-50%)", opacity: 0.45 }} />
-
-          <div className="relative z-10 flex flex-1 flex-col items-center px-5 pt-14 pb-8 safe-area-inset">
+          <div className="flex flex-1 flex-col items-center px-5 pt-14 pb-8 safe-area-inset">
 
             {/* Back button */}
             <div className="w-full max-w-[380px] flex items-center gap-2.5 mb-8 animate-fade-up">
               <button
                 onClick={() => history.replace("/login")}
                 className="flex h-10 w-10 items-center justify-center rounded-[14px] transition-all active:scale-95"
-                style={{ background: "var(--color-bg-glass)", border: "1px solid var(--color-border-glow)" }}
+                style={{ background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-medium)" }}
               >
                 <BackArrow />
               </button>
@@ -98,15 +94,9 @@ const ForgotPasswordPage: React.FC = () => {
               /* ── Success state ── */
               <div className="w-full max-w-[380px] animate-fade-up">
                 <div className="auth-card px-6 pt-8 pb-7 flex flex-col items-center text-center gap-6">
-                  <div className="relative">
-                    <div className="logo-glow-ring" style={{ inset: "-10px" }} />
-                    <div className="relative flex h-[84px] w-[84px] items-center justify-center rounded-[26px]"
-                      style={{
-                        background: "var(--gradient-primary)",
-                        boxShadow: "0 10px 30px var(--color-primary-glow)",
-                      }}>
-                      <CheckSuccessIcon />
-                    </div>
+                  <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px]"
+                    style={{ background: "var(--gradient-primary)" }}>
+                    <CheckSuccessIcon />
                   </div>
                   <div>
                     <h2 className="text-2xl font-extrabold" style={{ color: "var(--color-fg-primary)" }}>
@@ -126,15 +116,9 @@ const ForgotPasswordPage: React.FC = () => {
               <>
                 {/* Icon + heading */}
                 <div className="flex flex-col items-center text-center gap-4 mb-8 animate-fade-up">
-                  <div className="relative">
-                    <div className="logo-glow-ring" />
-                    <div className="relative flex h-[76px] w-[76px] items-center justify-center rounded-[24px]"
-                      style={{
-                        background: "var(--gradient-primary)",
-                        boxShadow: "0 8px 28px var(--color-primary-glow), inset 0 1px 0 rgba(255,255,255,0.2)",
-                      }}>
-                      <MailOpenIcon />
-                    </div>
+                  <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px]"
+                    style={{ background: "var(--gradient-primary)" }}>
+                    <MailOpenIcon />
                   </div>
                   <div>
                     <h1 className="text-[26px] font-extrabold leading-tight"

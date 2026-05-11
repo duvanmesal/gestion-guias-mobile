@@ -18,48 +18,21 @@ import {
   maskDocumentNumber,
 } from "../utils/accountFormatters";
 
-/* ── Palette ── */
-const P = {
-  violet:       "var(--color-primary)",
-  violetLight:  "var(--color-primary-light)",
-  violetGlow:   "var(--color-primary-glow)",
-  violetFaint:  "var(--color-primary-glow)",
-  violetBorder: "var(--color-primary-glow)",
-  amber:        "var(--color-accent)",
-  amberFaint:   "var(--color-accent-glow)",
-  amberBorder:  "var(--color-accent-glow)",
-  danger:       "var(--color-danger)",
-  dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "var(--color-danger-border)",
-  teal:         "var(--color-success)",
-  tealFaint:    "var(--color-success-soft)",
-  tealBorder:   "var(--color-success-soft)",
-  fg:           "var(--color-fg-primary)",
-  fgSec:        "var(--color-fg-secondary)",
-  fgMuted:      "var(--color-fg-muted)",
-  surface: "var(--color-bg-elevated)",
-};
-
-/* ── Icons ── */
 const Ico = {
   user:    (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
   mail:    (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>,
-  phone:   (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.1a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
-  id:      (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>,
   shield:  (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
   edit:    (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>,
   refresh: (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>,
   logout:  (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>,
   warning: (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
-  check:   (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
   spinner: () => <svg style={{ width: 16, height: 16, animation: "spin 0.8s linear infinite" }} fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.2 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" /><path style={{ opacity: 0.9 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>,
 };
 
-/* ── Role label map ── */
-const ROLE_COLOR: Record<string, { color: string; faint: string; border: string }> = {
-  SUPER_ADMIN: { color: P.amber,  faint: P.amberFaint,  border: P.amberBorder },
-  SUPERVISOR:  { color: P.violet, faint: P.violetFaint, border: P.violetBorder },
-  GUIA:        { color: P.teal,   faint: P.tealFaint,   border: P.tealBorder },
+const ROLE_STYLE: Record<string, { color: string; bg: string }> = {
+  SUPER_ADMIN: { color: "var(--color-accent)",  bg: "var(--color-accent-soft)"  },
+  SUPERVISOR:  { color: "var(--color-primary)", bg: "var(--color-primary-soft)" },
+  GUIA:        { color: "var(--color-success)", bg: "var(--color-success-soft)" },
 };
 
 interface ProfileCardProps {
@@ -77,13 +50,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
   const [localError, setLocalError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  const fullName   = buildFullName(user);
-  const roleLabel  = getRoleLabel(user.role);
-  const verLabel   = getVerificationLabel(user);
-  const profLabel  = getProfileStatusLabel(user.profileStatus);
-  const docLabel   = getDocumentTypeLabel(user.documentType);
-  const docMasked  = maskDocumentNumber(user.documentNumber);
-  const roleStyle  = ROLE_COLOR[user.role] ?? ROLE_COLOR.GUIA;
+  const fullName  = buildFullName(user);
+  const roleLabel = getRoleLabel(user.role);
+  const verLabel  = getVerificationLabel(user);
+  const profLabel = getProfileStatusLabel(user.profileStatus);
+  const docLabel  = getDocumentTypeLabel(user.documentType);
+  const docMasked = maskDocumentNumber(user.documentNumber);
+  const roleStyle = ROLE_STYLE[user.role] ?? ROLE_STYLE.GUIA;
+  const initials  = `${user.nombres?.[0] ?? ""}${user.apellidos?.[0] ?? ""}`.toUpperCase() || fullName.charAt(0).toUpperCase();
+  const disabled  = busy !== null || isRefreshing;
 
   const handleLogout = async () => {
     setLocalError(null);
@@ -123,107 +98,128 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
     }
   };
 
-  const disabled = busy !== null || isRefreshing;
-
   return (
     <>
-      {/* ══ HERO ══ */}
-      <div className="relative overflow-hidden" style={{
-        background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 55%, var(--color-bg-base) 100%)",
-        borderBottom: "1px solid var(--color-primary-glow)",
-      }}>
-        {/* Ambient orbs */}
-        <div style={{ position: "absolute", top: -80, left: -50, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", top: 10, right: -30, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, var(--color-accent-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-        {/* Dot grid */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
-
-        <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "2.5rem 1.25rem 1.75rem" }}>
-          {/* Page label */}
-          <p style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: P.violet, marginBottom: 18 }}>
-            Mi cuenta
-          </p>
-
-          {/* Avatar + name */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{
-              width: 70, height: 70, borderRadius: 22, flexShrink: 0,
-              background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)",
-              boxShadow: `0 8px 28px ${P.violetGlow}, 0 2px 6px rgba(0,0,0,0.05)`,
-              border: "2px solid var(--color-primary-glow)",
+      {/* ══ HEADER ══ */}
+      <div
+        style={{
+          background: "var(--color-bg-elevated)",
+          borderBottom: "1px solid var(--color-border-hairline)",
+          padding: "52px 20px 20px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* Avatar */}
+          <div
+            style={{
+              width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+              background: "var(--color-primary)",
+              border: "1px solid var(--color-primary-active)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "1.65rem", fontWeight: 800, color: "white", letterSpacing: "-0.01em",
-            }}>
-              {fullName.charAt(0).toUpperCase()}
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h1 className="truncate font-extrabold" style={{ fontSize: "1.45rem", color: P.fg, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-                {fullName}
-              </h1>
-              <p className="truncate" style={{ fontSize: "0.72rem", color: P.fgSec, marginTop: 4 }}>
-                {user.email || "Sin correo registrado"}
-              </p>
-
-              {/* Role pill */}
-              <span style={{
-                display: "inline-flex", alignItems: "center",
-                marginTop: 8, borderRadius: 9999, padding: "3px 10px",
-                background: roleStyle.faint, border: `1px solid ${roleStyle.border}`,
-                fontSize: "0.575rem", fontWeight: 800, textTransform: "uppercase",
-                letterSpacing: "0.14em", color: roleStyle.color,
-              }}>
-                {roleLabel}
-              </span>
-            </div>
+              fontSize: "1.25rem", fontWeight: 700, color: "white",
+              letterSpacing: "var(--tracking-tight)",
+            }}
+          >
+            {initials}
           </div>
 
-          {/* Status pills row */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 18 }}>
-            <StatusPill
-              label={user.emailVerifiedAt ? "Verificado" : "No verificado"}
-              tone={user.emailVerifiedAt ? "teal" : "muted"}
-            />
-            <StatusPill
-              label={profLabel}
-              tone={user.profileStatus === "COMPLETE" ? "teal" : "muted"}
-            />
-            {typeof user.activo === "boolean" && (
-              <StatusPill label={user.activo ? "Activo" : "Inactivo"} tone={user.activo ? "teal" : "danger"} />
-            )}
+          {/* Name + email + role */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1
+              className="truncate"
+              style={{
+                margin: 0,
+                fontSize: "var(--text-subhead)",
+                fontWeight: 700,
+                color: "var(--color-fg-primary)",
+                letterSpacing: "var(--tracking-tight)",
+                lineHeight: "var(--leading-tight)",
+              }}
+            >
+              {fullName}
+            </h1>
+            <p
+              className="truncate"
+              style={{
+                margin: "3px 0 0",
+                fontSize: "var(--text-caption)",
+                color: "var(--color-fg-muted)",
+              }}
+            >
+              {user.email || "Sin correo registrado"}
+            </p>
+            <span
+              style={{
+                display: "inline-block", marginTop: 8,
+                borderRadius: 9999, padding: "2px 8px",
+                background: roleStyle.bg,
+                border: `1px solid ${roleStyle.bg}`,
+                fontSize: "var(--text-eyebrow)",
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+                color: roleStyle.color,
+              }}
+            >
+              {roleLabel}
+            </span>
           </div>
 
-          {isRefreshing && (
-            <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6 }}>
-              <span className="animate-spin" style={{ color: P.violet, display: "flex" }}>{Ico.refresh()}</span>
-              <span style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.08em", color: P.violet }}>Actualizando perfil…</span>
-            </div>
+          {/* Refresh button */}
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={disabled}
+              style={{
+                flexShrink: 0, width: 36, height: 36,
+                borderRadius: 10, border: "1px solid var(--color-border-hairline)",
+                background: "var(--color-bg-elevated)", cursor: disabled ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "var(--color-fg-muted)", opacity: disabled ? 0.5 : 1,
+                transition: "background 140ms ease",
+              }}
+            >
+              {isRefreshing ? Ico.spinner() : Ico.refresh()}
+            </button>
           )}
+        </div>
 
-          <div style={{ height: 1, background: "linear-gradient(90deg, var(--color-primary-glow), transparent)", marginTop: 20 }} />
+        {/* Status pills */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 }}>
+          <StatusPill
+            label={user.emailVerifiedAt ? "Verificado" : "No verificado"}
+            tone={user.emailVerifiedAt ? "success" : "neutral"}
+          />
+          <StatusPill
+            label={profLabel}
+            tone={user.profileStatus === "COMPLETE" ? "success" : "neutral"}
+          />
+          {typeof user.activo === "boolean" && (
+            <StatusPill label={user.activo ? "Activo" : "Inactivo"} tone={user.activo ? "success" : "danger"} />
+          )}
         </div>
       </div>
 
-      {/* ══ CONTENT CARDS ══ */}
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "1.25rem 1.25rem 0" }}>
+      {/* ══ CONTENT ══ */}
+      <div style={{ padding: "16px 16px 24px" }}>
 
         {/* Error banner */}
         {localError && (
-          <div className="animate-shake" style={{
-            display: "flex", alignItems: "flex-start", gap: 10,
-            borderRadius: 16, padding: "12px 14px", marginBottom: 14,
-            background: P.dangerFaint, border: `1px solid ${P.dangerBorder}`,
-          }}>
-            <span style={{ color: P.danger, flexShrink: 0, marginTop: 1 }}>{Ico.warning()}</span>
-            <p style={{ fontSize: "0.8125rem", color: "var(--color-danger)", lineHeight: 1.5 }}>{localError}</p>
+          <div
+            style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              borderRadius: 12, padding: "12px 14px", marginBottom: 12,
+              background: "var(--color-danger-soft)", border: "1px solid var(--color-danger-border)",
+            }}
+          >
+            <span style={{ color: "var(--color-danger)", flexShrink: 0, marginTop: 1 }}>{Ico.warning()}</span>
+            <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-danger)", lineHeight: 1.5 }}>{localError}</p>
           </div>
         )}
 
-        {/* Personal info */}
         <InfoSection
           title="Información Personal"
           icon={Ico.user()}
-          color={P.violet}
           items={[
             { label: "Nombres",   value: user.nombres   || "No registrado" },
             { label: "Apellidos", value: user.apellidos || "No registrado" },
@@ -232,22 +228,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
           ]}
         />
 
-        {/* Contact */}
         <InfoSection
           title="Contacto"
           icon={Ico.mail()}
-          color="var(--color-info)"
           items={[
-            { label: "Correo",    value: user.email    || "No registrado" },
-            { label: "Teléfono",  value: user.telefono || "No registrado" },
+            { label: "Correo",   value: user.email    || "No registrado" },
+            { label: "Teléfono", value: user.telefono || "No registrado" },
           ]}
         />
 
-        {/* Account status */}
         <InfoSection
-          title="Estado de Cuenta"
+          title="Estado de cuenta"
           icon={Ico.shield()}
-          color={P.amber}
           items={[
             { label: "Rol",          value: roleLabel },
             { label: "Verificación", value: verLabel },
@@ -258,85 +250,47 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
         <SessionsPanel />
 
         {/* Appearance */}
-        <div className="animate-fade-up" style={{
-          borderRadius: 20, marginBottom: 14,
-          background: P.surface,
-          border: "1px solid var(--color-glass-medium)",
-          overflow: "hidden",
-        }}>
-          <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 3, height: 13, borderRadius: 2, background: isDark ? "var(--color-primary)" : P.amber, opacity: 0.9 }} />
-            <span style={{ color: isDark ? "var(--color-primary)" : P.amber, display: "flex", opacity: 0.85 }}>
-              {isDark ? <MoonIcon /> : <SunIcon />}
-            </span>
-            <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: isDark ? "var(--color-primary)" : P.amber }}>
-              Apariencia
-            </span>
-          </div>
-          <div style={{ padding: "0.875rem 1rem" }}>
+        <SectionCard>
+          <SectionHeader icon={isDark ? <MoonIcon /> : <SunIcon />} title="Apariencia" />
+          <div style={{ padding: "12px 16px" }}>
             <ThemeToggleRow isDark={isDark} onToggle={toggle} />
           </div>
-        </div>
+        </SectionCard>
 
         {/* Actions */}
-        <div className="animate-fade-up" style={{
-          borderRadius: 20, marginBottom: 14,
-          background: P.surface,
-          border: "1px solid var(--color-glass-medium)",
-          overflow: "hidden",
-        }}>
-          <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 3, height: 13, borderRadius: 2, background: P.violet, opacity: 0.9 }} />
-            <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: P.violet }}>Acciones</span>
-          </div>
-
-          <div style={{ padding: "0.875rem 1rem", display: "flex", flexDirection: "column", gap: 10 }}>
+        <SectionCard>
+          <SectionHeader title="Acciones" />
+          <div style={{ padding: "8px 12px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
             <ActionBtn
               label="Editar mis datos"
               icon={Ico.edit()}
-              color={P.violet}
-              faint={P.violetFaint}
-              border={P.violetBorder}
-              shadow={`0 6px 20px ${P.violetGlow}`}
-              gradient="linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)"
               primary
               disabled={disabled}
               onClick={() => history.push("/profile/edit")}
             />
-
             {onRefresh && (
               <ActionBtn
                 label={isRefreshing ? "Recargando…" : "Recargar información"}
                 icon={isRefreshing ? Ico.spinner() : Ico.refresh()}
-                color="var(--color-fg-secondary)"
-                faint="var(--color-glass-soft)"
-                border="var(--color-glass-medium)"
                 disabled={disabled}
                 onClick={onRefresh}
               />
             )}
-
             <ActionBtn
               label={busy === "logout" ? "Cerrando sesión…" : "Cerrar sesión"}
               icon={busy === "logout" ? Ico.spinner() : Ico.logout()}
-              color="var(--color-fg-secondary)"
-              faint="var(--color-glass-soft)"
-              border="var(--color-glass-medium)"
               disabled={disabled}
               onClick={() => void handleLogout()}
             />
-
             <ActionBtn
               label={busy === "logoutAll" ? "Cerrando todas…" : "Cerrar todas las sesiones"}
               icon={busy === "logoutAll" ? Ico.spinner() : Ico.warning()}
-              color={P.danger}
-              faint={P.dangerFaint}
-              border={P.dangerBorder}
+              danger
               disabled={disabled}
               onClick={() => void handleOpenLogoutAll()}
             />
           </div>
-        </div>
+        </SectionCard>
       </div>
 
       <LogoutAllModal
@@ -351,92 +305,144 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
 };
 
 /* ── Shared atoms ── */
-const StatusPill: React.FC<{ label: string; tone: "teal" | "muted" | "danger" }> = ({ label, tone }) => {
-  const styles = {
-    teal:   { color: "var(--color-success)", faint: "var(--color-success-soft)",  border: "var(--color-success-soft)" },
-    danger: { color: "var(--color-danger)", faint: "var(--color-danger-soft)",   border: "var(--color-danger-border)" },
-    muted:  { color: "var(--color-fg-muted)", faint: "var(--color-glass-soft)", border: "var(--color-glass-medium)" },
+
+const StatusPill: React.FC<{ label: string; tone: "success" | "neutral" | "danger" }> = ({ label, tone }) => {
+  const s = {
+    success: { color: "#047857", bg: "var(--color-success-soft)", border: "var(--color-success-border)" },
+    danger:  { color: "var(--color-danger)",  bg: "var(--color-danger-soft)", border: "var(--color-danger-border)" },
+    neutral: { color: "var(--color-fg-secondary)", bg: "var(--color-bg-subtle)", border: "var(--color-border-hairline)" },
   }[tone];
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      borderRadius: 9999, padding: "3px 9px",
-      background: styles.faint, border: `1px solid ${styles.border}`,
-      fontSize: "0.6rem", fontWeight: 700, color: styles.color,
-    }}>
+    <span
+      style={{
+        borderRadius: 9999, padding: "2px 8px",
+        background: s.bg,
+        border: `1px solid ${s.border}`,
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        letterSpacing: "0.02em",
+        color: s.color,
+      }}
+    >
       {label}
     </span>
   );
 };
 
+const SectionCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div
+    style={{
+      borderRadius: 16,
+      marginBottom: 12,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      boxShadow: "var(--shadow-card)",
+      overflow: "hidden",
+    }}
+  >
+    {children}
+  </div>
+);
+
+const SectionHeader: React.FC<{ title: string; icon?: React.ReactElement }> = ({ title, icon }) => (
+  <div
+    style={{
+      padding: "12px 16px",
+      borderBottom: "1px solid var(--color-border-hairline)",
+      display: "flex", alignItems: "center", gap: 8,
+    }}
+  >
+    {icon && <span style={{ color: "var(--color-fg-muted)", display: "flex" }}>{icon}</span>}
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color: "var(--color-fg-secondary)",
+      }}
+    >
+      {title}
+    </span>
+  </div>
+);
+
 const InfoSection: React.FC<{
   title: string;
   icon: React.ReactElement;
-  color: string;
   items: { label: string; value: string }[];
-}> = ({ title, icon, color, items }) => (
-  <div className="animate-fade-up" style={{
-    borderRadius: 20, marginBottom: 14,
-    background: P.surface,
-    border: "1px solid var(--color-glass-medium)",
-    overflow: "hidden",
-  }}>
-    {/* Header */}
-    <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ width: 3, height: 13, borderRadius: 2, background: color, opacity: 0.9 }} />
-      <span style={{ color, display: "flex", opacity: 0.85 }}>{icon}</span>
-      <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color }}>
-        {title}
-      </span>
-    </div>
-
-    {/* Rows */}
-    <div style={{ padding: "0.75rem 1rem" }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {items.map(({ label, value }) => (
-          <div key={label} style={{
+}> = ({ title, icon, items }) => (
+  <SectionCard>
+    <SectionHeader title={title} icon={icon} />
+    <div>
+      {items.map(({ label, value }, i) => (
+        <div
+          key={label}
+          style={{
             display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-            borderRadius: 12, padding: "9px 12px",
-            background: "rgba(255,255,255,0.025)",
-            border: "1px solid var(--color-glass-soft)",
-          }}>
-            <span style={{ fontSize: "0.72rem", color: P.fgMuted, fontWeight: 500, flexShrink: 0 }}>{label}</span>
-            <span className="truncate" style={{ fontSize: "0.8125rem", color: P.fg, fontWeight: 600, textAlign: "right" }}>{value}</span>
-          </div>
-        ))}
-      </div>
+            padding: "11px 16px",
+            borderBottom: i < items.length - 1 ? "1px solid var(--color-border-hairline)" : "none",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "var(--text-caption)",
+              color: "var(--color-fg-muted)",
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
+            {label}
+          </span>
+          <span
+            className="truncate"
+            style={{
+              fontSize: "var(--text-caption)",
+              color: "var(--color-fg-primary)",
+              fontWeight: 600,
+              textAlign: "right",
+            }}
+          >
+            {value}
+          </span>
+        </div>
+      ))}
     </div>
-  </div>
+  </SectionCard>
 );
 
 const ActionBtn: React.FC<{
   label: string;
   icon: React.ReactElement;
-  color: string;
-  faint: string;
-  border: string;
-  shadow?: string;
-  gradient?: string;
   primary?: boolean;
+  danger?: boolean;
   disabled?: boolean;
   onClick: () => void;
-}> = ({ label, icon, color, faint, border, shadow, gradient, primary = false, disabled = false, onClick }) => (
+}> = ({ label, icon, primary = false, danger = false, disabled = false, onClick }) => (
   <button
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="w-full transition-all active:scale-[0.97]"
     style={{
       display: "flex", alignItems: "center", gap: 10,
-      padding: "13px 16px", borderRadius: 16,
-      background: primary && gradient ? gradient : faint,
-      border: `1px solid ${primary ? "rgba(255,255,255,0.12)" : border}`,
-      boxShadow: shadow ?? "none",
-      color: primary ? "white" : color,
-      fontSize: "0.875rem", fontWeight: 700,
+      padding: "11px 14px", borderRadius: 10, width: "100%", textAlign: "left",
+      background: primary
+        ? "var(--color-primary)"
+        : danger
+        ? "var(--color-bg-elevated)"
+        : "var(--color-bg-elevated)",
+      border: primary
+        ? "1px solid var(--color-primary)"
+        : danger
+        ? "1px solid var(--color-danger-border)"
+        : "1px solid var(--color-border-hairline)",
+      color: primary ? "white" : danger ? "var(--color-danger)" : "var(--color-fg-primary)",
+      fontSize: "var(--text-body)",
+      fontWeight: 600,
+      letterSpacing: "var(--tracking-tight)",
       cursor: disabled ? "not-allowed" : "pointer",
       opacity: disabled ? 0.55 : 1,
-      textAlign: "left",
+      transition: "background 140ms ease, border-color 140ms ease",
     }}
   >
     <span style={{ display: "flex", flexShrink: 0 }}>{icon}</span>
@@ -445,7 +451,7 @@ const ActionBtn: React.FC<{
 );
 
 const SunIcon: React.FC = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="5" />
     <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
     <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
@@ -455,7 +461,7 @@ const SunIcon: React.FC = () => (
 );
 
 const MoonIcon: React.FC = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
@@ -464,54 +470,70 @@ const ThemeToggleRow: React.FC<{ isDark: boolean; onToggle: () => void }> = ({ i
   <button
     type="button"
     onClick={onToggle}
-    className="w-full transition-all active:scale-[0.97]"
     style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "12px 14px", borderRadius: 16,
-      background: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(217, 119, 6, 0.07)",
-      border: `1px solid ${isDark ? "rgba(59, 130, 246, 0.2)" : "rgba(217, 119, 6, 0.2)"}`,
+      padding: "10px 12px", borderRadius: 10, width: "100%",
+      background: "var(--color-bg-subtle)",
+      border: "1px solid var(--color-border-hairline)",
       cursor: "pointer",
+      transition: "background 140ms ease",
     }}
   >
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{
-        width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-        background: isDark ? "rgba(59, 130, 246, 0.12)" : "rgba(217, 119, 6, 0.12)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "background 0.3s ease",
-      }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div
+        style={{
+          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          background: "var(--color-bg-elevated)",
+          border: "1px solid var(--color-border-hairline)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}
+      >
         {isDark
-          ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-          : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+          ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+          : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-fg-secondary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
         }
       </div>
-
-      <div>
-        <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--color-fg-primary)", lineHeight: 1.2 }}>
-          {isDark ? "Modo Oscuro" : "Modo Claro"}
+      <div style={{ textAlign: "left" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "var(--text-body)",
+            fontWeight: 600,
+            color: "var(--color-fg-primary)",
+            letterSpacing: "var(--tracking-tight)",
+          }}
+        >
+          {isDark ? "Modo oscuro" : "Modo claro"}
         </p>
-        <p style={{ fontSize: "0.65rem", color: "var(--color-fg-muted)", marginTop: 2 }}>
+        <p
+          style={{
+            margin: "2px 0 0",
+            fontSize: "var(--text-caption)",
+            color: "var(--color-fg-muted)",
+          }}
+        >
           Toca para {isDark ? "activar modo claro" : "activar modo oscuro"}
         </p>
       </div>
     </div>
 
-    {/* Animated pill switch */}
-    <div style={{
-      width: 48, height: 28, borderRadius: 14, flexShrink: 0,
-      background: isDark ? "var(--color-primary)" : "var(--color-glass-medium)",
-      position: "relative",
-      transition: "background 0.3s ease",
-      border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "var(--color-glass-soft)"}`,
-    }}>
-      <div style={{
-        position: "absolute", top: 4,
-        left: isDark ? 22 : 4,
-        width: 18, height: 18, borderRadius: "50%",
-        background: isDark ? "white" : "var(--color-fg-muted)",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-        transition: "left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      }} />
+    {/* Toggle pill */}
+    <div
+      style={{
+        width: 40, height: 22, borderRadius: 11, flexShrink: 0, position: "relative",
+        background: isDark ? "var(--color-primary)" : "var(--color-border-hairline-strong)",
+        transition: "background 0.2s ease",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute", top: 3,
+          left: isDark ? 21 : 3,
+          width: 16, height: 16, borderRadius: "50%",
+          background: "#FFFFFF",
+          transition: "left 0.2s ease",
+        }}
+      />
     </div>
   </button>
 );

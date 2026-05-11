@@ -65,9 +65,9 @@ const EditProfilePage: React.FC = () => {
                 width: 40,
                 height: 40,
                 borderRadius: 12,
-                border: "1px solid rgba(0,0,0,0.08)",
-                background: "#FFFFFF",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                border: "1px solid var(--color-glass-medium)",
+                background: "var(--color-bg-elevated)",
+                boxShadow: "var(--shadow-neu-raised)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -89,19 +89,19 @@ const EditProfilePage: React.FC = () => {
                 width: 44,
                 height: 44,
                 borderRadius: "50%",
-                background: "linear-gradient(140deg, #2563EB 0%, #1D4ED8 100%)",
+                background: "var(--gradient-primary)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: "0 2px 10px rgba(37,99,235,0.25)",
+                boxShadow: "var(--shadow-glow-primary)",
               }}
             >
               <span
                 style={{
-                  fontSize: 15,
+                  fontSize: "0.9375rem",
                   fontWeight: 700,
-                  color: "#FFFFFF",
+                  color: "white",
                   letterSpacing: "0.03em",
                 }}
               >
@@ -114,7 +114,7 @@ const EditProfilePage: React.FC = () => {
               <h1
                 style={{
                   margin: 0,
-                  fontSize: 20,
+                  fontSize: "1.25rem",
                   fontWeight: 700,
                   color: "var(--color-fg-primary)",
                   lineHeight: 1.2,
@@ -125,7 +125,7 @@ const EditProfilePage: React.FC = () => {
               <p
                 style={{
                   margin: "2px 0 0",
-                  fontSize: 12,
+                  fontSize: "0.75rem",
                   color: "var(--color-fg-muted)",
                 }}
               >
@@ -154,10 +154,10 @@ const EditProfilePage: React.FC = () => {
             ) : (
               <div
                 style={{
-                  background: "#FFFFFF",
+                  background: "var(--color-bg-elevated)",
                   borderRadius: 20,
-                  border: "1px solid rgba(0,0,0,0.07)",
-                  boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
+                  border: "1px solid var(--color-glass-medium)",
+                  boxShadow: "var(--shadow-neu-raised)",
                   padding: "32px 20px",
                   textAlign: "center",
                 }}
@@ -170,7 +170,7 @@ const EditProfilePage: React.FC = () => {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p style={{ fontSize: 14, color: "var(--color-fg-secondary)", margin: "0 0 16px" }}>
+                <p style={{ fontSize: "0.875rem", color: "var(--color-fg-secondary)", margin: "0 0 16px" }}>
                   No pude cargar la informacion del perfil.
                 </p>
                 <button
@@ -179,7 +179,7 @@ const EditProfilePage: React.FC = () => {
                   style={{
                     background: "none",
                     border: "none",
-                    fontSize: 14,
+                    fontSize: "0.875rem",
                     fontWeight: 600,
                     color: "var(--color-primary)",
                     cursor: "pointer",

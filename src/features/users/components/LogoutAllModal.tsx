@@ -85,7 +85,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
     >
       <div
         style={{
-          background: "#FFFFFF",
+          background: "var(--color-bg-elevated)",
           borderRadius: "24px 24px 0 0",
           padding: "12px 24px 40px",
           display: "flex",
@@ -101,7 +101,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
             width: 36,
             height: 4,
             borderRadius: 2,
-            background: "rgba(0,0,0,0.12)",
+            background: "var(--color-glass-medium)",
             marginBottom: 24,
           }}
         />
@@ -112,8 +112,8 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
             width: 64,
             height: 64,
             borderRadius: 20,
-            background: "rgba(239,68,68,0.08)",
-            border: "1.5px solid rgba(239,68,68,0.15)",
+            background: "var(--color-danger-soft)",
+            border: "1.5px solid var(--color-danger-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -121,7 +121,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
           }}
         >
           <svg
-            style={{ width: 28, height: 28, color: "#EF4444" }}
+            style={{ width: 28, height: 28, color: "var(--color-danger)" }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -139,7 +139,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
         <h2
           style={{
             margin: 0,
-            fontSize: 20,
+            fontSize: "1.25rem",
             fontWeight: 700,
             color: "var(--color-fg-primary)",
             textAlign: "center",
@@ -153,7 +153,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
         <p
           style={{
             margin: "8px 0 0",
-            fontSize: 13,
+            fontSize: "0.8125rem",
             color: "var(--color-fg-muted)",
             textAlign: "center",
             lineHeight: 1.55,
@@ -191,10 +191,10 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
                 border: `2px solid ${
                   digit
                     ? "var(--color-primary)"
-                    : "rgba(0,0,0,0.12)"
+                    : "var(--color-input-border)"
                 }`,
-                background: digit ? "rgba(37,99,235,0.04)" : "var(--color-bg-base)",
-                fontSize: 22,
+                background: digit ? "var(--color-primary-muted)" : "var(--color-bg-base)",
+                fontSize: "1.375rem",
                 fontWeight: 700,
                 color: "var(--color-fg-primary)",
                 textAlign: "center",
@@ -215,15 +215,15 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(239,68,68,0.06)",
-              border: "1px solid rgba(239,68,68,0.2)",
+              background: "var(--color-danger-soft)",
+              border: "1px solid var(--color-danger-border)",
               borderRadius: 12,
               padding: "10px 14px",
               width: "100%",
             }}
           >
             <svg
-              style={{ width: 15, height: 15, color: "#EF4444", flexShrink: 0 }}
+              style={{ width: 15, height: 15, color: "var(--color-danger)", flexShrink: 0 }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -235,7 +235,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span style={{ fontSize: 13, color: "#EF4444", fontWeight: 500 }}>{error}</span>
+            <span style={{ fontSize: "0.8125rem", color: "var(--color-danger)", fontWeight: 500 }}>{error}</span>
           </div>
         )}
 
@@ -257,13 +257,13 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
             style={{
               width: "100%",
               background: isComplete && !isLoading
-                ? "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)"
-                : "rgba(239,68,68,0.25)",
-              color: "#FFFFFF",
+                ? "var(--gradient-danger)"
+                : "var(--color-danger-soft)",
+              color: "white",
               border: "none",
               borderRadius: 14,
               padding: "15px 20px",
-              fontSize: 15,
+              fontSize: "0.9375rem",
               fontWeight: 600,
               cursor: isComplete && !isLoading ? "pointer" : "not-allowed",
               display: "flex",
@@ -298,7 +298,7 @@ const LogoutAllModal: React.FC<LogoutAllModalProps> = ({
               background: "none",
               border: "none",
               padding: "10px",
-              fontSize: 14,
+              fontSize: "0.875rem",
               fontWeight: 500,
               color: "var(--color-fg-secondary)",
               cursor: isLoading ? "not-allowed" : "pointer",

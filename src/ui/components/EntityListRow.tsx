@@ -16,16 +16,30 @@ const EntityListRow: React.FC<EntityListRowProps> = ({
   title,
 }) => (
   <SurfaceCard
-    className={`flex-row items-center justify-between gap-3 px-3 py-3 ${className}`.trim()}
+    className={`flex-row items-center justify-between gap-3 px-3.5 py-3 ${className}`.trim()}
     radius="lg"
-    variant="inset"
+    variant="raised"
   >
     <div className="min-w-0 flex-1">
-      <div className="truncate text-sm font-semibold text-[var(--color-fg-primary)]">
+      <div
+        className="truncate"
+        style={{
+          fontSize: "var(--text-body)",
+          fontWeight: 600,
+          letterSpacing: "var(--tracking-tight)",
+          color: "var(--color-fg-primary)",
+        }}
+      >
         {title}
       </div>
       {subtitle ? (
-        <div className="mt-0.5 truncate text-[0.6875rem] font-medium text-[var(--color-fg-secondary)]">
+        <div
+          className="mt-0.5 truncate"
+          style={{
+            fontSize: "var(--text-caption)",
+            color: "var(--color-fg-muted)",
+          }}
+        >
           {subtitle}
         </div>
       ) : null}

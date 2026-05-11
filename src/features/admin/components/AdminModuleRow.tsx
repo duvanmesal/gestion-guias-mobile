@@ -12,10 +12,10 @@ interface AdminModuleRowProps {
 }
 
 const TONE: Record<ModuleTone, { color: string; faint: string; border: string }> = {
-  cyan:   { color: "#0284C7", faint: "rgba(2,132,199,0.10)",   border: "rgba(2,132,199,0.20)"   },
-  amber:  { color: "#D97706", faint: "rgba(217,119,6,0.10)",   border: "rgba(217,119,6,0.20)"   },
-  teal:   { color: "#059669", faint: "rgba(5,150,105,0.10)",   border: "rgba(5,150,105,0.20)"   },
-  violet: { color: "#2563EB", faint: "rgba(37,99,235,0.10)",   border: "rgba(37,99,235,0.20)"   },
+  cyan:   { color: "var(--color-info)",    faint: "var(--color-info-soft)",    border: "var(--color-info-border)"    },
+  amber:  { color: "var(--color-accent)",  faint: "var(--color-accent-soft)",  border: "var(--color-accent-border)"  },
+  teal:   { color: "var(--color-success)", faint: "var(--color-success-soft)", border: "var(--color-success-border)" },
+  violet: { color: "var(--color-primary)", faint: "var(--color-primary-soft)", border: "var(--color-border-glow)"    },
 };
 
 const LockIcon = (
@@ -78,8 +78,8 @@ const AdminModuleRow: React.FC<AdminModuleRowProps> = ({
       <div
         style={{
           width: 46, height: 46, borderRadius: 13, flexShrink: 0,
-          background: disabled ? "rgba(0,0,0,0.05)" : t.faint,
-          border: `1px solid ${disabled ? "rgba(0,0,0,0.08)" : t.border}`,
+          background: disabled ? "var(--color-glass-soft)" : t.faint,
+          border: `1px solid ${disabled ? "var(--color-glass-medium)" : t.border}`,
           color: disabled ? "var(--color-fg-disabled)" : t.color,
           display: "flex", alignItems: "center", justifyContent: "center",
         }}
@@ -90,15 +90,15 @@ const AdminModuleRow: React.FC<AdminModuleRowProps> = ({
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap" }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: "var(--color-fg-primary)", lineHeight: 1.2 }}>
+          <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--color-fg-primary)", lineHeight: 1.2 }}>
             {title}
           </span>
           {badge && (
             <span style={{
-              fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-              background: disabled ? "rgba(0,0,0,0.05)" : `${t.color}18`,
+              fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+              background: disabled ? "var(--color-glass-soft)" : t.faint,
               color: disabled ? "var(--color-fg-muted)" : t.color,
-              border: `1px solid ${disabled ? "rgba(0,0,0,0.08)" : `${t.color}30`}`,
+              border: `1px solid ${disabled ? "var(--color-glass-medium)" : t.border}`,
               borderRadius: 999, padding: "2px 6px", flexShrink: 0,
             }}>
               {badge}
@@ -106,7 +106,7 @@ const AdminModuleRow: React.FC<AdminModuleRowProps> = ({
           )}
         </div>
         <p style={{
-          fontSize: 12.5, color: "var(--color-fg-muted)",
+          fontSize: "0.78rem", color: "var(--color-fg-muted)",
           marginTop: 2, lineHeight: 1.4,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>

@@ -12,8 +12,6 @@ export interface SuccessBannerProps {
 const iconWrapStyle: CSSProperties = {
   background: "var(--color-success-soft)",
   border: "1px solid var(--color-success-border)",
-  boxShadow:
-    "inset 0 1px 0 var(--color-glass-medium), 0 8px 18px var(--color-success-soft)",
 };
 
 const SuccessBanner: React.FC<SuccessBannerProps> = ({
@@ -30,7 +28,7 @@ const SuccessBanner: React.FC<SuccessBannerProps> = ({
     <div className="flex min-w-0 items-start gap-3">
       <div
         aria-hidden="true"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[var(--color-success)]"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-[var(--color-success)]"
         style={iconWrapStyle}
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

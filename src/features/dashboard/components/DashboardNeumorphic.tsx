@@ -218,91 +218,147 @@ const SyncBanner: React.FC = () => (
   <div
     className="flex items-center justify-center gap-2 animate-fade-in"
     style={{
-      height: 36,
-      background: `linear-gradient(90deg, ${RAW.primaryRgba(0.08)}, ${RAW.accentRgba(0.06)}, ${RAW.primaryRgba(0.08)})`,
-      borderBottom: `1px solid ${RAW.primaryRgba(0.20)}`,
+      height: 32,
+      background: "var(--color-bg-subtle)",
+      borderBottom: "1px solid var(--color-border-hairline)",
     }}
   >
-    <div className="animate-spin" style={{ color: P.violet }}>{Ico.refresh()}</div>
-    <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: P.violet, letterSpacing: "0.08em" }}>
+    <div className="animate-spin" style={{ color: "var(--color-primary)" }}>{Ico.refresh()}</div>
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        color: "var(--color-fg-secondary)",
+        letterSpacing: "var(--tracking-eyebrow)",
+        textTransform: "uppercase",
+      }}
+    >
       Actualizando datos…
     </span>
   </div>
 );
 
 /* ══════════════════════════════════════════════
-   HERO SHARED ATOMS
+   HERO SHARED ATOMS — Maritime Premium
+   Decoración eliminada: orbs, dot grids y watermarks
+   son no-ops. Mantengo los componentes para no romper
+   call sites; el hero queda limpio, plano e institucional.
 ══════════════════════════════════════════════ */
-const HeroOrb: React.FC<{ top?: number; left?: number; right?: number; bottom?: number; size: number; color: string }> = ({
-  top, left, right, bottom, size, color,
-}) => (
-  <div style={{
-    position: "absolute", top, left, right, bottom,
-    width: size, height: size,
-    background: `radial-gradient(circle, ${color} 0%, transparent 65%)`,
-    pointerEvents: "none",
-  }} />
-);
+const HeroOrb: React.FC<{ top?: number; left?: number; right?: number; bottom?: number; size: number; color: string }> = () => null;
 
-const HeroDotGrid: React.FC<{ color?: string }> = ({ color = "var(--color-primary-glow)" }) => (
-  <div style={{
-    position: "absolute", inset: 0,
-    backgroundImage: `radial-gradient(circle, ${color} 1px, transparent 1px)`,
-    backgroundSize: "22px 22px",
-    pointerEvents: "none",
-  }} />
-);
+const HeroDotGrid: React.FC<{ color?: string }> = () => null;
 
-const HeroWatermark: React.FC<{ color?: string }> = ({ color = "var(--color-primary)" }) => (
-  <div style={{ position: "absolute", right: -10, bottom: -16, opacity: 0.05, color, pointerEvents: "none" }}>
-    <svg width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="3" /><line x1="12" y1="8" x2="12" y2="22" /><path d="M5 15H2a10 10 0 0 0 20 0h-3" />
-    </svg>
-  </div>
-);
+const HeroWatermark: React.FC<{ color?: string }> = () => null;
 
 const LiveBadge: React.FC<{ color: string; label: string; bg: string; border: string }> = ({ color, label, bg, border }) => (
-  <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5" style={{ background: bg, border: `1px solid ${border}` }}>
+  <span
+    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5"
+    style={{ background: bg, border: `1px solid ${border}` }}
+  >
     <span className="live-pulse-dot" style={{ background: color }} />
-    <span style={{ fontSize: "0.55rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.14em", color }}>{label}</span>
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color,
+      }}
+    >
+      {label}
+    </span>
   </span>
 );
 
-const HeroAvatar: React.FC<{ name: string; gradient: string; shadow: string; border: string }> = ({ name, gradient, shadow, border }) => (
-  <div style={{
-    width: 56, height: 56, borderRadius: 20, flexShrink: 0,
-    background: gradient,
-    boxShadow: shadow,
-    border: `2px solid ${border}`,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: "1.35rem", fontWeight: 800, color: "white", letterSpacing: "-0.01em",
-  }}>
+const HeroAvatar: React.FC<{ name: string; gradient: string; shadow: string; border: string }> = ({ name }) => (
+  <div
+    style={{
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      flexShrink: 0,
+      background: "var(--color-primary)",
+      border: "1px solid var(--color-primary-active)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "1.125rem",
+      fontWeight: 700,
+      color: "white",
+      letterSpacing: "var(--tracking-tight)",
+    }}
+  >
     {name.charAt(0).toUpperCase()}
   </div>
 );
 
 const HeroStatPill: React.FC<{ value: number; label: string; color: string }> = ({ value, label, color }) => (
-  <div className="flex flex-col items-center" style={{
-    flex: 1, padding: "9px 0", borderRadius: 14,
-    background: `${color}10`, border: `1px solid ${color}28`,
-  }}>
-    <span className="font-mono" style={{ fontSize: "1.4rem", fontWeight: 900, color, lineHeight: 1, letterSpacing: "-0.04em" }}>{value}</span>
-    <span style={{ fontSize: "0.54rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color, marginTop: 3, opacity: 0.75 }}>{label}</span>
+  <div
+    className="flex flex-col items-center"
+    style={{
+      flex: 1,
+      padding: "10px 0",
+      borderRadius: 12,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+    }}
+  >
+    <span
+      className="t-mono"
+      style={{
+        fontSize: "1.375rem",
+        fontWeight: 700,
+        color,
+        lineHeight: 1,
+        letterSpacing: "var(--tracking-tight)",
+      }}
+    >
+      {value}
+    </span>
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color: "var(--color-fg-muted)",
+        marginTop: 4,
+      }}
+    >
+      {label}
+    </span>
   </div>
 );
 
 const HeroQuickBtn: React.FC<{ icon: React.ReactElement; label: string; color: string; border: string; bg: string; onClick?: () => void }> = ({
-  icon, label, color, border, bg, onClick,
+  icon, label, color, onClick,
 }) => (
   <button
     type="button"
     onClick={onClick}
-    className="flex shrink-0 items-center justify-center gap-2 transition-all active:scale-[0.95]"
-    style={{ padding: "10px 14px", borderRadius: 16, background: bg, border: `1px solid ${border}`, color, minWidth: 108 }}
+    className="flex shrink-0 items-center justify-center gap-2 transition-colors active:translate-y-px"
+    style={{
+      padding: "10px 14px",
+      borderRadius: 10,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      color: "var(--color-fg-primary)",
+      minWidth: 108,
+    }}
   >
-    <span style={{ display: "flex", opacity: 0.9 }}>{icon}</span>
-    <span style={{ fontSize: "0.73rem", fontWeight: 700, letterSpacing: "0.01em" }}>{label}</span>
-    <span style={{ display: "flex", opacity: 0.45 }}>{Ico.arrowRight(11)}</span>
+    <span style={{ display: "flex", color }}>{icon}</span>
+    <span
+      style={{
+        fontSize: "var(--text-caption)",
+        fontWeight: 600,
+        letterSpacing: "var(--tracking-base)",
+      }}
+    >
+      {label}
+    </span>
+    <span style={{ display: "flex", color: "var(--color-fg-muted)" }}>
+      {Ico.arrowRight(11)}
+    </span>
   </button>
 );
 
@@ -314,9 +370,9 @@ const GuideHero: React.FC<{
   greeting: string; onNavigate?: (path: string) => void;
   role: SessionUser["role"]; turno: TurnoLite | null;
 }> = ({ availableCount, dateLabel, displayName, greeting, onNavigate, role, turno }) => (
-  <div className="relative overflow-hidden" style={{
-    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 55%, var(--color-bg-base) 100%)",
-    borderBottom: `1px solid ${RAW.primaryRgba(0.14)}`,
+  <div className="relative" style={{
+    background: "var(--color-bg-elevated)",
+    borderBottom: "1px solid var(--color-border-hairline)",
   }}>
     {/* Aurora background layers */}
     <HeroOrb top={-90} left={-70} size={320} color={RAW.primaryRgba(0.13)} />
@@ -329,27 +385,50 @@ const GuideHero: React.FC<{
       {/* Top bar */}
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
-          <span style={{ fontSize: "0.57rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: P.violet }}>
+          <span
+            style={{
+              fontSize: "var(--text-eyebrow)",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "var(--tracking-eyebrow)",
+              color: "var(--color-fg-muted)",
+            }}
+          >
             {greeting}
           </span>
-          {turno && <LiveBadge color={P.violet} label="En turno" bg={RAW.primaryRgba(0.10)} border={RAW.primaryRgba(0.28)} />}
+          {turno && <LiveBadge color={P.violet} label="En turno" bg="var(--color-primary-soft)" border="var(--color-primary-soft)" />}
         </div>
         <RoleBadge role={role} />
       </div>
 
       {/* Avatar + name */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3.5">
         <HeroAvatar
           name={displayName}
-          gradient={`linear-gradient(135deg, ${RAW.primary} 0%, ${RAW.primaryDark} 100%)`}
-          shadow={`0 6px 22px ${RAW.primaryRgba(0.40)}, 0 2px 6px rgba(0,0,0,0.05)`}
-          border={RAW.primaryRgba(0.30)}
+          gradient=""
+          shadow=""
+          border=""
         />
         <div className="min-w-0 flex-1">
-          <h1 className="font-extrabold leading-tight truncate" style={{ fontSize: "1.55rem", color: P.fgPrimary, letterSpacing: "-0.02em" }}>
+          <h1
+            className="truncate"
+            style={{
+              fontSize: "var(--text-display)",
+              fontWeight: 700,
+              color: "var(--color-fg-primary)",
+              letterSpacing: "var(--tracking-tight)",
+              lineHeight: "var(--leading-tight)",
+            }}
+          >
             {displayName}
           </h1>
-          <p style={{ marginTop: 4, fontSize: "0.72rem", color: P.fgSecondary }}>
+          <p
+            style={{
+              marginTop: 4,
+              fontSize: "var(--text-caption)",
+              color: "var(--color-fg-muted)",
+            }}
+          >
             {turno ? "Guía activa · turno en curso" : "Guía activa · sin turno activo"}
           </p>
         </div>
@@ -362,7 +441,7 @@ const GuideHero: React.FC<{
       </div>
 
       {/* Quick nav */}
-      <div className="flex gap-2.5 mt-4">
+      <div className="flex gap-2 mt-4">
         <HeroQuickBtn
           icon={<>{Ico.ticket()}</>}
           label="Mis turnos"
@@ -376,8 +455,6 @@ const GuideHero: React.FC<{
           onClick={() => onNavigate?.("/atenciones")}
         />
       </div>
-
-      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, ${RAW.primaryRgba(0.28)}, transparent 70%)` }} />
     </div>
   </div>
 );
@@ -391,9 +468,9 @@ const SupervisorHero: React.FC<{
   lastUpdatedAt: string | null; onNavigate?: (path: string) => void;
   role: SessionUser["role"]; summary: string;
 }> = ({ counts, dateLabel, displayName, isRefreshing, lastUpdatedAt, onNavigate, role, summary }) => (
-  <div className="relative overflow-hidden" style={{
-    background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 55%, var(--color-bg-elevated) 100%)",
-    borderBottom: `1px solid ${RAW.accentRgba(0.12)}`,
+  <div className="relative" style={{
+    background: "var(--color-bg-elevated)",
+    borderBottom: "1px solid var(--color-border-hairline)",
   }}>
     <HeroOrb top={-80} left={-60} size={300} color={RAW.accentRgba(0.09)} />
     <HeroOrb top={-20} right={-30} size={200} color={RAW.primaryRgba(0.08)} />
@@ -405,8 +482,15 @@ const SupervisorHero: React.FC<{
       {/* Top bar */}
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2">
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: RAW.accent, boxShadow: `0 0 10px ${RAW.accentRgba(0.4)}`, display: "inline-block" }} />
-          <span style={{ fontSize: "0.57rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: P.amber }}>
+          <span
+            style={{
+              fontSize: "var(--text-eyebrow)",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "var(--tracking-eyebrow)",
+              color: "var(--color-fg-muted)",
+            }}
+          >
             Centro operativo
           </span>
         </div>
@@ -419,18 +503,35 @@ const SupervisorHero: React.FC<{
       </div>
 
       {/* Avatar + name */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3.5">
         <HeroAvatar
           name={displayName}
-          gradient={`linear-gradient(135deg, ${RAW.accent} 0%, var(--color-accent-active) 100%)`}
-          shadow={`0 6px 22px ${RAW.accentRgba(0.40)}, 0 2px 6px rgba(0,0,0,0.05)`}
-          border={RAW.accentRgba(0.32)}
+          gradient=""
+          shadow=""
+          border=""
         />
         <div className="min-w-0 flex-1">
-          <h1 className="font-extrabold leading-tight truncate" style={{ fontSize: "1.55rem", color: P.fgPrimary, letterSpacing: "-0.02em" }}>
+          <h1
+            className="truncate"
+            style={{
+              fontSize: "var(--text-display)",
+              fontWeight: 700,
+              color: "var(--color-fg-primary)",
+              letterSpacing: "var(--tracking-tight)",
+              lineHeight: "var(--leading-tight)",
+            }}
+          >
             {displayName}
           </h1>
-          <p style={{ marginTop: 4, fontSize: "0.72rem", color: P.fgSecondary }}>{summary}</p>
+          <p
+            style={{
+              marginTop: 4,
+              fontSize: "var(--text-caption)",
+              color: "var(--color-fg-muted)",
+            }}
+          >
+            {summary}
+          </p>
         </div>
       </div>
 
@@ -442,11 +543,11 @@ const SupervisorHero: React.FC<{
 
       {/* Mini stat strip */}
       {counts && (
-        <div className="flex gap-2 mt-4">
-          <HeroStatPill value={counts.recaladas}             label="Recaladas"  color={RAW.info} />
-          <HeroStatPill value={counts.atenciones}            label="Atenciones" color={RAW.accent} />
-          <HeroStatPill value={counts.turnos}                label="Turnos"     color={RAW.success} />
-          <HeroStatPill value={counts.turnosInProgress ?? 0} label="En curso"   color={RAW.primary} />
+        <div className="grid grid-cols-4 gap-2 mt-4">
+          <HeroStatPill value={counts.recaladas}             label="Recaladas"  color="var(--color-fg-primary)" />
+          <HeroStatPill value={counts.atenciones}            label="Atenciones" color="var(--color-fg-primary)" />
+          <HeroStatPill value={counts.turnos}                label="Turnos"     color="var(--color-fg-primary)" />
+          <HeroStatPill value={counts.turnosInProgress ?? 0} label="En curso"   color="var(--color-primary)" />
         </div>
       )}
 
@@ -471,8 +572,6 @@ const SupervisorHero: React.FC<{
           onClick={() => onNavigate?.("/atenciones")}
         />
       </div>
-
-      <div className="mt-5 h-px" style={{ background: `linear-gradient(90deg, ${RAW.accentRgba(0.28)}, transparent 70%)` }} />
     </div>
   </div>
 );
@@ -515,33 +614,52 @@ const GuideFocusCard: React.FC<{ onNavigate?: (path: string) => void; turno: Tur
   }
 
   return (
-    <div className="relative overflow-hidden" style={{
-      borderRadius: 22,
-      background: "var(--color-bg-elevated)",
-      border: `1px solid ${RAW.primaryRgba(0.20)}`,
-      borderLeft: `3px solid ${RAW.primary}`,
-      boxShadow: `0 12px 40px ${RAW.primaryRgba(0.12)}, 0 24px 56px rgba(0,0,0,0.05), inset 0 1px 0 ${RAW.primaryRgba(0.08)}`,
-    }}>
-      <HeroOrb top={-50} right={-30} size={200} color={RAW.primaryRgba(0.09)} />
-
-      <div className="relative p-5">
+    <div
+      className="relative"
+      style={{
+        borderRadius: 16,
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-border-hairline)",
+        borderLeft: "3px solid var(--color-primary)",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <div className="p-5">
         <div className="flex items-center justify-between gap-3">
-          <LiveBadge color={P.violet} label="Turno activo" bg={RAW.primaryRgba(0.11)} border={RAW.primaryRgba(0.24)} />
+          <LiveBadge color={P.violet} label="Turno activo" bg="var(--color-primary-soft)" border="var(--color-primary-soft)" />
           <StatusChip tone={getTurnoTone(turno.status)}>{formatTurnoStatus(turno.status)}</StatusChip>
         </div>
 
-        <p className="font-mono leading-none tracking-tight mt-5" style={{
-          fontSize: "3.5rem", fontWeight: 900, color: P.violet,
-          letterSpacing: "-0.04em",
-          textShadow: `0 0 36px ${RAW.primaryRgba(0.35)}`,
-        }}>
+        <p
+          className="t-mono leading-none mt-4"
+          style={{
+            fontSize: "2.75rem",
+            fontWeight: 700,
+            color: "var(--color-primary)",
+            letterSpacing: "var(--tracking-tight)",
+          }}
+        >
           #{formatTurnoNumber(turno.numero)}
         </p>
 
-        <p style={{ fontSize: "1rem", fontWeight: 700, color: P.fgPrimary, marginTop: 10 }}>
+        <p
+          style={{
+            fontSize: "var(--text-subhead)",
+            fontWeight: 600,
+            letterSpacing: "var(--tracking-tight)",
+            color: "var(--color-fg-primary)",
+            marginTop: 10,
+          }}
+        >
           {turno.atencion.recalada.buque.nombre}
         </p>
-        <p style={{ fontSize: "0.73rem", color: P.fgSecondary, marginTop: 3 }}>
+        <p
+          style={{
+            fontSize: "var(--text-caption)",
+            color: "var(--color-fg-muted)",
+            marginTop: 2,
+          }}
+        >
           {turno.atencion.recalada.codigoRecalada}
         </p>
 
@@ -550,7 +668,7 @@ const GuideFocusCard: React.FC<{ onNavigate?: (path: string) => void; turno: Tur
           <InfoPill label="Check-in" value={turno.checkInAt ? formatTime(turno.checkInAt) : "Pendiente"} accent={P.amber} />
         </div>
 
-        <div style={{ height: 1, background: RAW.primaryRgba(0.14), margin: "18px 0" }} />
+        <div style={{ height: 1, background: "var(--color-border-hairline)", margin: "18px 0" }} />
 
         <VioletBtn onClick={() => onNavigate?.("/turnos")} icon={<>{Ico.arrowRight()}</>}>
           Registrar check-in
@@ -721,11 +839,10 @@ const Card: React.FC<{ children: React.ReactNode; className?: string; style?: Re
   <div
     className={className}
     style={{
-      background: P.bgSurface,
-      border: "1px solid var(--color-glass-medium)",
-      borderTop: "1px solid var(--color-glass-medium)",
-      borderRadius: 22,
-      boxShadow: "0 24px 56px rgba(0,0,0,0.05), inset 0 1px 0 var(--color-glass-soft)",
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      borderRadius: 16,
+      boxShadow: "var(--shadow-card)",
       ...style,
     }}
   >
@@ -733,26 +850,54 @@ const Card: React.FC<{ children: React.ReactNode; className?: string; style?: Re
   </div>
 );
 
-const SectionDivider: React.FC<{ title: string; color?: string }> = ({ title, color = P.violet }) => (
-  <div className="flex items-center gap-2.5">
-    <div style={{ width: 3, height: 14, borderRadius: 2, background: color, flexShrink: 0, opacity: 0.9 }} />
-    <p style={{ fontSize: "0.595rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color, flexShrink: 0 }}>
+const SectionDivider: React.FC<{ title: string; color?: string }> = ({ title, color = "var(--color-fg-secondary)" }) => (
+  <div className="flex items-center gap-2">
+    <p
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color,
+        flexShrink: 0,
+      }}
+    >
       {title}
     </p>
-    <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${color}35, transparent)` }} />
+    <div style={{ flex: 1, height: 1, background: "var(--color-border-hairline)" }} />
   </div>
 );
 
 const InfoPill: React.FC<{ label: string; value?: string; accent?: string }> = ({ label, value, accent }) => (
   <div
-    className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5"
+    className="inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1"
     style={{
-      background: accent ? `${accent}10` : "var(--color-glass-soft)",
-      border: `1px solid ${accent ? `${accent}28` : "var(--color-glass-medium)"}`,
+      background: "var(--color-bg-subtle)",
+      border: "1px solid var(--color-border-hairline)",
     }}
   >
-    <span style={{ fontSize: "0.54rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: accent ?? P.fgMuted }}>{label}</span>
-    {value && <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: accent ?? P.fgPrimary }}>{value}</span>}
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color: "var(--color-fg-muted)",
+      }}
+    >
+      {label}
+    </span>
+    {value && (
+      <span
+        style={{
+          fontSize: "var(--text-caption)",
+          fontWeight: 600,
+          color: accent ?? "var(--color-fg-primary)",
+        }}
+      >
+        {value}
+      </span>
+    )}
   </div>
 );
 
@@ -761,21 +906,64 @@ const CountTile: React.FC<{
   label: string; helper: string; value: number;
 }> = ({ tone, label, helper, value }) => {
   const color  = TILE_COLOR[tone];
-  const bg     = TILE_BG[tone];
-  const border = TILE_BORDER[tone];
   const iconBg = TILE_ICON_BG[tone];
 
   return (
-    <div className="relative overflow-hidden" style={{ borderRadius: 18, padding: "16px 14px", background: bg, border: `1px solid ${border}`, boxShadow: `0 4px 24px ${color}14` }}>
-      <div style={{ position: "absolute", right: -10, bottom: -12, opacity: 0.07, color, pointerEvents: "none" }}>
-        {TILE_ICONS_LG[tone]}
-      </div>
-      <div style={{ width: 32, height: 32, borderRadius: 10, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", background: iconBg, color, border: `1px solid ${border}` }}>
+    <div
+      style={{
+        borderRadius: 14,
+        padding: "14px 14px",
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-border-hairline)",
+      }}
+    >
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 8,
+          marginBottom: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: iconBg,
+          color,
+        }}
+      >
         {TILE_ICONS_SM[tone]}
       </div>
-      <p className="font-mono leading-none" style={{ fontSize: "2.6rem", fontWeight: 900, color, letterSpacing: "-0.04em", textShadow: `0 0 22px ${color}45` }}>{value}</p>
-      <p style={{ fontSize: "0.75rem", fontWeight: 700, color: P.fgPrimary, marginTop: 7 }}>{label}</p>
-      <p style={{ fontSize: "0.58rem", color: P.fgMuted, marginTop: 2, fontWeight: 600, letterSpacing: "0.02em" }}>{helper}</p>
+      <p
+        className="t-mono leading-none"
+        style={{
+          fontSize: "1.875rem",
+          fontWeight: 700,
+          color: "var(--color-fg-primary)",
+          letterSpacing: "var(--tracking-tight)",
+        }}
+      >
+        {value}
+      </p>
+      <p
+        style={{
+          fontSize: "var(--text-caption)",
+          fontWeight: 600,
+          color: "var(--color-fg-primary)",
+          marginTop: 8,
+          letterSpacing: "var(--tracking-tight)",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          fontSize: "var(--text-eyebrow)",
+          color: "var(--color-fg-muted)",
+          marginTop: 1,
+          fontWeight: 500,
+        }}
+      >
+        {helper}
+      </p>
     </div>
   );
 };
@@ -800,51 +988,122 @@ const CapacityRow: React.FC<{ label: string; value: number; total: number; pct: 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: P.fgSecondary }}>{label}</span>
+        <span
+          style={{
+            fontSize: "var(--text-caption)",
+            fontWeight: 600,
+            color: "var(--color-fg-secondary)",
+          }}
+        >
+          {label}
+        </span>
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: "0.6rem", color: P.fgMuted, fontWeight: 600 }}>{pctDisplay}%</span>
-          <span className="font-mono" style={{ fontSize: "0.8125rem", fontWeight: 800, color: P.fgPrimary }}>{value}</span>
+          <span
+            style={{
+              fontSize: "var(--text-eyebrow)",
+              color: "var(--color-fg-muted)",
+              fontWeight: 600,
+            }}
+          >
+            {pctDisplay}%
+          </span>
+          <span
+            className="t-mono"
+            style={{
+              fontSize: "var(--text-caption)",
+              fontWeight: 700,
+              color: "var(--color-fg-primary)",
+            }}
+          >
+            {value}
+          </span>
         </div>
       </div>
-      <div style={{ height: 5, borderRadius: 4, background: "var(--color-glass-medium)", overflow: "hidden" }}>
-        <div style={{
-          height: "100%",
-          width: `${Math.min(100, pct)}%`,
-          background: `linear-gradient(90deg, ${color}70, ${color})`,
-          borderRadius: 4,
-          transition: "width 0.7s cubic-bezier(0.34,1.56,0.64,1)",
-        }} />
+      <div style={{ height: 4, borderRadius: 2, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${Math.min(100, pct)}%`,
+            background: color,
+            borderRadius: 2,
+            transition: "width 360ms ease",
+          }}
+        />
       </div>
     </div>
   );
 };
 
 const MilestoneTimeline: React.FC<{ items: DashboardMilestone[] }> = ({ items }) => (
-  <div style={{ position: "relative", paddingLeft: 24 }}>
+  <div style={{ position: "relative", paddingLeft: 22 }}>
     {items.length > 1 && (
-      <div style={{ position: "absolute", left: 5, top: 10, bottom: 10, width: 2, background: `linear-gradient(180deg, ${RAW.primaryRgba(0.28)}, ${RAW.primaryRgba(0.03)})`, borderRadius: 1 }} />
+      <div
+        style={{
+          position: "absolute",
+          left: 9,
+          top: 12,
+          bottom: 12,
+          width: 1,
+          background: "var(--color-border-hairline)",
+        }}
+      />
     )}
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3.5">
       {items.map((item) => {
         const color = MILESTONE_COLOR[item.kind] ?? "var(--color-fg-muted)";
         return (
           <div key={getMilestoneKey(item)} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-              marginTop: 0, marginLeft: -24,
-              background: `${color}1A`,
-              border: `1.5px solid ${color}60`,
-              boxShadow: `0 0 10px ${color}55`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color,
-            }}>
+            <div
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                flexShrink: 0,
+                marginTop: 1,
+                marginLeft: -22,
+                background: "var(--color-bg-elevated)",
+                border: `1.5px solid ${color}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color,
+              }}
+            >
               {getMilestoneIcon(item.kind)}
             </div>
-            <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
-              <p className="truncate font-semibold" style={{ fontSize: "0.8125rem", color: P.fgPrimary }}>{item.title}</p>
-              <p style={{ fontSize: "0.54rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color, marginTop: 3 }}>{formatMilestoneKind(item.kind)}</p>
+            <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+              <p
+                className="truncate"
+                style={{
+                  fontSize: "var(--text-caption)",
+                  fontWeight: 600,
+                  color: "var(--color-fg-primary)",
+                }}
+              >
+                {item.title}
+              </p>
+              <p
+                style={{
+                  fontSize: "var(--text-eyebrow)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-eyebrow)",
+                  color: "var(--color-fg-muted)",
+                  marginTop: 2,
+                }}
+              >
+                {formatMilestoneKind(item.kind)}
+              </p>
             </div>
-            <p className="font-mono flex-shrink-0" style={{ fontSize: "0.8125rem", fontWeight: 700, color: P.fgPrimary, paddingTop: 2 }}>
+            <p
+              className="t-mono flex-shrink-0"
+              style={{
+                fontSize: "var(--text-caption)",
+                fontWeight: 600,
+                color: "var(--color-fg-primary)",
+                paddingTop: 1,
+              }}
+            >
               {formatTime(item.at)}
             </p>
           </div>
@@ -855,44 +1114,58 @@ const MilestoneTimeline: React.FC<{ items: DashboardMilestone[] }> = ({ items })
 );
 
 const FooterUpdated: React.FC<{ lastUpdatedAt: string | null }> = ({ lastUpdatedAt }) => (
-  <div className="rounded-[12px] px-3 py-2.5" style={{ background: "var(--color-glass-subtle)", border: "1px solid var(--color-glass-soft)" }}>
+  <div
+    className="rounded-[10px] px-3 py-2"
+    style={{
+      background: "var(--color-bg-subtle)",
+      border: "1px solid var(--color-border-hairline)",
+    }}
+  >
     <LastUpdatedRow label="Última actualización" statusLabel={formatTime(lastUpdatedAt)} statusTone="info" />
   </div>
 );
 
 /* ══════════════════════════════════════════════
-   BUTTONS
+   BUTTONS — Maritime Premium (solid, no glow)
 ══════════════════════════════════════════════ */
 const VioletBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; icon?: React.ReactElement }> = ({ children, onClick, icon }) => (
   <button
-    type="button" onClick={onClick}
-    className="w-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
+    type="button"
+    onClick={onClick}
+    className="w-full flex items-center justify-center gap-2 transition-colors active:translate-y-px"
     style={{
-      padding: "15px 20px", borderRadius: 18,
-      background: `linear-gradient(135deg, ${RAW.primaryDark} 0%, ${RAW.primary} 55%, var(--color-primary-dark) 100%)`,
-      boxShadow: `0 8px 28px ${RAW.primaryRgba(0.42)}, 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.18)`,
-      border: "1px solid rgba(255,255,255,0.12)",
-      color: "white", fontSize: "0.9rem", fontWeight: 800, letterSpacing: "0.015em",
+      padding: "11px 18px",
+      borderRadius: 12,
+      background: "var(--color-primary)",
+      border: "1px solid var(--color-primary)",
+      color: "white",
+      fontSize: "var(--text-body)",
+      fontWeight: 600,
+      letterSpacing: "var(--tracking-base)",
     }}
   >
-    {icon && <span style={{ opacity: 0.9, display: "flex" }}>{icon}</span>}
+    {icon && <span style={{ display: "flex" }}>{icon}</span>}
     <span>{children}</span>
   </button>
 );
 
 const AmberBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; icon?: React.ReactElement }> = ({ children, onClick, icon }) => (
   <button
-    type="button" onClick={onClick}
-    className="w-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.97]"
+    type="button"
+    onClick={onClick}
+    className="w-full flex items-center justify-center gap-2 transition-colors active:translate-y-px"
     style={{
-      padding: "14px 20px", borderRadius: 18,
-      background: `linear-gradient(135deg, ${RAW.accentRgba(0.12)} 0%, ${RAW.accentRgba(0.06)} 100%)`,
-      boxShadow: `0 4px 18px ${RAW.accentRgba(0.18)}, 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 ${RAW.accentRgba(0.12)}`,
-      border: `1px solid ${P.amberBorder}`,
-      color: P.amber, fontSize: "0.9rem", fontWeight: 700, letterSpacing: "0.015em",
+      padding: "11px 18px",
+      borderRadius: 12,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      color: "var(--color-fg-primary)",
+      fontSize: "var(--text-body)",
+      fontWeight: 600,
+      letterSpacing: "var(--tracking-base)",
     }}
   >
-    {icon && <span style={{ opacity: 0.85, display: "flex" }}>{icon}</span>}
+    {icon && <span style={{ display: "flex", color: "var(--color-fg-muted)" }}>{icon}</span>}
     <span>{children}</span>
   </button>
 );

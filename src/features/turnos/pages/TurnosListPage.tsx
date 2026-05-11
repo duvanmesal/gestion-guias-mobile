@@ -29,14 +29,14 @@ const C = {
   amberFaint:   "var(--color-accent-glow)",
   amberBorder:  "var(--color-accent-glow)",
   cyan:         "var(--color-info)",
-  cyanFaint:    "rgba(56,189,248,0.10)",
-  cyanBorder:   "rgba(56,189,248,0.26)",
+  cyanFaint:    "var(--color-info-soft)",
+  cyanBorder:   "var(--color-info-border)",
   teal:         "var(--color-success)",
   tealFaint:    "var(--color-success-soft)",
   tealBorder:   "var(--color-success-soft)",
   danger:       "var(--color-danger)",
   dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "rgba(244,63,94,0.26)",
+  dangerBorder: "var(--color-danger-border)",
   fgPrimary:    "var(--color-fg-primary)",
   fgSecondary:  "var(--color-fg-secondary)",
   fgMuted:      "var(--color-fg-muted)",
@@ -130,12 +130,50 @@ const TurnosListPage: React.FC = () => {
       <IonContent scrollY={true}>
         <div style={{ minHeight: "100vh", background: C.bg, paddingBottom: "1.5rem" }}>
 
-          {/* ── Hero header ── */}
-          <PageHeader
-            isSupervisor={isSupervisor}
-            total={total}
-            activeCount={activeItem ? 1 : 0}
-          />
+          {/* Page Header */}
+          <div style={{ padding: "52px 1.25rem 0" }}>
+            <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "var(--text-eyebrow)",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-eyebrow)",
+                    color: "var(--color-fg-muted)",
+                  }}
+                >
+                  {isSupervisor ? "Gestión global" : "Mis operaciones"}
+                </p>
+                <h1
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "var(--text-display)",
+                    fontWeight: 700,
+                    color: "var(--color-fg-primary)",
+                    letterSpacing: "var(--tracking-tight)",
+                    lineHeight: "var(--leading-tight)",
+                  }}
+                >
+                  Turnos
+                </h1>
+              </div>
+              {total > 0 && (
+                <span
+                  style={{
+                    fontSize: "var(--text-eyebrow)",
+                    fontWeight: 600,
+                    color: "var(--color-fg-muted)",
+                    letterSpacing: "var(--tracking-eyebrow)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {total} total
+                </span>
+              )}
+            </div>
+          </div>
 
           <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 1.25rem" }}>
 
@@ -188,64 +226,6 @@ const TurnosListPage: React.FC = () => {
 };
 
 /* ─────────────────────────────────────────────
-   PAGE HEADER
-───────────────────────────────────────────── */
-const PageHeader: React.FC<{ isSupervisor: boolean; total: number; activeCount: number }> = ({
-  isSupervisor, total,
-}) => (
-  <div
-    className="relative overflow-hidden"
-    style={{
-      background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
-      borderBottom: "1px solid var(--color-primary-glow)",
-    }}
-  >
-    {/* Orbs */}
-    <div style={{ position: "absolute", top: -60, left: -40, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-    <div style={{ position: "absolute", top: 0, right: -30, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle, var(--color-accent-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-    {/* Dot grid */}
-    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, var(--color-primary-glow) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
-
-    <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "2.5rem 1.25rem 1.5rem" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          {/* Icon box */}
-          <div style={{
-            width: 48, height: 48, borderRadius: 16,
-            background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
-            boxShadow: `0 6px 22px ${C.violetGlow}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "white", flexShrink: 0,
-          }}>
-            {Ico.ticket(22)}
-          </div>
-          <div>
-            <p style={{ fontSize: "0.575rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: C.violet }}>
-              {isSupervisor ? "Gestión global" : "Mis operaciones"}
-            </p>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: C.fgPrimary, letterSpacing: "-0.02em", lineHeight: 1.1, marginTop: 3 }}>
-              Turnos
-            </h1>
-          </div>
-        </div>
-
-        {/* Total badge */}
-        {total > 0 && (
-          <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            padding: "8px 14px", borderRadius: 14,
-            background: C.violetFaint, border: `1px solid ${C.violetBorder}`,
-          }}>
-            <span style={{ fontSize: "1.4rem", fontWeight: 900, color: C.violet, letterSpacing: "-0.04em", lineHeight: 1 }}>{total}</span>
-            <span style={{ fontSize: "0.52rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: C.violet, opacity: 0.7, marginTop: 2 }}>total</span>
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-/* ─────────────────────────────────────────────
    ACTIVE TURNO CARD
 ───────────────────────────────────────────── */
 const ActiveTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ turno, onPress }) => {
@@ -257,60 +237,91 @@ const ActiveTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ 
     <button
       type="button"
       onClick={onPress}
-      className="w-full text-left transition-all active:scale-[0.98]"
+      className="w-full text-left transition-colors active:translate-y-px"
       style={{
-        borderRadius: 22,
+        borderRadius: 16,
         background: "var(--color-bg-elevated)",
-        border: "1px solid var(--color-accent-glow)",
+        border: "1px solid var(--color-border-hairline)",
         borderLeft: "3px solid var(--color-accent)",
-        boxShadow: `0 12px 40px ${C.amberGlow}, 0 24px 52px rgba(0,0,0,0.05), inset 0 1px 0 var(--color-accent-glow)`,
-        position: "relative", overflow: "hidden",
+        boxShadow: "var(--shadow-card)",
         display: "block", width: "100%",
       }}
     >
-      {/* Ambient orb */}
-      <div style={{ position: "absolute", top: -40, right: -20, width: 180, height: 180, borderRadius: "50%", background: `radial-gradient(circle, ${C.amberFaint} 0%, transparent 65%)`, pointerEvents: "none" }} />
-
-      <div style={{ position: "relative", padding: "1.25rem 1.25rem 1rem" }}>
-        {/* Header row */}
+      <div style={{ padding: "1.125rem 1.125rem 1rem" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 14 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 9999, padding: "3px 10px", background: C.amberFaint, border: `1px solid ${C.amberBorder}` }}>
-            <span className="live-pulse-dot" style={{ background: C.amber }} />
-            <span style={{ fontSize: "0.55rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.14em", color: C.amber }}>En curso</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 9999, padding: "3px 9px", background: "var(--color-warning-soft)", border: "1px solid var(--color-warning-border)" }}>
+            <span className="live-pulse-dot" style={{ background: "var(--color-accent)" }} />
+            <span
+              style={{
+                fontSize: "var(--text-eyebrow)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "var(--tracking-eyebrow)",
+                color: "#B45309",
+              }}
+            >
+              En curso
+            </span>
           </span>
           <StatusBadge status={turno.status} />
         </div>
 
-        {/* Big turno number */}
-        <p style={{ fontFamily: "monospace", fontSize: "3.2rem", fontWeight: 900, color: C.amber, letterSpacing: "-0.04em", lineHeight: 1, textShadow: `0 0 36px ${C.amberGlow}` }}>
+        <p
+          className="t-mono"
+          style={{
+            fontSize: "2.75rem",
+            fontWeight: 700,
+            color: "var(--color-fg-primary)",
+            letterSpacing: "var(--tracking-tight)",
+            lineHeight: 1,
+          }}
+        >
           #{pad(turno.numero)}
         </p>
 
-        {/* Ship info */}
         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: C.amber, opacity: 0.7 }}>{Ico.ship(14)}</span>
-          <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: C.fgPrimary }}>{shipCode}</span>
+          <span style={{ color: "var(--color-fg-muted)" }}>{Ico.ship(14)}</span>
+          <span
+            style={{
+              fontSize: "var(--text-body)",
+              fontWeight: 600,
+              color: "var(--color-fg-primary)",
+              letterSpacing: "var(--tracking-tight)",
+            }}
+          >
+            {shipCode}
+          </span>
         </div>
 
-        {/* Time range */}
         <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <TimePill label="Inicio" value={shortTime(turno.fechaInicio)} color={C.amber} />
-          <TimePill label="Fin"    value={shortTime(turno.fechaFin)}    color={C.fgMuted} />
+          <TimePill label="Fin"    value={shortTime(turno.fechaFin)} />
           {turno.checkInAt && <TimePill label="Check-in" value={shortTime(turno.checkInAt)} color={C.teal} />}
         </div>
 
         {guiaName && (
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ color: C.fgMuted }}>{Ico.user(13)}</span>
-            <span style={{ fontSize: "0.72rem", color: C.fgSecondary, fontWeight: 500 }}>{guiaName}</span>
+            <span style={{ color: "var(--color-fg-muted)" }}>{Ico.user(13)}</span>
+            <span style={{ fontSize: "var(--text-caption)", color: "var(--color-fg-secondary)", fontWeight: 500 }}>
+              {guiaName}
+            </span>
           </div>
         )}
 
-        <div style={{ marginTop: 14, height: 1, background: "var(--color-accent-glow)" }} />
+        <div style={{ marginTop: 14, height: 1, background: "var(--color-border-hairline)" }} />
 
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: "0.72rem", fontWeight: 700, color: C.amber, letterSpacing: "0.04em" }}>Ver detalle completo</span>
-          <span style={{ color: C.amber }}>{Ico.chevron()}</span>
+          <span
+            style={{
+              fontSize: "var(--text-caption)",
+              fontWeight: 600,
+              color: "var(--color-primary)",
+              letterSpacing: "var(--tracking-tight)",
+            }}
+          >
+            Ver detalle completo
+          </span>
+          <span style={{ color: "var(--color-primary)" }}>{Ico.chevron()}</span>
         </div>
       </div>
     </button>
@@ -327,31 +338,60 @@ const NextTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ tu
     <button
       type="button"
       onClick={onPress}
-      className="w-full text-left transition-all active:scale-[0.98]"
+      className="w-full text-left transition-colors active:translate-y-px"
       style={{
-        borderRadius: 20,
+        borderRadius: 16,
         background: "var(--color-bg-elevated)",
-        border: "1px solid rgba(56,189,248,0.18)",
+        border: "1px solid var(--color-border-hairline)",
         borderLeft: "3px solid var(--color-info)",
-        boxShadow: "0 8px 28px rgba(56,189,248,0.12), inset 0 1px 0 rgba(56,189,248,0.06)",
+        boxShadow: "var(--shadow-card)",
         display: "block", width: "100%",
       }}
     >
-      <div style={{ padding: "1rem 1.25rem" }}>
+      <div style={{ padding: "1rem 1.125rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <span style={{ color: C.cyan, opacity: 0.8 }}>{Ico.clock(13)}</span>
-          <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.cyan }}>Próximo turno</span>
+          <span style={{ color: "var(--color-info)" }}>{Ico.clock(13)}</span>
+          <span
+            style={{
+              fontSize: "var(--text-eyebrow)",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "var(--tracking-eyebrow)",
+              color: "var(--color-fg-muted)",
+            }}
+          >
+            Próximo turno
+          </span>
         </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, justifyContent: "space-between" }}>
-          <p style={{ fontFamily: "monospace", fontSize: "1.8rem", fontWeight: 900, color: C.fgPrimary, letterSpacing: "-0.03em", lineHeight: 1 }}>
+          <p
+            className="t-mono"
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              color: "var(--color-fg-primary)",
+              letterSpacing: "var(--tracking-tight)",
+              lineHeight: 1,
+            }}
+          >
             #{pad(turno.numero)}
           </p>
           <StatusBadge status={turno.status} />
         </div>
-        <p style={{ marginTop: 8, fontSize: "0.8rem", fontWeight: 600, color: C.fgSecondary }}>{shipCode}</p>
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: "var(--text-body)",
+            fontWeight: 600,
+            color: "var(--color-fg-primary)",
+            letterSpacing: "var(--tracking-tight)",
+          }}
+        >
+          {shipCode}
+        </p>
         <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <TimePill label="Inicio" value={shortTime(turno.fechaInicio)} color={C.cyan} />
-          <TimePill label="Fin"    value={shortTime(turno.fechaFin)}    color={C.fgMuted} />
+          <TimePill label="Fin"    value={shortTime(turno.fechaFin)} />
         </div>
       </div>
     </button>
@@ -362,26 +402,31 @@ const NextTurnoCard: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ tu
    FILTER SECTION
 ───────────────────────────────────────────── */
 const FilterSection: React.FC<{ value: StatusFilter; onChange: (v: StatusFilter) => void }> = ({ value, onChange }) => (
-  <div style={{
-    borderRadius: 18,
-    background: C.surface,
-    border: "1px solid var(--color-glass-medium)",
-    padding: "0.875rem 1rem",
-  }}>
+  <div
+    style={{
+      borderRadius: 16,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      padding: "0.875rem 1rem",
+    }}
+  >
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-      <span style={{ color: C.fgMuted }}>{Ico.filter()}</span>
-      <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.fgMuted }}>Filtrar por estado</span>
+      <span style={{ color: "var(--color-fg-muted)" }}>{Ico.filter()}</span>
+      <span
+        style={{
+          fontSize: "var(--text-eyebrow)",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "var(--tracking-eyebrow)",
+          color: "var(--color-fg-muted)",
+        }}
+      >
+        Filtrar por estado
+      </span>
     </div>
-    <div
-      style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 2 }}
-    >
+    <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
       {STATUS_FILTERS.map(({ value: v, label }) => {
         const isActive = value === v;
-        const cfg = v ? STATUS_CONFIG[v as TurnoStatus] : null;
-        const activeColor = cfg?.color ?? C.violet;
-        const activeFaint = cfg?.faint ?? C.violetFaint;
-        const activeBorder= cfg?.border ?? C.violetBorder;
-
         return (
           <button
             key={v}
@@ -390,14 +435,14 @@ const FilterSection: React.FC<{ value: StatusFilter; onChange: (v: StatusFilter)
             style={{
               flexShrink: 0,
               borderRadius: 9999,
-              padding: "6px 13px",
-              fontSize: "0.72rem",
-              fontWeight: isActive ? 700 : 500,
-              letterSpacing: isActive ? "0.02em" : "0.01em",
-              border: `1px solid ${isActive ? activeBorder : "var(--color-glass-medium)"}`,
-              background: isActive ? activeFaint : "var(--color-glass-subtle)",
-              color: isActive ? activeColor : C.fgSecondary,
-              transition: "all 160ms ease",
+              padding: "5px 12px",
+              fontSize: "var(--text-caption)",
+              fontWeight: 600,
+              letterSpacing: "var(--tracking-base)",
+              border: `1px solid ${isActive ? "var(--color-primary)" : "var(--color-border-hairline)"}`,
+              background: isActive ? "var(--color-primary)" : "var(--color-bg-elevated)",
+              color: isActive ? "#FFFFFF" : "var(--color-fg-secondary)",
+              transition: "background 140ms ease, color 140ms ease, border-color 140ms ease",
             }}
           >
             {label}
@@ -427,22 +472,41 @@ const ListSection: React.FC<{
   onPrev: () => void;
   onNext: () => void;
 }> = ({ items, isLoading, isFetching, error, page, totalPages, total, canGoPrev, canGoNext, isSupervisor, onRefetch, onNavigate, onPrev, onNext }) => (
-  <div style={{
-    borderRadius: 20,
-    background: C.surface,
-    border: "1px solid var(--color-glass-medium)",
-    overflow: "hidden",
-  }}>
+  <div
+    style={{
+      borderRadius: 16,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      overflow: "hidden",
+      boxShadow: "var(--shadow-card)",
+    }}
+  >
     {/* Section header */}
-    <div style={{ padding: "1rem 1.25rem 0.75rem", borderBottom: "1px solid var(--color-glass-soft)" }}>
+    <div style={{ padding: "0.875rem 1.125rem", borderBottom: "1px solid var(--color-border-hairline)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 3, height: 13, borderRadius: 2, background: C.violet, opacity: 0.9 }} />
-        <span style={{ fontSize: "0.575rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.violet }}>
+        <span
+          style={{
+            fontSize: "var(--text-eyebrow)",
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "var(--tracking-eyebrow)",
+            color: "var(--color-fg-muted)",
+          }}
+        >
           {isSupervisor ? "Agenda de turnos" : "Mis turnos"}
         </span>
         {total > 0 && (
-          <span style={{ marginLeft: "auto", fontSize: "0.6875rem", fontWeight: 600, color: C.fgMuted }}>
-            Pág. {page} de {totalPages}
+          <span
+            style={{
+              marginLeft: "auto",
+              fontSize: "var(--text-eyebrow)",
+              fontWeight: 600,
+              color: "var(--color-fg-muted)",
+              letterSpacing: "var(--tracking-eyebrow)",
+              textTransform: "uppercase",
+            }}
+          >
+            Pág. {page} / {totalPages}
           </span>
         )}
       </div>
@@ -506,52 +570,72 @@ const TurnoRow: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ turno, 
     <button
       type="button"
       onClick={onPress}
-      className="w-full text-left transition-all active:scale-[0.98]"
+      className="w-full text-left transition-colors active:translate-y-px"
       style={{
-        borderRadius: 16,
-        background: "rgba(255,255,255,0.025)",
-        border: `1px solid var(--color-glass-medium)`,
+        borderRadius: 12,
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-border-hairline)",
         borderLeft: `3px solid ${cfg.color}`,
         display: "flex", alignItems: "center", gap: 12,
         padding: "11px 12px",
-        position: "relative", overflow: "hidden",
       }}
     >
-      {/* Status dot column */}
-      <div style={{
-        width: 36, height: 36, borderRadius: 12, flexShrink: 0,
-        background: cfg.faint, border: `1px solid ${cfg.border}`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: cfg.color,
-      }}>
+      <div
+        style={{
+          width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+          background: cfg.faint, border: `1px solid ${cfg.border}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: cfg.color,
+        }}
+      >
         {isLive
-          ? <span className="live-pulse-dot" style={{ background: cfg.color, width: 8, height: 8 }} />
-          : <span style={{ fontSize: "0.875rem", fontWeight: 800 }}>{cfg.icon}</span>
+          ? <span className="live-pulse-dot" style={{ background: cfg.color, width: 7, height: 7 }} />
+          : <span style={{ fontSize: "var(--text-caption)", fontWeight: 700 }}>{cfg.icon}</span>
         }
       </div>
 
-      {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{ fontFamily: "monospace", fontSize: "0.9375rem", fontWeight: 900, color: C.fgPrimary, letterSpacing: "-0.02em" }}>
+          <span
+            className="t-mono"
+            style={{
+              fontSize: "var(--text-body)",
+              fontWeight: 700,
+              color: "var(--color-fg-primary)",
+              letterSpacing: "var(--tracking-tight)",
+            }}
+          >
             #{pad(turno.numero)}
           </span>
-          <span style={{ fontSize: "0.6875rem", color: C.fgSecondary, fontWeight: 500 }} className="truncate">
+          <span
+            className="truncate"
+            style={{
+              fontSize: "var(--text-caption)",
+              color: "var(--color-fg-muted)",
+              fontWeight: 500,
+            }}
+          >
             · {shipCode}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4 }}>
-          <span style={{ color: C.fgMuted, opacity: 0.6 }}>{Ico.clock(11)}</span>
-          <span style={{ fontSize: "0.65rem", color: C.fgMuted, fontWeight: 500 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 3 }}>
+          <span style={{ color: "var(--color-fg-muted)" }}>{Ico.clock(11)}</span>
+          <span
+            style={{
+              fontSize: "var(--text-eyebrow)",
+              color: "var(--color-fg-muted)",
+              fontWeight: 500,
+              letterSpacing: "0.02em",
+            }}
+          >
             {shortTime(turno.fechaInicio)} → {shortTime(turno.fechaFin)}
           </span>
         </div>
       </div>
 
-      {/* Right side */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
         <StatusBadge status={turno.status} small />
-        <span style={{ color: "rgba(255,255,255,0.2)" }}>{Ico.chevron(12)}</span>
+        <span style={{ color: "var(--color-fg-disabled)" }}>{Ico.chevron(12)}</span>
       </div>
     </button>
   );
@@ -563,27 +647,53 @@ const TurnoRow: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ turno, 
 const StatusBadge: React.FC<{ status: TurnoStatus; small?: boolean }> = ({ status, small }) => {
   const cfg = STATUS_CONFIG[status];
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      borderRadius: 9999,
-      padding: small ? "2px 7px" : "3px 9px",
-      background: cfg.faint, border: `1px solid ${cfg.border}`,
-      fontSize: small ? "0.58rem" : "0.625rem",
-      fontWeight: 700, color: cfg.color,
-    }}>
+    <span
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 4,
+        borderRadius: 9999,
+        padding: small ? "2px 7px" : "3px 8px",
+        background: cfg.faint,
+        border: `1px solid ${cfg.border}`,
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        letterSpacing: "0.02em",
+        color: cfg.color,
+      }}
+    >
       {cfg.label}
     </span>
   );
 };
 
 const TimePill: React.FC<{ label: string; value: string; color?: string }> = ({ label, value, color }) => (
-  <div style={{
-    display: "inline-flex", alignItems: "center", gap: 5,
-    borderRadius: 8, padding: "4px 9px",
-    background: "var(--color-glass-soft)", border: "1px solid var(--color-glass-medium)",
-  }}>
-    <span style={{ fontSize: "0.52rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: color ?? C.fgMuted }}>{label}</span>
-    <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: color ?? C.fgPrimary }}>{value}</span>
+  <div
+    style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      borderRadius: 8, padding: "3px 8px",
+      background: "var(--color-bg-subtle)",
+      border: "1px solid var(--color-border-hairline)",
+    }}
+  >
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        textTransform: "uppercase",
+        letterSpacing: "var(--tracking-eyebrow)",
+        color: "var(--color-fg-muted)",
+      }}
+    >
+      {label}
+    </span>
+    <span
+      style={{
+        fontSize: "var(--text-eyebrow)",
+        fontWeight: 600,
+        color: color ?? "var(--color-fg-primary)",
+      }}
+    >
+      {value}
+    </span>
   </div>
 );
 
@@ -591,9 +701,9 @@ const SkeletonRow: React.FC<{ delay: number }> = ({ delay }) => (
   <div
     className="animate-pulse"
     style={{
-      height: 62, borderRadius: 16,
-      background: "var(--color-glass-subtle)",
-      border: "1px solid var(--color-glass-soft)",
+      height: 56, borderRadius: 12,
+      background: "var(--color-bg-subtle)",
+      border: "1px solid var(--color-border-hairline)",
       animationDelay: `${delay}ms`,
     }}
   />
@@ -601,11 +711,36 @@ const SkeletonRow: React.FC<{ delay: number }> = ({ delay }) => (
 
 const EmptyTurnos: React.FC = () => (
   <div style={{ padding: "2rem 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-    <div style={{ width: 52, height: 52, borderRadius: 16, background: C.violetFaint, border: `1px solid ${C.violetBorder}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.violet }}>
-      {Ico.ticket(24)}
+    <div
+      style={{
+        width: 48, height: 48, borderRadius: 12,
+        background: "var(--color-primary-soft)",
+        border: "1px solid var(--color-primary-soft)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "var(--color-primary)",
+      }}
+    >
+      {Ico.ticket(22)}
     </div>
-    <p style={{ fontSize: "0.875rem", fontWeight: 700, color: C.fgPrimary }}>Sin turnos</p>
-    <p style={{ fontSize: "0.75rem", color: C.fgMuted, textAlign: "center", maxWidth: 220 }}>
+    <p
+      style={{
+        fontSize: "var(--text-body)",
+        fontWeight: 600,
+        color: "var(--color-fg-primary)",
+        letterSpacing: "var(--tracking-tight)",
+      }}
+    >
+      Sin turnos
+    </p>
+    <p
+      style={{
+        fontSize: "var(--text-caption)",
+        color: "var(--color-fg-muted)",
+        textAlign: "center",
+        maxWidth: 240,
+        lineHeight: "var(--leading-base)",
+      }}
+    >
       Cuando existan turnos aparecerán aquí.
     </p>
   </div>
@@ -620,13 +755,14 @@ const PaginationBtn: React.FC<{ label: string; icon: React.ReactElement; iconRig
     disabled={disabled}
     style={{
       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-      padding: "10px 14px", borderRadius: 14,
-      background: disabled ? "var(--color-glass-subtle)" : "var(--color-primary-glow)",
-      border: `1px solid ${disabled ? "var(--color-glass-soft)" : "var(--color-primary-glow)"}`,
-      color: disabled ? "rgba(255,255,255,0.2)" : C.violet,
-      fontSize: "0.78rem", fontWeight: 600,
+      padding: "9px 14px", borderRadius: 10,
+      background: "var(--color-bg-elevated)",
+      border: "1px solid var(--color-border-hairline)",
+      color: disabled ? "var(--color-fg-disabled)" : "var(--color-fg-primary)",
+      fontSize: "var(--text-caption)",
+      fontWeight: 600,
       cursor: disabled ? "not-allowed" : "pointer",
-      transition: "all 160ms ease",
+      transition: "background 140ms ease, border-color 140ms ease",
     }}
   >
     {!iconRight && icon}

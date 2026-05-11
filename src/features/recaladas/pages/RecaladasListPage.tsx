@@ -16,8 +16,8 @@ import type {
 ───────────────────────────────────────────── */
 const C = {
   cyan:         "var(--color-info)",
-  cyanFaint:    "rgba(56,189,248,0.10)",
-  cyanBorder:   "rgba(56,189,248,0.26)",
+  cyanFaint:    "var(--color-info-soft)",
+  cyanBorder:   "var(--color-info-border)",
   amber:        "var(--color-accent)",
   amberFaint:   "var(--color-accent-glow)",
   amberBorder:  "var(--color-accent-glow)",
@@ -26,7 +26,7 @@ const C = {
   tealBorder:   "var(--color-success-soft)",
   danger:       "var(--color-danger)",
   dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "rgba(244,63,94,0.26)",
+  dangerBorder: "var(--color-danger-border)",
   violet:       "var(--color-primary)",
   violetFaint:  "var(--color-primary-glow)",
   violetBorder: "var(--color-primary-glow)",
@@ -109,69 +109,43 @@ const RecaladasListPage: React.FC = () => {
       <IonContent scrollY={true}>
         <div style={{ minHeight: "100vh", background: C.bg, paddingBottom: "1.5rem" }}>
 
-          {/* ── Hero ── */}
-          <div className="relative overflow-hidden" style={{
-            background: "var(--gradient-hero-main) 0%, var(--color-bg-base) 60%, var(--color-bg-base) 100%)",
-            borderBottom: "1px solid rgba(56,189,248,0.13)",
-          }}>
-            <div style={{ position: "absolute", top: -70, left: -50, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, rgba(56,189,248,0.13) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", top: 0, right: -30, width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(circle, var(--color-primary-glow) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, rgba(56,189,248,0.04) 1px, transparent 1px)", backgroundSize: "22px 22px", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 480, margin: "0 auto", padding: "52px 1.25rem 0" }}>
 
-            <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", padding: "2.5rem 1.25rem 1.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 16, flexShrink: 0,
-                    background: "linear-gradient(135deg, var(--color-info) 0%, var(--color-info) 100%)",
-                    boxShadow: "0 6px 22px rgba(56,189,248,0.42)",
-                    display: "flex", alignItems: "center", justifyContent: "center", color: "white",
-                  }}>
-                    {Ico.ship(22)}
-                  </div>
-                  <div>
-                    <p style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: C.cyan }}>Operaciones</p>
-                    <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: C.fg, letterSpacing: "-0.02em", lineHeight: 1.1, marginTop: 3 }}>Recaladas</h1>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {total > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "7px 13px", borderRadius: 13, background: C.cyanFaint, border: `1px solid ${C.cyanBorder}` }}>
-                      <span style={{ fontSize: "1.35rem", fontWeight: 900, color: C.cyan, letterSpacing: "-0.04em", lineHeight: 1 }}>{total}</span>
-                      <span style={{ fontSize: "0.52rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: C.cyan, opacity: 0.7, marginTop: 2 }}>total</span>
-                    </div>
-                  )}
-                  {isSupervisor && (
-                    <button
-                      type="button"
-                      onClick={() => history.push("/recaladas/nueva")}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 6,
-                        borderRadius: 13, padding: "9px 14px",
-                        background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
-                        boxShadow: `0 4px 16px ${C.violetGlow}`,
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        color: "white", fontSize: "0.78rem", fontWeight: 700,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {Ico.plus()} Nueva
-                    </button>
-                  )}
-                </div>
+            {/* ── Page Header ── */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+              <div>
+                <p style={{ margin: 0, fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: C.cyan }}>Operaciones</p>
+                <h1 style={{ margin: "2px 0 0", fontSize: "1.5rem", fontWeight: 800, color: C.fg, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Recaladas</h1>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {total > 0 && (
+                  <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: C.fgMuted }}>{total} total</span>
+                )}
+                {isSupervisor && (
+                  <button
+                    type="button"
+                    onClick={() => history.push("/recaladas/nueva")}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      borderRadius: 12, padding: "9px 14px",
+                      background: "var(--color-primary)",
+                      border: "none",
+                      color: "white", fontSize: "0.8125rem", fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {Ico.plus()} Nueva
+                  </button>
+                )}
               </div>
             </div>
-          </div>
-
-          <div style={{ maxWidth: 480, margin: "0 auto", padding: "1.25rem 1.25rem 0" }}>
 
             {/* ── Search + filters ── */}
             <div className="animate-fade-up" style={{ animationFillMode: "backwards" }}>
               <div style={{ borderRadius: 18, background: C.surface, border: "1px solid var(--color-glass-medium)", padding: "0.875rem 1rem", marginBottom: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                   <span style={{ color: C.fgMuted }}>{Ico.filter()}</span>
-                  <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.fgMuted }}>Búsqueda y filtros</span>
+                  <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: C.fgMuted }}>Búsqueda y filtros</span>
                 </div>
 
                 {/* Status pills */}
@@ -229,7 +203,7 @@ const RecaladasListPage: React.FC = () => {
                     type="submit"
                     style={{
                       marginTop: 8, width: "100%", borderRadius: 13, padding: "11px",
-                      background: "rgba(56,189,248,0.10)", border: `1px solid ${C.cyanBorder}`,
+                      background: C.cyanFaint, border: `1px solid ${C.cyanBorder}`,
                       color: C.cyan, fontSize: "0.825rem", fontWeight: 700, cursor: "pointer",
                     }}
                   >
@@ -245,7 +219,7 @@ const RecaladasListPage: React.FC = () => {
                 {/* Header */}
                 <div style={{ padding: "0.9rem 1.25rem 0.7rem", borderBottom: "1px solid var(--color-glass-soft)", display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 3, height: 13, borderRadius: 2, background: C.cyan, opacity: 0.9 }} />
-                  <span style={{ fontSize: "0.565rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: C.cyan }}>Agenda operativa</span>
+                  <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: C.cyan }}>Agenda operativa</span>
                   {total > 0 && (
                     <span style={{ marginLeft: "auto", fontSize: "0.6875rem", fontWeight: 600, color: C.fgMuted }}>Pág. {page} de {totalPages}</span>
                   )}
@@ -305,7 +279,7 @@ const RecaladaRow: React.FC<{ recalada: RecaladaItem; onPress: () => void }> = (
       className="w-full text-left transition-all active:scale-[0.98]"
       style={{
         borderRadius: 16, padding: "12px 13px",
-        background: "rgba(255,255,255,0.025)",
+        background: "var(--color-glass-subtle)",
         border: "1px solid var(--color-glass-medium)",
         borderLeft: `3px solid ${cfg.color}`,
         display: "flex", alignItems: "center", gap: 12,
@@ -327,7 +301,7 @@ const RecaladaRow: React.FC<{ recalada: RecaladaItem; onPress: () => void }> = (
       <div style={{ flex: 1, minWidth: 0 }}>
         <p className="truncate" style={{ fontSize: "0.875rem", fontWeight: 700, color: C.fg }}>{recalada.buque.nombre}</p>
         <p className="truncate" style={{ fontSize: "0.6875rem", fontWeight: 600, color: C.fgSec, marginTop: 2 }}>{recalada.codigoRecalada}</p>
-        <p className="truncate" style={{ fontSize: "0.625rem", color: C.fgMuted, marginTop: 2 }}>
+        <p className="truncate" style={{ fontSize: "0.6875rem", color: C.fgMuted, marginTop: 2 }}>
           {Ico.anchor()} Llegada: {shortDt(recalada.fechaLlegada)}
         </p>
       </div>
@@ -338,11 +312,11 @@ const RecaladaRow: React.FC<{ recalada: RecaladaItem; onPress: () => void }> = (
           display: "inline-flex", alignItems: "center",
           borderRadius: 9999, padding: "2px 8px",
           background: cfg.faint, border: `1px solid ${cfg.border}`,
-          fontSize: "0.58rem", fontWeight: 700, color: cfg.color,
+          fontSize: "0.6875rem", fontWeight: 700, color: cfg.color,
         }}>
           {cfg.label}
         </span>
-        <span style={{ color: "rgba(255,255,255,0.2)" }}>{Ico.chevron()}</span>
+        <span style={{ color: "var(--color-fg-disabled)" }}>{Ico.chevron()}</span>
       </div>
     </button>
   );
@@ -365,11 +339,10 @@ const EmptyRecaladas: React.FC<{ hasFilters: boolean; isSupervisor: boolean; onN
         type="button"
         onClick={onNew}
         style={{
-          marginTop: 4, borderRadius: 13, padding: "10px 20px",
-          background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          color: "white", fontSize: "0.825rem", fontWeight: 700, cursor: "pointer",
-          boxShadow: `0 6px 18px ${C.violetGlow}`,
+          marginTop: 4, borderRadius: 12, padding: "10px 20px",
+          background: "var(--color-primary)",
+          border: "none",
+          color: "white", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer",
         }}
       >
         Crear recalada
@@ -386,10 +359,10 @@ const PagBtn: React.FC<{ label: string; icon: React.ReactElement; iconRight?: bo
     style={{
       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
       padding: "10px 14px", borderRadius: 13,
-      background: disabled ? "var(--color-glass-subtle)" : C.cyanFaint,
-      border: `1px solid ${disabled ? "var(--color-glass-soft)" : C.cyanBorder}`,
-      color: disabled ? "rgba(255,255,255,0.18)" : C.cyan,
-      fontSize: "0.78rem", fontWeight: 600,
+      background: "var(--color-glass-subtle)",
+      border: "1px solid var(--color-glass-medium)",
+      color: disabled ? "var(--color-fg-disabled)" : C.fg,
+      fontSize: "0.8125rem", fontWeight: 600,
       cursor: disabled ? "not-allowed" : "pointer",
     }}
   >

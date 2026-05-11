@@ -12,8 +12,6 @@ export interface WarningBannerProps {
 const iconWrapStyle: CSSProperties = {
   background: "var(--color-warning-soft)",
   border: "1px solid var(--color-warning-border)",
-  boxShadow:
-    "inset 0 1px 0 var(--color-glass-medium), 0 8px 18px var(--color-warning-soft)",
 };
 
 const WarningBanner: React.FC<WarningBannerProps> = ({
@@ -30,7 +28,7 @@ const WarningBanner: React.FC<WarningBannerProps> = ({
     <div className="flex min-w-0 items-start gap-3">
       <div
         aria-hidden="true"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[var(--color-warning)]"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-[var(--color-warning)]"
         style={iconWrapStyle}
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

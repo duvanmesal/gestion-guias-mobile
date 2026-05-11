@@ -60,11 +60,11 @@ const C = {
   amberFaint:   "var(--color-accent-glow)",
   amberBorder:  "var(--color-accent-glow)",
   cyan:         "var(--color-info)",
-  cyanFaint:    "rgba(56,189,248,0.09)",
-  cyanBorder:   "rgba(56,189,248,0.25)",
+  cyanFaint:    "var(--color-info-soft)",
+  cyanBorder:   "var(--color-info-border)",
   danger:       "var(--color-danger)",
   dangerFaint:  "var(--color-danger-soft)",
-  dangerBorder: "rgba(244,63,94,0.26)",
+  dangerBorder: "var(--color-danger-border)",
   teal:         "var(--color-success)",
   fg:           "var(--color-fg-primary)",
   fgSec:        "var(--color-fg-secondary)",
@@ -225,10 +225,10 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             padding: "15px 20px", borderRadius: 16, width: "100%",
             background: (isLoading || (isEdit && !isDirty))
-              ? "var(--color-primary-glow)"
-              : "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 55%, var(--color-primary-dark) 100%)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: (isLoading || (isEdit && !isDirty)) ? "none" : `0 8px 24px ${C.violetGlow}, inset 0 1px 0 rgba(255,255,255,0.18)`,
+              ? "var(--color-primary-soft)"
+              : "var(--color-primary)",
+            border: "none",
+            boxShadow: "none",
             color: "white", fontSize: "0.9rem", fontWeight: 800,
             cursor: (isLoading || (isEdit && !isDirty)) ? "not-allowed" : "pointer",
           }}
@@ -245,7 +245,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
           onClick={onCancel}
           style={{
             padding: "13px 20px", borderRadius: 14, width: "100%",
-            background: "var(--color-glass-soft)", border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--color-glass-soft)", border: "1px solid var(--color-glass-medium)",
             color: C.fgSec, fontSize: "0.875rem", fontWeight: 600,
             cursor: isLoading ? "not-allowed" : "pointer",
           }}
@@ -270,7 +270,7 @@ const FormSection: React.FC<{ title: string; color: string; children: React.Reac
   <div style={{ borderRadius: 18, background: "var(--color-bg-elevated)", border: "1px solid var(--color-glass-medium)", padding: "1.125rem 1.125rem" }}>
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "0.875rem" }}>
       <div style={{ width: 3, height: 13, borderRadius: 2, background: color, opacity: 0.9, flexShrink: 0 }} />
-      <span style={{ fontSize: "0.555rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color }}>{title}</span>
+      <span style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color }}>{title}</span>
       <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${color}28, transparent)` }} />
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -281,7 +281,7 @@ const FormSection: React.FC<{ title: string; color: string; children: React.Reac
 
 const Field: React.FC<{ label: string; error?: string; children: React.ReactNode }> = ({ label, error, children }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-    <label style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--color-fg-muted)" }}>
+    <label style={{ fontSize: "0.6875rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-fg-muted)" }}>
       {label}
     </label>
     {children}
