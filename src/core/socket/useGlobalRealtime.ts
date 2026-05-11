@@ -37,10 +37,16 @@ interface CatalogSocketPayload {
 }
 
 interface AtencionNuevaPayload {
+  notificationId?: string
   atencionId: number
   recaladaId?: number
   fechaInicio?: string
   fechaFin?: string
+}
+
+interface RecaladaNuevaPayload {
+  notificationId?: string
+  recaladaId: number
 }
 
 interface DisponibilidadPenalizadoPayload {
@@ -165,7 +171,15 @@ export function useGlobalRealtime() {
     const handleAtencionNueva = (payload: AtencionNuevaPayload) => {
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
       queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
+      if (payload.recaladaId) {
+        queryClient.invalidateQueries({ queryKey: recaladasKeys.atenciones(payload.recaladaId) })
+      }
       void showToast("Nueva atención disponible", "primary")
+    }
+
+    const handleRecaladaNueva = (payload: RecaladaNuevaPayload) => {
+      invalidateRecaladas(payload)
+      void showToast("Nueva recalada programada", "primary")
     }
 
     const handleDisponibilidadPenalizado = (payload: DisponibilidadPenalizadoPayload) => {
@@ -194,6 +208,7 @@ export function useGlobalRealtime() {
     socket.on("disponibilidad:penalizado", handleDisponibilidadPenalizado)
 
     socket.on("recalada:created", invalidateRecaladas)
+    socket.on("recalada:nueva", handleRecaladaNueva)
     socket.on("recalada:updated", invalidateRecaladas)
     socket.on("recalada:arrived", invalidateRecaladas)
     socket.on("recalada:departed", invalidateRecaladas)
@@ -238,6 +253,7 @@ export function useGlobalRealtime() {
       socket.off("disponibilidad:penalizado", handleDisponibilidadPenalizado)
 
       socket.off("recalada:created", invalidateRecaladas)
+      socket.off("recalada:nueva", handleRecaladaNueva)
       socket.off("recalada:updated", invalidateRecaladas)
       socket.off("recalada:arrived", invalidateRecaladas)
       socket.off("recalada:departed", invalidateRecaladas)

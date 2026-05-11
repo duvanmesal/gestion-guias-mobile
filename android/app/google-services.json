@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "388798112241",
+    "project_id": "gestion-guias",
+    "storage_bucket": "gestion-guias.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388798112241:android:d391e958152c3ff6d1e450",
+        "android_client_info": {
+          "package_name": "com.gestionguias.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHARocbCFWGpgCbWF69QC8g5sYx_euURs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

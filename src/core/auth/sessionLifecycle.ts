@@ -4,6 +4,7 @@ import { tokenService } from "./tokenService";
 import { useSessionStore } from "./sessionStore";
 import { socketClient } from "../socket/socketClient";
 import type { AuthNotice } from "./types";
+import { deactivateCurrentPushToken } from "../notifications/pushDeviceToken";
 
 const PLATFORM_HEADER = { "X-Client-Platform": "MOBILE" } as const;
 
@@ -47,6 +48,7 @@ export async function finalizeClientLogout(
 
 export async function logoutCurrentSession(): Promise<void> {
   try {
+    await deactivateCurrentPushToken();
     await request<void>("/auth/logout", {
       method: "POST",
       headers: {
@@ -68,6 +70,7 @@ export async function logoutAllSessions(
   options: LogoutAllOptions
 ): Promise<void> {
   try {
+    await deactivateCurrentPushToken();
     await request<void>("/auth/logout-all", {
       method: "POST",
       body: {
