@@ -397,7 +397,7 @@ El **accessToken** vive únicamente en memoria.
 
 ### Regla 2
 
-El **refreshToken** vive persistido en storage seguro.
+El **refreshToken** vive persistido en storage seguro. La continuidad de sesión móvil depende de ese refresh token y de la expiración absoluta enviada por backend: máximo 15 días desde el login, sin extenderse por actividad o refresh.
 
 ### Regla 3
 
