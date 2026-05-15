@@ -91,6 +91,12 @@ export interface GuiaOverview {
   atencionesDisponibles: AtencionDisponibleLite[];
 }
 
+export interface SupervisorAlert {
+  code: "OVERDUE_RECALADAS" | "UNASSIGNED_TURNOS" | "CANCELED_TURNOS" | string;
+  label: string;
+  count: number;
+}
+
 export interface SupervisorOverview {
   counts: {
     recaladas: number;
@@ -101,6 +107,7 @@ export interface SupervisorOverview {
     turnosInProgress?: number;
     turnosDone?: number;
     turnosCanceled?: number;
+    overdueRecaladas?: number;
   };
   guides?: {
     activos: number;
@@ -108,6 +115,7 @@ export interface SupervisorOverview {
     libres: number;
   };
   turnosBreakdown?: Record<string, number>;
+  alerts?: SupervisorAlert[];
   upcoming: DashboardMilestone[];
 }
 

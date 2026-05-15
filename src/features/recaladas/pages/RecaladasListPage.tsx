@@ -1,6 +1,6 @@
 import { IonContent, IonPage } from "@ionic/react";
-import { useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import ErrorState from "../../../ui/components/ErrorState";
 import { useRecaladasList } from "../hooks/useRecaladasList";
@@ -77,21 +77,40 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
 ───────────────────────────────────────────── */
 const RecaladasListPage: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const user = useSessionStore((s) => s.user);
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   useRecaladaSocket();
 
+  const initialOverdue = useMemo(() => {
+    const v = new URLSearchParams(location.search).get("overdueDeparture");
+    return v === "1" || v === "true";
+  }, [location.search]);
+
   const [draft,        setDraft]        = useState("");
   const [search,       setSearch]       = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
+  const [overdueOnly,  setOverdueOnly]  = useState<boolean>(initialOverdue);
   const [page,         setPage]         = useState(1);
+
+  // Mantener overdueOnly sincronizado con la URL si cambia (deep-link desde dashboard).
+  useEffect(() => {
+    const v = new URLSearchParams(location.search).get("overdueDeparture");
+    const fromUrl = v === "1" || v === "true";
+    if (fromUrl !== overdueOnly) {
+      setOverdueOnly(fromUrl);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   const queryParams = useMemo<ListRecaladasParams>(() => ({
     q: search.trim() || undefined,
     operationalStatus: statusFilter || undefined,
+    overdueDeparture: overdueOnly || undefined,
     page,
     pageSize: PAGE_SIZE,
-  }), [page, search, statusFilter]);
+  }), [page, search, statusFilter, overdueOnly]);
 
   const { data, isLoading, isFetching, error, refetch } = useRecaladasList(queryParams);
 
@@ -100,9 +119,20 @@ const RecaladasListPage: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canPrev    = page > 1;
   const canNext    = page < totalPages;
-  const hasFilters = Boolean(search.trim() || statusFilter);
+  const hasFilters = Boolean(search.trim() || statusFilter || overdueOnly);
 
   function clearSearch() { setDraft(""); setSearch(""); setPage(1); }
+
+  function clearOverdue() {
+    setOverdueOnly(false);
+    setPage(1);
+    const params = new URLSearchParams(location.search);
+    params.delete("overdueDeparture");
+    history.replace({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : "",
+    });
+  }
 
   return (
     <IonPage>
@@ -139,6 +169,77 @@ const RecaladasListPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {overdueOnly && (
+              <div
+                className="animate-fade-up"
+                style={{
+                  marginBottom: "1rem",
+                  borderRadius: 16,
+                  padding: "12px 14px",
+                  background: C.dangerFaint,
+                  border: `1px solid ${C.dangerBorder}`,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 11,
+                    background: "var(--color-danger-soft)",
+                    border: `1px solid ${C.dangerBorder}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: C.danger,
+                    flexShrink: 0,
+                  }}
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 700, color: C.fg }}>
+                    Solo vencidas pendientes de zarpe
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: "0.7rem", color: C.fgMuted }}>
+                    Recaladas arribadas cuya salida programada ya venció.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={clearOverdue}
+                  style={{
+                    flexShrink: 0,
+                    borderRadius: 10,
+                    padding: "6px 10px",
+                    background: "transparent",
+                    border: `1px solid ${C.dangerBorder}`,
+                    color: C.danger,
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Quitar
+                </button>
+              </div>
+            )}
 
             {/* ── Search + filters ── */}
             <div className="animate-fade-up" style={{ animationFillMode: "backwards" }}>

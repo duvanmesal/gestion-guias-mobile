@@ -67,6 +67,7 @@ export interface RecaladaListMeta {
     operationalStatus?: RecaladaOperationalStatus;
     buqueId?: number;
     paisOrigenId?: number;
+    overdueDeparture?: boolean;
   };
 }
 
@@ -77,6 +78,8 @@ export interface ListRecaladasParams {
   buqueId?: number;
   paisOrigenId?: number;
   q?: string;
+  // Filtro operativo: recaladas ARRIVED cuyo zarpe programado ya venció.
+  overdueDeparture?: boolean;
   page?: number;
   pageSize?: number;
 }

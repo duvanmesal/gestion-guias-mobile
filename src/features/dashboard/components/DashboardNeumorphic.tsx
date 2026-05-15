@@ -773,10 +773,80 @@ const SupervisorContent: React.FC<{
   }
 
   const { counts } = overview;
+  const overdueRecaladas =
+    counts.overdueRecaladas ??
+    overview.alerts?.find((a) => a.code === "OVERDUE_RECALADAS")?.count ??
+    0;
 
   return (
     <>
-      <FadeCard delay={0}>
+      {overdueRecaladas > 0 && (
+        <FadeCard delay={0}>
+          <button
+            type="button"
+            onClick={() => onNavigate?.("/recaladas?overdueDeparture=true")}
+            className="w-full text-left active:scale-[0.99] transition-transform"
+            style={{
+              borderRadius: 16,
+              padding: "14px 16px",
+              background: P.dangerFaint,
+              border: `1px solid ${P.danger}`,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 12,
+                background: "var(--color-danger-soft)",
+                border: `1px solid ${P.danger}`,
+                color: P.danger,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {Ico.warning()}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 700, color: P.fgPrimary }}>
+                Recaladas vencidas pendientes de zarpe
+              </p>
+              <p
+                style={{
+                  margin: "3px 0 0",
+                  fontSize: "0.75rem",
+                  color: P.fgSecondary,
+                  lineHeight: 1.35,
+                }}
+              >
+                {overdueRecaladas === 1
+                  ? "1 recalada arribada cuya salida programada ya venció. Marca el zarpe."
+                  : `${overdueRecaladas} recaladas arribadas cuya salida programada ya venció. Marca el zarpe.`}
+              </p>
+            </div>
+            <span
+              style={{
+                flexShrink: 0,
+                borderRadius: 9999,
+                padding: "3px 9px",
+                background: P.danger,
+                color: "white",
+                fontSize: "0.75rem",
+                fontWeight: 800,
+              }}
+            >
+              {overdueRecaladas}
+            </span>
+          </button>
+        </FadeCard>
+      )}
+
+      <FadeCard delay={overdueRecaladas > 0 ? 60 : 0}>
         <Card className="p-5">
           <SectionDivider title="Operaciones del día" color={P.amber} />
           <div className="mt-4 grid grid-cols-2 gap-3">

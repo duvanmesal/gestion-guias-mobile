@@ -28,6 +28,7 @@ function buildListSearch(params: ListRecaladasParams): string {
     search.set("buqueId", String(params.buqueId));
   if (typeof params.paisOrigenId === "number")
     search.set("paisOrigenId", String(params.paisOrigenId));
+  if (params.overdueDeparture) search.set("overdueDeparture", "true");
   search.set("page", String(params.page ?? 1));
   search.set("pageSize", String(params.pageSize ?? 20));
   return search.toString();
