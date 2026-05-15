@@ -787,61 +787,152 @@ const SupervisorContent: React.FC<{
             onClick={() => onNavigate?.("/recaladas?overdueDeparture=true")}
             className="w-full text-left active:scale-[0.99] transition-transform"
             style={{
-              borderRadius: 16,
-              padding: "14px 16px",
-              background: P.dangerFaint,
-              border: `1px solid ${P.danger}`,
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 12,
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 18,
+              padding: "15px 16px 14px",
+              background:
+                "linear-gradient(135deg, var(--color-danger-soft) 0%, var(--color-bg-elevated) 65%, var(--color-danger-soft) 100%)",
+              border: "1px solid var(--color-danger-border)",
+              boxShadow: "var(--shadow-card)",
             }}
           >
+            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: P.danger }} />
             <div
+              aria-hidden
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
+                position: "absolute",
+                right: -32,
+                top: -32,
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
                 background: "var(--color-danger-soft)",
-                border: `1px solid ${P.danger}`,
-                color: P.danger,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
+                opacity: 0.55,
+                filter: "blur(28px)",
+                pointerEvents: "none",
               }}
-            >
-              {Ico.warning()}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 700, color: P.fgPrimary }}>
-                Recaladas vencidas pendientes de zarpe
-              </p>
-              <p
+            />
+
+            <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <div
                 style={{
-                  margin: "3px 0 0",
-                  fontSize: "0.75rem",
-                  color: P.fgSecondary,
-                  lineHeight: 1.35,
+                  position: "relative",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 13,
+                  background: "var(--color-danger-soft)",
+                  border: "1px solid var(--color-danger-border)",
+                  color: P.danger,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                {overdueRecaladas === 1
-                  ? "1 recalada arribada cuya salida programada ya venció. Marca el zarpe."
-                  : `${overdueRecaladas} recaladas arribadas cuya salida programada ya venció. Marca el zarpe.`}
-              </p>
+                <span className="live-pulse-dot" style={{ position: "absolute", top: 4, right: 4, width: 6, height: 6, background: P.danger }} />
+                {Ico.warning()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span
+                    style={{
+                      fontSize: "0.6rem",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.14em",
+                      color: P.danger,
+                    }}
+                  >
+                    Atención operativa
+                  </span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      borderRadius: 9999,
+                      padding: "2px 7px",
+                      background: "var(--color-danger-soft)",
+                      border: "1px solid var(--color-danger-border)",
+                      color: P.danger,
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: P.danger }} />
+                    ARRIVED
+                  </span>
+                </div>
+                <p style={{ margin: "6px 0 0", fontSize: "0.92rem", fontWeight: 800, color: P.fgPrimary, letterSpacing: "-0.01em" }}>
+                  Recaladas pendientes de zarpe
+                </p>
+                <p
+                  style={{
+                    margin: "3px 0 0",
+                    fontSize: "0.745rem",
+                    color: P.fgSecondary,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {overdueRecaladas === 1
+                    ? "1 buque arribado ya superó su salida programada."
+                    : `${overdueRecaladas} buques arribados ya superaron su salida programada.`}{" "}
+                  Abre la lista filtrada para cerrarlos.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                <span
+                  className="t-mono"
+                  style={{
+                    minWidth: 36,
+                    borderRadius: 11,
+                    padding: "7px 9px",
+                    background: P.danger,
+                    color: "white",
+                    fontSize: "1.05rem",
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    textAlign: "center",
+                    boxShadow: "0 6px 14px -6px var(--color-danger-soft)",
+                  }}
+                >
+                  {overdueRecaladas}
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.54rem",
+                    fontWeight: 800,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: P.danger,
+                  }}
+                >
+                  vencidas
+                </span>
+              </div>
             </div>
-            <span
+
+            <div
               style={{
-                flexShrink: 0,
-                borderRadius: 9999,
-                padding: "3px 9px",
-                background: P.danger,
-                color: "white",
-                fontSize: "0.75rem",
-                fontWeight: 800,
+                position: "relative",
+                marginTop: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+                paddingTop: 10,
+                borderTop: "1px dashed var(--color-danger-border)",
               }}
             >
-              {overdueRecaladas}
-            </span>
+              <span style={{ fontSize: "0.66rem", fontWeight: 600, color: P.fgMuted }}>
+                Toca para revisar el listado filtrado
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: P.danger, fontSize: "0.72rem", fontWeight: 800 }}>
+                Revisar
+                {Ico.arrowRight(12)}
+              </span>
+            </div>
           </button>
         </FadeCard>
       )}
