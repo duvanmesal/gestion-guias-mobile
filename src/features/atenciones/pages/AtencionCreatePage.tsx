@@ -1,9 +1,10 @@
 import { IonContent, IonPage } from "@ionic/react";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import Button from "../../../ui/components/Button";
 import PageSectionHeader from "../../../ui/components/PageSectionHeader";
 import SurfaceCard from "../../../ui/components/SurfaceCard";
+import { useRecalada } from "../../recaladas/hooks/useRecalada";
 import { useCreateAtencion } from "../hooks/useCreateAtencion";
 
 const inputClassName =
@@ -15,6 +16,20 @@ const inputStyle = {
   color: "var(--color-fg-primary)",
   boxShadow: "var(--shadow-neu-inset)",
 } as const;
+
+function toLocalInputValue(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function addHours(iso: string, hours: number): string {
+  const d = new Date(iso);
+  d.setHours(d.getHours() + hours);
+  return d.toISOString();
+}
 
 const AtencionCreatePage: React.FC = () => {
   const history = useHistory();
@@ -34,6 +49,30 @@ const AtencionCreatePage: React.FC = () => {
   const [turnosTotal, setTurnosTotal] = useState<string>("1");
   const [descripcion, setDescripcion] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [datesHydrated, setDatesHydrated] = useState(false);
+
+  const recaladaIdForQuery = useMemo(() => {
+    const parsed = Number(recaladaId);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  }, [recaladaId]);
+  const recaladaQuery = useRecalada(recaladaIdForQuery);
+  const recalada = recaladaQuery.data;
+
+  useEffect(() => {
+    setDatesHydrated(false);
+  }, [recaladaIdForQuery]);
+
+  useEffect(() => {
+    if (!datesHydrated && recalada?.fechaLlegada) {
+      setFechaInicio(toLocalInputValue(recalada.fechaLlegada));
+      setFechaFin(
+        toLocalInputValue(
+          recalada.fechaSalida ?? addHours(recalada.fechaLlegada, 4)
+        )
+      );
+      setDatesHydrated(true);
+    }
+  }, [datesHydrated, recalada]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +92,21 @@ const AtencionCreatePage: React.FC = () => {
     if (new Date(fechaFin) < new Date(fechaInicio)) {
       setSubmitError("La fecha fin debe ser mayor o igual al inicio.");
       return;
+    }
+    if (recalada?.fechaLlegada) {
+      const start = new Date(fechaInicio);
+      const end = new Date(fechaFin);
+      const llegada = new Date(recalada.fechaLlegada);
+      const salida = recalada.fechaSalida ? new Date(recalada.fechaSalida) : null;
+
+      if (start < llegada || end < llegada) {
+        setSubmitError("La atención debe iniciar y terminar después de la llegada de la recalada.");
+        return;
+      }
+      if (salida && (start > salida || end > salida)) {
+        setSubmitError("La atención debe quedar dentro de la salida programada de la recalada.");
+        return;
+      }
     }
     if (!Number.isFinite(turnosTotalNum) || turnosTotalNum < 1) {
       setSubmitError("El cupo de turnos debe ser al menos 1.");

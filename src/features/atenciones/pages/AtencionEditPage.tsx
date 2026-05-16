@@ -109,6 +109,11 @@ const AtencionEditPage: React.FC = () => {
     e.preventDefault();
     setSubmitError(null);
 
+    if (!atencion) {
+      setSubmitError("No pude cargar la atención para editar.");
+      return;
+    }
+
     const turnosTotalNum = Number(turnosTotal);
 
     if (!fechaInicio || !fechaFin) {
@@ -118,6 +123,23 @@ const AtencionEditPage: React.FC = () => {
     if (new Date(fechaFin) < new Date(fechaInicio)) {
       setSubmitError("La fecha fin debe ser mayor o igual al inicio.");
       return;
+    }
+    if (atencion.recalada?.fechaLlegada) {
+      const start = new Date(fechaInicio);
+      const end = new Date(fechaFin);
+      const llegada = new Date(atencion.recalada.fechaLlegada);
+      const salida = atencion.recalada.fechaSalida
+        ? new Date(atencion.recalada.fechaSalida)
+        : null;
+
+      if (start < llegada || end < llegada) {
+        setSubmitError("La atención debe iniciar y terminar después de la llegada de la recalada.");
+        return;
+      }
+      if (salida && (start > salida || end > salida)) {
+        setSubmitError("La atención debe quedar dentro de la salida programada de la recalada.");
+        return;
+      }
     }
     if (!Number.isFinite(turnosTotalNum) || turnosTotalNum < 1) {
       setSubmitError("El cupo de turnos debe ser al menos 1.");
