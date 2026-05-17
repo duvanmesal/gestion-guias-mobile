@@ -4,6 +4,7 @@ import type {
   CompleteProfileRequest,
   CompleteProfileResponse,
   GuidesLookupResponse,
+  GuideAvailabilityResponse,
   SessionsResponse,
   UpdateMeRequest,
   UpdateMeResponse,
@@ -31,8 +32,18 @@ export function updateMe(
   });
 }
 
-export function getGuides(): Promise<ApiResult<GuidesLookupResponse>> {
-  return authRequest<GuidesLookupResponse>("/users/guides", {
+export function getGuides(params?: {
+  activo?: boolean;
+  disponible?: boolean;
+  penalizado?: boolean;
+}): Promise<ApiResult<GuidesLookupResponse>> {
+  const search = new URLSearchParams();
+  if (typeof params?.activo === "boolean") search.set("activo", String(params.activo));
+  if (typeof params?.disponible === "boolean") search.set("disponible", String(params.disponible));
+  if (typeof params?.penalizado === "boolean") search.set("penalizado", String(params.penalizado));
+  const qs = search.toString();
+
+  return authRequest<GuidesLookupResponse>(`/users/guides${qs ? `?${qs}` : ""}`, {
     headers: { ...PLATFORM_HEADER },
   });
 }
@@ -43,6 +54,23 @@ export function getMe(): Promise<ApiResult<UserMeResponse>> {
     headers: {
       "X-Client-Platform": "MOBILE",
     },
+  });
+}
+
+export function getMyAvailability(): Promise<ApiResult<GuideAvailabilityResponse>> {
+  return authRequest<GuideAvailabilityResponse>("/users/me/disponibilidad", {
+    method: "GET",
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function updateMyAvailability(
+  disponible: boolean
+): Promise<ApiResult<GuideAvailabilityResponse>> {
+  return authRequest<GuideAvailabilityResponse>("/users/me/disponibilidad", {
+    method: "PATCH",
+    body: { disponible },
+    headers: { ...PLATFORM_HEADER },
   });
 }
 

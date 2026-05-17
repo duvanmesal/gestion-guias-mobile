@@ -586,6 +586,9 @@ const GuideContent: React.FC<{
 }> = ({ guia, lastUpdatedAt, onNavigate }) => (
   <>
     <FadeCard delay={0}>
+      <GuideAvailabilityCard guia={guia} onNavigate={onNavigate} />
+    </FadeCard>
+    <FadeCard delay={0}>
       <GuideFocusCard onNavigate={onNavigate} turno={guia?.activeTurno ?? null} />
     </FadeCard>
     <FadeCard delay={80}>
@@ -596,6 +599,47 @@ const GuideContent: React.FC<{
     </FadeCard>
   </>
 );
+
+const GuideAvailabilityCard: React.FC<{
+  guia?: DashboardOverviewResponse["guia"];
+  onNavigate?: (path: string) => void;
+}> = ({ guia, onNavigate }) => {
+  const mode = guia?.assignmentMode ?? "MANUAL_RECLAMO";
+  const availability = guia?.disponibilidad;
+  const penalized = availability?.pendingPenalty ?? false;
+  const available = availability?.disponibleParaTurnos ?? false;
+  const toneColor = penalized ? P.danger : available ? P.teal : P.fgMuted;
+
+  return (
+    <Card className="p-5">
+      <SectionDivider title="Disponibilidad" color={toneColor} />
+      <div className="mt-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-bold" style={{ color: P.fgPrimary }}>
+            {penalized ? "Penalización pendiente" : available ? "Disponible para turnos" : "No disponible"}
+          </p>
+          <p className="mt-1 text-xs leading-5" style={{ color: P.fgMuted }}>
+            {mode === "FIFO_GLOBAL"
+              ? "FIFO automático activo. La asignación sale del orden global."
+              : "Reclamo manual activo. Marca disponibilidad para tomar cupos."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onNavigate?.("/profile")}
+          className="shrink-0 rounded-xl px-3 py-2 text-xs font-bold"
+          style={{
+            background: "var(--color-bg-subtle)",
+            border: "1px solid var(--color-border-hairline)",
+            color: P.fgPrimary,
+          }}
+        >
+          Mi cuenta
+        </button>
+      </div>
+    </Card>
+  );
+};
 
 const GuideFocusCard: React.FC<{ onNavigate?: (path: string) => void; turno: TurnoLite | null }> = ({ onNavigate, turno }) => {
   if (!turno) {
@@ -1132,14 +1176,18 @@ const CountTile: React.FC<{
 const TeamCapacity: React.FC<{ guides?: SupervisorOverview["guides"] }> = ({ guides }) => {
   const activos   = guides?.activos   ?? 0;
   const asignados = guides?.asignados ?? 0;
-  const libres    = guides?.libres    ?? 0;
+  const disponibles = guides?.disponibles ?? guides?.libres ?? 0;
+  const penalizados = guides?.penalizados ?? 0;
   const total     = activos || 1;
 
   return (
     <div className="mt-4 flex flex-col gap-4">
       <CapacityRow label="Activos"     value={activos}   total={total} pct={100}                       color={P.cyan} />
       <CapacityRow label="Asignados"   value={asignados} total={total} pct={(asignados / total) * 100} color={P.amber} />
-      <CapacityRow label="Disponibles" value={libres}    total={total} pct={(libres / total) * 100}    color={P.teal} />
+      <CapacityRow label="Disponibles" value={disponibles} total={total} pct={(disponibles / total) * 100} color={P.teal} />
+      {penalizados > 0 && (
+        <CapacityRow label="Penalizados" value={penalizados} total={total} pct={(penalizados / total) * 100} color={P.danger} />
+      )}
     </div>
   );
 };

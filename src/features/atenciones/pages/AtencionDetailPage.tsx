@@ -2,6 +2,7 @@ import { IonContent, IonPage } from "@ionic/react";
 import { useMemo, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
+import { useMyAccount } from "../../users/hooks/useMyAccount";
 import Button from "../../../ui/components/Button";
 import EmptyStateCard from "../../../ui/components/EmptyStateCard";
 import ErrorState from "../../../ui/components/ErrorState";
@@ -121,6 +122,7 @@ const AtencionDetailPage: React.FC = () => {
   const location = useLocation();
   const { id: paramId } = useParams<RouteParams>();
   const user = useSessionStore((state) => state.user);
+  const myAccount = useMyAccount();
 
   const id = paramId || location.pathname.match(/\/atenciones\/(\d+)/)?.[1];
 
@@ -129,9 +131,10 @@ const AtencionDetailPage: React.FC = () => {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
   }, [id]);
 
+  const currentUser = myAccount.data ?? user;
   const isSupervisor =
-    user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
-  const isGuia = user?.role === "GUIA";
+    currentUser?.role === "SUPERVISOR" || currentUser?.role === "SUPER_ADMIN";
+  const isGuia = currentUser?.role === "GUIA";
   useTurnoSocket(atencionId);
 
   const atencionQuery = useAtencion(atencionId);
@@ -186,10 +189,20 @@ const AtencionDetailPage: React.FC = () => {
   const isActive =
     opStatus !== "CANCELED" && opStatus !== "CLOSED" && opStatus !== "COMPLETED";
 
-  const alreadyClaimed = turnos.some((t) => t.guiaId === user?.id);
+  const assignmentMode = currentUser?.turnoAssignmentMode ?? "MANUAL_RECLAMO";
+  const guiaDisponible = currentUser?.disponibleParaTurnos ?? false;
+  const guiaPenalizado = currentUser?.pendingPenalty ?? false;
+  const alreadyClaimed = turnos.some((t) => t.guiaId === currentUser?.guiaId);
   const hasAvailable = turnos.some((t) => t.status === "AVAILABLE");
 
-  const canClaim = isGuia && isActive && !alreadyClaimed && hasAvailable;
+  const canClaim =
+    isGuia &&
+    assignmentMode === "MANUAL_RECLAMO" &&
+    guiaDisponible &&
+    !guiaPenalizado &&
+    isActive &&
+    !alreadyClaimed &&
+    hasAvailable;
   const canEdit = isSupervisor && isActive;
   const canCancel = isSupervisor && opStatus !== "CANCELED" && opStatus !== "CLOSED";
   const canClose = isSupervisor && isActive;

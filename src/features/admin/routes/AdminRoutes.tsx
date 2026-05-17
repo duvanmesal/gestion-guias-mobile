@@ -12,6 +12,7 @@ import AdminPage from "../pages/AdminPage";
 import AdminUserCreatePage from "../users/pages/AdminUserCreatePage";
 import AdminUsersPage from "../users/pages/AdminUsersPage";
 import AdminUserUpsertPage from "../users/pages/AdminUserUpsertPage";
+import OperationalConfigPage from "../operational-config/pages/OperationalConfigPage";
 
 const adminAllowedRoles = ["SUPERVISOR", "SUPER_ADMIN"] as const;
 
@@ -59,6 +60,12 @@ const AdminRoutes: React.FC = () => {
       <Route path="/admin/catalogos" exact>
         <RoleGuard allowed={[...adminAllowedRoles]}>
           <CatalogsPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/configuracion-operativa" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <OperationalConfigPage />
         </RoleGuard>
       </Route>
 

@@ -2,6 +2,7 @@ import type {
   Role,
   ProfileStatus,
   UserDocumentType,
+  TurnoAssignmentMode,
 } from "../../../core/auth/types";
 
 export type DocumentType = UserDocumentType;
@@ -38,6 +39,12 @@ export interface UpdateMeResponse {
   profileStatus: ProfileStatus;
   profileCompletedAt?: string | null;
   emailVerifiedAt?: string | null;
+  guiaId?: string | null;
+  supervisorId?: string | null;
+  disponibleParaTurnos?: boolean | null;
+  disponibilidadUpdatedAt?: string | null;
+  pendingPenalty?: boolean | null;
+  turnoAssignmentMode?: TurnoAssignmentMode;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -48,6 +55,9 @@ export interface GuideLookupItem {
   apellidos: string;
   email: string;
   activo: boolean;
+  disponibleParaTurnos: boolean;
+  disponibilidadUpdatedAt: string | null;
+  pendingPenalty: boolean;
 }
 
 export interface UserMeResponse {
@@ -67,9 +77,23 @@ export interface UserMeResponse {
   profileCompletedAt?: string | null;
   emailVerifiedAt?: string | null;
   activo?: boolean;
+  guiaId?: string | null;
+  supervisorId?: string | null;
+  disponibleParaTurnos?: boolean | null;
+  disponibilidadUpdatedAt?: string | null;
+  pendingPenalty?: boolean | null;
+  turnoAssignmentMode?: TurnoAssignmentMode;
 }
 
 export type GuidesLookupResponse = GuideLookupItem[];
+
+export interface GuideAvailabilityResponse {
+  guiaId: string;
+  disponibleParaTurnos: boolean;
+  disponibilidadUpdatedAt: string | null;
+  pendingPenalty: boolean;
+  turnoAssignmentMode?: TurnoAssignmentMode;
+}
 
 export interface UserSessionItem {
   id: string;

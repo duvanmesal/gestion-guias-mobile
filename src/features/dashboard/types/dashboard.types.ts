@@ -1,4 +1,4 @@
-import type { Role } from "../../../core/auth/types";
+import type { Role, TurnoAssignmentMode } from "../../../core/auth/types";
 
 export type DashboardWidgetTone =
   | "neutral"
@@ -86,6 +86,13 @@ export interface AtencionDisponibleLite {
 }
 
 export interface GuiaOverview {
+  assignmentMode: TurnoAssignmentMode;
+  disponibilidad: {
+    guiaId: string | null;
+    disponibleParaTurnos: boolean;
+    disponibilidadUpdatedAt: string | null;
+    pendingPenalty: boolean;
+  };
   nextTurno: TurnoLite | null;
   activeTurno: TurnoLite | null;
   atencionesDisponibles: AtencionDisponibleLite[];
@@ -113,6 +120,9 @@ export interface SupervisorOverview {
     activos: number;
     asignados: number;
     libres: number;
+    disponibles?: number;
+    noDisponibles?: number;
+    penalizados?: number;
   };
   turnosBreakdown?: Record<string, number>;
   alerts?: SupervisorAlert[];
@@ -121,6 +131,7 @@ export interface SupervisorOverview {
 
 export interface DashboardOverviewResponse {
   role: Role;
+  turnoAssignmentMode: TurnoAssignmentMode;
   date: string;
   tzOffsetMinutes: number;
   generatedAt: string;

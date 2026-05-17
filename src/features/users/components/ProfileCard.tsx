@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import LogoutAllModal from "./LogoutAllModal";
 import SessionsPanel from "./SessionsPanel";
 import type { SessionUser } from "../../../core/auth/types";
+import { useGuideAvailability } from "../hooks/useGuideAvailability";
 import {
   logoutCurrentSession,
   logoutAllSessions,
@@ -49,6 +50,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
   const [logoutAllOpen, setLogoutAllOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
+  const isGuia = user.role === "GUIA";
+  const {
+    availability,
+    setAvailabilityAsync,
+    isUpdating: availabilityBusy,
+  } = useGuideAvailability(isGuia);
 
   const fullName  = buildFullName(user);
   const roleLabel = getRoleLabel(user.role);
@@ -59,6 +66,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
   const roleStyle = ROLE_STYLE[user.role] ?? ROLE_STYLE.GUIA;
   const initials  = `${user.nombres?.[0] ?? ""}${user.apellidos?.[0] ?? ""}`.toUpperCase() || fullName.charAt(0).toUpperCase();
   const disabled  = busy !== null || isRefreshing;
+  const disponibleParaTurnos =
+    availability?.disponibleParaTurnos ?? user.disponibleParaTurnos ?? false;
+  const pendingPenalty = availability?.pendingPenalty ?? user.pendingPenalty ?? false;
+  const assignmentMode =
+    availability?.turnoAssignmentMode ?? user.turnoAssignmentMode ?? "MANUAL_RECLAMO";
 
   const handleLogout = async () => {
     setLocalError(null);
@@ -95,6 +107,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
       setModalError(error instanceof Error ? error.message : "No pude cerrar todas las sesiones.");
     } finally {
       setBusy(null);
+    }
+  };
+
+  const handleAvailability = async (disponible: boolean) => {
+    setLocalError(null);
+    try {
+      await setAvailabilityAsync(disponible);
+    } catch (error) {
+      setLocalError(error instanceof Error ? error.message : "No pude actualizar tu disponibilidad.");
     }
   };
 
@@ -236,6 +257,57 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
             { label: "Teléfono", value: user.telefono || "No registrado" },
           ]}
         />
+
+        {isGuia && (
+          <SectionCard>
+            <SectionHeader title="Disponibilidad operativa" icon={Ico.shield()} />
+            <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div
+                style={{
+                  borderRadius: 12,
+                  padding: "10px 12px",
+                  background: pendingPenalty
+                    ? "var(--color-danger-soft)"
+                    : disponibleParaTurnos
+                    ? "var(--color-success-soft)"
+                    : "var(--color-bg-subtle)",
+                  border: pendingPenalty
+                    ? "1px solid var(--color-danger-border)"
+                    : "1px solid var(--color-border-hairline)",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>
+                  {pendingPenalty
+                    ? "Penalización pendiente"
+                    : disponibleParaTurnos
+                    ? "Disponible para turnos"
+                    : "No disponible"}
+                </p>
+                <p style={{ margin: "4px 0 0", fontSize: "var(--text-caption)", color: "var(--color-fg-muted)", lineHeight: 1.45 }}>
+                  {assignmentMode === "FIFO_GLOBAL"
+                    ? "FIFO automático activo: el sistema asignará por orden global."
+                    : "Reclamo manual activo: debes estar disponible para tomar cupos."}
+                </p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <ActionBtn
+                  label="Disponible"
+                  icon={Ico.shield()}
+                  primary={disponibleParaTurnos && !pendingPenalty}
+                  disabled={disabled || availabilityBusy || pendingPenalty}
+                  onClick={() => void handleAvailability(true)}
+                />
+                <ActionBtn
+                  label="No disponible"
+                  icon={Ico.warning()}
+                  primary={!disponibleParaTurnos && !pendingPenalty}
+                  disabled={disabled || availabilityBusy}
+                  onClick={() => void handleAvailability(false)}
+                />
+              </div>
+            </div>
+          </SectionCard>
+        )}
 
         <InfoSection
           title="Estado de cuenta"

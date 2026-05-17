@@ -2,6 +2,7 @@ export type Role = "GUIA" | "SUPERVISOR" | "SUPER_ADMIN";
 export type ProfileStatus = "INCOMPLETE" | "COMPLETE";
 export type SessionStatus = "loading" | "guest" | "authed";
 export type UserDocumentType = "CC" | "CE" | "PAS" | "NIT" | "OTRO";
+export type TurnoAssignmentMode = "MANUAL_RECLAMO" | "FIFO_GLOBAL";
 
 export type AuthNoticeKind = "info" | "success" | "warning" | "danger";
 
@@ -19,6 +20,12 @@ export interface SessionUser {
   telefono?: string | null;
   documentType?: UserDocumentType | null;
   documentNumber?: string | null;
+  guiaId?: string | null;
+  supervisorId?: string | null;
+  disponibleParaTurnos?: boolean | null;
+  disponibilidadUpdatedAt?: string | null;
+  pendingPenalty?: boolean | null;
+  turnoAssignmentMode?: TurnoAssignmentMode;
   role: Role;
   profileStatus: ProfileStatus;
   profileCompletedAt?: string | null;

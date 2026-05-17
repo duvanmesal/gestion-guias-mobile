@@ -55,6 +55,10 @@ interface DisponibilidadPenalizadoPayload {
   mensaje: string
 }
 
+interface DisponibilidadGlobalPayload {
+  userId?: string
+}
+
 export function useGlobalRealtime() {
   const queryClient = useQueryClient()
   const accessToken = useSessionStore((s) => s.accessToken)
@@ -135,6 +139,22 @@ export function useGlobalRealtime() {
       }
     }
 
+    const invalidateDisponibilidadGlobal = (payload: DisponibilidadGlobalPayload) => {
+      queryClient.invalidateQueries({ queryKey: usersKeys.guidesLookup() })
+      queryClient.invalidateQueries({ queryKey: usersKeys.guideAvailability() })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+      if (payload.userId && payload.userId === currentUserId) {
+        queryClient.invalidateQueries({ queryKey: usersKeys.me() })
+      }
+    }
+
+    const invalidateOperationalConfig = () => {
+      queryClient.invalidateQueries({ queryKey: ["operational-config"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+      queryClient.invalidateQueries({ queryKey: usersKeys.me() })
+      queryClient.invalidateQueries({ queryKey: usersKeys.guidesLookup() })
+    }
+
     const invalidateInvitations = () => {
       queryClient.invalidateQueries({ queryKey: invitationsKeys.lists() })
     }
@@ -206,6 +226,8 @@ export function useGlobalRealtime() {
     socket.on("atencion:closed", invalidateAtenciones)
     socket.on("atencion:nueva", handleAtencionNueva)
     socket.on("disponibilidad:penalizado", handleDisponibilidadPenalizado)
+    socket.on("disponibilidad:globalChanged", invalidateDisponibilidadGlobal)
+    socket.on("operational-config:changed", invalidateOperationalConfig)
 
     socket.on("recalada:created", invalidateRecaladas)
     socket.on("recalada:nueva", handleRecaladaNueva)
@@ -251,6 +273,8 @@ export function useGlobalRealtime() {
       socket.off("atencion:closed", invalidateAtenciones)
       socket.off("atencion:nueva", handleAtencionNueva)
       socket.off("disponibilidad:penalizado", handleDisponibilidadPenalizado)
+      socket.off("disponibilidad:globalChanged", invalidateDisponibilidadGlobal)
+      socket.off("operational-config:changed", invalidateOperationalConfig)
 
       socket.off("recalada:created", invalidateRecaladas)
       socket.off("recalada:nueva", handleRecaladaNueva)

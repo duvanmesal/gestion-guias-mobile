@@ -2,6 +2,7 @@ import { IonContent, IonPage } from "@ionic/react";
 import { useMemo, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
+import { useMyAccount } from "../../users/hooks/useMyAccount";
 import ErrorState from "../../../ui/components/ErrorState";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
 import { useTurno } from "../hooks/useTurno";
@@ -88,6 +89,7 @@ const TurnoDetailPage: React.FC = () => {
   const location = useLocation();
   const { id: paramId } = useParams<RouteParams>();
   const user = useSessionStore((s) => s.user);
+  const myAccount = useMyAccount();
 
   const id = paramId || location.pathname.match(/\/turnos\/(\d+)/)?.[1];
 
@@ -96,8 +98,9 @@ const TurnoDetailPage: React.FC = () => {
     return Number.isFinite(n) && n > 0 ? n : undefined;
   }, [id]);
 
-  const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
-  const isGuia       = user?.role === "GUIA";
+  const currentUser = myAccount.data ?? user;
+  const isSupervisor = currentUser?.role === "SUPERVISOR" || currentUser?.role === "SUPER_ADMIN";
+  const isGuia       = currentUser?.role === "GUIA";
   useTurnoSocket();
 
   const turnoQuery = useTurno(turnoId);
@@ -149,8 +152,17 @@ const TurnoDetailPage: React.FC = () => {
   if (!turno) return null;
 
   /* ── Permission flags ── */
-  const isMine      = isGuia && !!user && turno.guia?.usuario?.id === user.id;
-  const canClaim    = isGuia && turno.status === "AVAILABLE" && !turno.guiaId;
+  const assignmentMode = currentUser?.turnoAssignmentMode ?? "MANUAL_RECLAMO";
+  const guiaDisponible = currentUser?.disponibleParaTurnos ?? false;
+  const guiaPenalizado = currentUser?.pendingPenalty ?? false;
+  const isMine      = isGuia && !!currentUser && turno.guia?.usuario?.id === currentUser.id;
+  const canClaim    =
+    isGuia &&
+    assignmentMode === "MANUAL_RECLAMO" &&
+    guiaDisponible &&
+    !guiaPenalizado &&
+    turno.status === "AVAILABLE" &&
+    !turno.guiaId;
   const canCheckIn  = isMine && turno.status === "ASSIGNED";
   const canCheckOut = isMine && turno.status === "IN_PROGRESS";
   const canUnassign = isSupervisor && (turno.status === "ASSIGNED" || turno.status === "IN_PROGRESS");

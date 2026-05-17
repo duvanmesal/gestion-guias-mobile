@@ -11,7 +11,11 @@ export function useGuidesLookup() {
   return useQuery<GuideLookupItem[], Error>({
     queryKey: usersKeys.guidesLookup(),
     queryFn: async () => {
-      const res = await usersApi.getGuides();
+      const res = await usersApi.getGuides({
+        activo: true,
+        disponible: true,
+        penalizado: false,
+      });
       if (!res.ok) throw new Error(res.error.message || "Guides lookup failed");
       return res.data;
     },
