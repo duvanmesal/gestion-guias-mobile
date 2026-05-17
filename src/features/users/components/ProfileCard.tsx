@@ -171,16 +171,24 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
             </p>
             <span
               style={{
-                display: "inline-block", marginTop: 8,
-                borderRadius: 9999, padding: "2px 8px",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                marginTop: 8,
+                borderRadius: 9999, padding: "3px 9px 3px 7px",
                 background: roleStyle.bg,
-                border: `1px solid ${roleStyle.bg}`,
+                border: `1px solid ${roleStyle.color}33`,
                 fontSize: "var(--text-eyebrow)",
-                fontWeight: 600,
-                letterSpacing: "0.02em",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
                 color: roleStyle.color,
               }}
             >
+              <span
+                style={{
+                  width: 5, height: 5, borderRadius: "50%",
+                  background: roleStyle.color,
+                }}
+              />
               {roleLabel}
             </span>
           </div>
@@ -258,35 +266,83 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
           ]}
         />
 
-        {isGuia && (
+        {isGuia && (() => {
+          const statusColor = pendingPenalty
+            ? "var(--color-danger)"
+            : disponibleParaTurnos
+              ? "var(--color-success)"
+              : "var(--color-fg-muted)";
+          const statusBg = pendingPenalty
+            ? "var(--color-danger-soft)"
+            : disponibleParaTurnos
+              ? "var(--color-success-soft)"
+              : "var(--color-bg-subtle)";
+          const statusBorder = pendingPenalty
+            ? "var(--color-danger-border)"
+            : disponibleParaTurnos
+              ? "var(--color-success-border)"
+              : "var(--color-border-hairline)";
+
+          return (
           <SectionCard>
             <SectionHeader title="Disponibilidad operativa" icon={Ico.shield()} />
             <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
               <div
                 style={{
                   borderRadius: 12,
-                  padding: "10px 12px",
-                  background: pendingPenalty
-                    ? "var(--color-danger-soft)"
-                    : disponibleParaTurnos
-                    ? "var(--color-success-soft)"
-                    : "var(--color-bg-subtle)",
-                  border: pendingPenalty
-                    ? "1px solid var(--color-danger-border)"
-                    : "1px solid var(--color-border-hairline)",
+                  padding: "12px 14px",
+                  background: statusBg,
+                  border: `1px solid ${statusBorder}`,
                 }}
               >
-                <p style={{ margin: 0, fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    className="live-pulse-dot"
+                    style={{ background: statusColor }}
+                  />
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--text-eyebrow)",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "var(--tracking-eyebrow)",
+                      color: statusColor,
+                    }}
+                  >
+                    {pendingPenalty
+                      ? "Penalización pendiente"
+                      : disponibleParaTurnos
+                        ? "En disponibilidad"
+                        : "Fuera de disponibilidad"}
+                  </p>
+                </div>
+                <p
+                  style={{
+                    margin: "6px 0 0",
+                    fontSize: "var(--text-body)",
+                    fontWeight: 600,
+                    color: "var(--color-fg-primary)",
+                    letterSpacing: "var(--tracking-tight)",
+                  }}
+                >
                   {pendingPenalty
-                    ? "Penalización pendiente"
+                    ? "No puedes tomar turnos"
                     : disponibleParaTurnos
-                    ? "Disponible para turnos"
-                    : "No disponible"}
+                      ? "Disponible para turnos"
+                      : "No disponible"}
                 </p>
-                <p style={{ margin: "4px 0 0", fontSize: "var(--text-caption)", color: "var(--color-fg-muted)", lineHeight: 1.45 }}>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "var(--text-caption)",
+                    color: "var(--color-fg-muted)",
+                    lineHeight: "var(--leading-base)",
+                  }}
+                >
                   {assignmentMode === "FIFO_GLOBAL"
-                    ? "FIFO automático activo: el sistema asignará por orden global."
-                    : "Reclamo manual activo: debes estar disponible para tomar cupos."}
+                    ? "FIFO automático activo: el sistema te asignará por orden de disponibilidad."
+                    : "Reclamo manual activo: debes estar disponible para reclamar cupos desde la app."}
                 </p>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -307,7 +363,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
               </div>
             </div>
           </SectionCard>
-        )}
+          );
+        })()}
 
         <InfoSection
           title="Estado de cuenta"
@@ -329,9 +386,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
           </div>
         </SectionCard>
 
-        {/* Actions */}
+        {/* Actions — main */}
         <SectionCard>
-          <SectionHeader title="Acciones" />
+          <SectionHeader title="Cuenta" />
           <div style={{ padding: "8px 12px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
             <ActionBtn
               label="Editar mis datos"
@@ -348,6 +405,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, isRefreshing = false, o
                 onClick={onRefresh}
               />
             )}
+          </div>
+        </SectionCard>
+
+        {/* Actions — session */}
+        <SectionCard>
+          <SectionHeader title="Sesión" />
+          <div style={{ padding: "8px 12px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
             <ActionBtn
               label={busy === "logout" ? "Cerrando sesión…" : "Cerrar sesión"}
               icon={busy === "logout" ? Ico.spinner() : Ico.logout()}
