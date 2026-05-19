@@ -2,14 +2,30 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 import * as turnosApi from "../data/turnos.api";
 import { turnosKeys } from "../data/turnos.keys";
+import { atencionesKeys } from "../../atenciones/data/atenciones.keys";
 
 function useInvalidate() {
   const queryClient = useQueryClient();
-  return async (id?: number) => {
-    await queryClient.invalidateQueries({ queryKey: turnosKeys.all });
-    if (typeof id === "number") {
-      await queryClient.invalidateQueries({ queryKey: turnosKeys.detail(id) });
-    }
+  return async (id?: number, atencionId?: number) => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: turnosKeys.all }),
+      queryClient.invalidateQueries({ queryKey: turnosKeys.meLists() }),
+      queryClient.invalidateQueries({ queryKey: turnosKeys.meNext() }),
+      queryClient.invalidateQueries({ queryKey: turnosKeys.meActive() }),
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      typeof id === "number"
+        ? queryClient.invalidateQueries({ queryKey: turnosKeys.detail(id) })
+        : Promise.resolve(),
+      typeof atencionId === "number"
+        ? queryClient.invalidateQueries({ queryKey: atencionesKeys.detail(atencionId) })
+        : Promise.resolve(),
+      typeof atencionId === "number"
+        ? queryClient.invalidateQueries({ queryKey: atencionesKeys.turnos(atencionId) })
+        : Promise.resolve(),
+      typeof atencionId === "number"
+        ? queryClient.invalidateQueries({ queryKey: atencionesKeys.summary(atencionId) })
+        : Promise.resolve(),
+    ]);
   };
 }
 
@@ -22,7 +38,7 @@ export function useClaimTurno() {
         throw new Error(getErrorMessage(res.error, "No pude tomar el turno"));
       return res.data;
     },
-    onSuccess: async (_data, id) => invalidate(id),
+    onSuccess: async (data, id) => invalidate(id, data?.atencionId),
   });
 }
 
@@ -35,7 +51,7 @@ export function useCheckInTurno() {
         throw new Error(getErrorMessage(res.error, "No pude hacer check-in"));
       return res.data;
     },
-    onSuccess: async (_data, id) => invalidate(id),
+    onSuccess: async (data, id) => invalidate(id, data?.atencionId),
   });
 }
 
@@ -48,7 +64,7 @@ export function useCheckOutTurno() {
         throw new Error(getErrorMessage(res.error, "No pude hacer check-out"));
       return res.data;
     },
-    onSuccess: async (_data, id) => invalidate(id),
+    onSuccess: async (data, id) => invalidate(id, data?.atencionId),
   });
 }
 

@@ -543,7 +543,7 @@ const AtencionDetailPage: React.FC = () => {
                     disabled={isBusy}
                     onClick={() => void handleClaim()}
                   >
-                    Tomar turno disponible
+                    Tomar primer turno disponible
                   </Button>
                 )}
                 {canEdit && (

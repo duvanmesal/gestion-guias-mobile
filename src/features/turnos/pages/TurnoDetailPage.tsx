@@ -15,6 +15,7 @@ import {
   useUnassignTurno,
 } from "../hooks/useTurnoActions";
 import { useTurnoSocket } from "../hooks/useTurnoSocket";
+import { useAtencionTurnos } from "../../atenciones/hooks/useAtencionTurnos";
 import { formatTurnoDate, getTurnoLabel } from "../lib/turnoStatus";
 import type { TurnoItem, TurnoStatus } from "../types/turnos.types";
 
@@ -117,6 +118,8 @@ const TurnoDetailPage: React.FC = () => {
   const [cancelReason,  setCancelReason]  = useState("");
 
   const turno = turnoQuery.data;
+  const atencionTurnosQuery = useAtencionTurnos(turno?.atencionId);
+  const atencionTurnosList = atencionTurnosQuery.data ?? [];
 
   /* ── Error / loading states ── */
   if (!turnoId) {
@@ -156,13 +159,29 @@ const TurnoDetailPage: React.FC = () => {
   const guiaDisponible = currentUser?.disponibleParaTurnos ?? false;
   const guiaPenalizado = currentUser?.pendingPenalty ?? false;
   const isMine      = isGuia && !!currentUser && turno.guia?.usuario?.id === currentUser.id;
+  const isFirstAvailable =
+    atencionTurnosList.length === 0
+      ? false
+      : atencionTurnosList
+          .filter((t) => t.status === "AVAILABLE" && !t.guiaId)
+          .sort((a, b) => a.numero - b.numero)[0]?.id === turno.id;
   const canClaim    =
     isGuia &&
     assignmentMode === "MANUAL_RECLAMO" &&
     guiaDisponible &&
     !guiaPenalizado &&
     turno.status === "AVAILABLE" &&
-    !turno.guiaId;
+    !turno.guiaId &&
+    isFirstAvailable;
+  const showClaimBlockedHint =
+    isGuia &&
+    assignmentMode === "MANUAL_RECLAMO" &&
+    guiaDisponible &&
+    !guiaPenalizado &&
+    turno.status === "AVAILABLE" &&
+    !turno.guiaId &&
+    !isFirstAvailable &&
+    atencionTurnosList.length > 0;
   const canCheckIn  = isMine && turno.status === "ASSIGNED";
   const canCheckOut = isMine && turno.status === "IN_PROGRESS";
   const canUnassign = isSupervisor && (turno.status === "ASSIGNED" || turno.status === "IN_PROGRESS");
@@ -258,6 +277,35 @@ const TurnoDetailPage: React.FC = () => {
             {(turno.observaciones || turno.cancelReason) && (
               <div className="animate-fade-up" style={{ animationDelay: "160ms", animationFillMode: "backwards", marginTop: "1rem" }}>
                 <NotesCard turno={turno} />
+              </div>
+            )}
+
+            {/* ── First-available hint ── */}
+            {!showCancel && showClaimBlockedHint && (
+              <div className="animate-fade-up" style={{
+                marginTop: "1rem",
+                borderRadius: 14, padding: "12px 14px",
+                background: C.cyanFaint, border: `1px solid ${C.cyanBorder}`,
+                display: "flex", flexDirection: "column", gap: 8,
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ color: C.cyan, flexShrink: 0, marginTop: 1 }}>{Ico.info()}</span>
+                  <span style={{ fontSize: "0.8125rem", color: C.fgSecondary, fontWeight: 500 }}>
+                    Este no es el primer turno disponible. Debes tomar primero el cupo más antiguo de la atención.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => history.push(`/atenciones/${turno.atencionId}`)}
+                  style={{
+                    alignSelf: "flex-start",
+                    fontSize: "0.75rem", fontWeight: 700, color: C.cyan,
+                    background: "transparent", border: "none", cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  Ir a la atención →
+                </button>
               </div>
             )}
 
