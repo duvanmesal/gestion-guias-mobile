@@ -18,6 +18,7 @@ import {
 } from "../hooks/useTurnoActions";
 import { useTurnoSocket } from "../hooks/useTurnoSocket";
 import { useAtencionTurnos } from "../../atenciones/hooks/useAtencionTurnos";
+import { useOperationalConfig } from "../../admin/operational-config/hooks/useOperationalConfig";
 import { formatTurnoDate, getTurnoLabel } from "../lib/turnoStatus";
 import type { TurnoItem, TurnoStatus } from "../types/turnos.types";
 
@@ -123,10 +124,16 @@ const TurnoDetailPage: React.FC = () => {
   const [cancelReason,  setCancelReason]  = useState("");
   const [showReject,    setShowReject]    = useState(false);
   const [rejectReason,  setRejectReason]  = useState("");
+  const [showNoShow,    setShowNoShow]    = useState(false);
+  const [noShowReason,  setNoShowReason]  = useState("");
 
   const turno = turnoQuery.data;
   const atencionTurnosQuery = useAtencionTurnos(turno?.atencionId);
   const atencionTurnosList = atencionTurnosQuery.data ?? [];
+
+  // Epica 6: duración configurada para informar en el NoShowForm.
+  const opConfigQuery = useOperationalConfig();
+  const penaltyHours = opConfigQuery.config?.noShowPenaltyDurationHours ?? 48;
 
   /* ── Error / loading states ── */
   if (!turnoId) {
@@ -218,6 +225,20 @@ const TurnoDetailPage: React.FC = () => {
     return fn()
       .then(() => setActionSuccess(successMsg))
       .catch((err: unknown) => setActionError(err instanceof Error ? err.message : fallbackErr));
+  }
+
+  async function handleNoShow() {
+    if (noShowReason.trim().length < 3) {
+      setActionError("Debes indicar un motivo (mín. 3 caracteres).");
+      return;
+    }
+    await runAction(
+      () => noShow.mutateAsync({ id: turnoId!, reason: noShowReason.trim() }),
+      "Turno marcado como NO_SHOW.",
+      "No pude marcar NO_SHOW"
+    );
+    setShowNoShow(false);
+    setNoShowReason("");
   }
 
   async function handleRejectCheckIn() {
@@ -396,8 +417,22 @@ const TurnoDetailPage: React.FC = () => {
               </div>
             )}
 
+            {/* ── NO_SHOW form inline ── */}
+            {showNoShow && (
+              <div className="animate-fade-up" style={{ animationFillMode: "backwards", marginTop: "1rem" }}>
+                <NoShowForm
+                  value={noShowReason}
+                  onChange={setNoShowReason}
+                  isLoading={noShow.isPending}
+                  penaltyHours={penaltyHours}
+                  onConfirm={() => void handleNoShow()}
+                  onCancel={() => { setShowNoShow(false); setNoShowReason(""); setActionError(null); }}
+                />
+              </div>
+            )}
+
             {/* ── Acciones inline ── */}
-            {!showCancel && !showReject && hasActions && (
+            {!showCancel && !showReject && !showNoShow && hasActions && (
               <div className="animate-fade-up" style={{ marginTop: "1rem" }}>
                 <ActionBar
                   canClaim={canClaim}
@@ -421,7 +456,7 @@ const TurnoDetailPage: React.FC = () => {
                   onRejectCheckInOpen={() => setShowReject(true)}
                   onCheckOut={() => void runAction(() => checkOut.mutateAsync(turnoId!), "Check-out registrado.", "No pude hacer check-out")}
                   onUnassign={() => void runAction(() => unassign.mutateAsync({ id: turnoId! }), "Turno desasignado.", "No pude desasignar el turno")}
-                  onNoShow={() => void runAction(() => noShow.mutateAsync({ id: turnoId! }), "Marcado como no-show.", "No pude marcar no-show")}
+                  onNoShow={() => setShowNoShow(true)}
                   onCancelOpen={() => setShowCancel(true)}
                 />
               </div>
@@ -692,6 +727,72 @@ const CancelForm: React.FC<{
         isLoading={isLoading}
         onClick={onConfirm}
         icon={Ico.trash()}
+      />
+      <ActionBtn
+        label="Volver"
+        color="var(--color-fg-secondary)"
+        bg="var(--color-glass-soft)"
+        border="var(--color-glass-medium)"
+        glow="transparent"
+        disabled={isLoading}
+        onClick={onCancel}
+      />
+    </div>
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   NO_SHOW FORM (Epica 6)
+───────────────────────────────────────────── */
+const NoShowForm: React.FC<{
+  value: string; onChange: (v: string) => void;
+  isLoading: boolean; onConfirm: () => void; onCancel: () => void;
+  penaltyHours?: number | null;
+}> = ({ value, onChange, isLoading, onConfirm, onCancel, penaltyHours }) => (
+  <div style={{
+    borderRadius: 20,
+    background: "var(--color-bg-elevated)",
+    border: `1px solid ${C.dangerBorder}`,
+    borderTop: `2px solid ${C.danger}`,
+    padding: "1.25rem",
+    boxShadow: `0 12px 32px var(--color-danger-soft)`,
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1rem" }}>
+      <span style={{ color: C.danger }}>{Ico.noShow()}</span>
+      <p style={{ fontSize: "0.875rem", fontWeight: 800, color: C.danger }}>Marcar NO_SHOW</p>
+    </div>
+    <p style={{ fontSize: "0.75rem", color: C.fgMuted, marginBottom: 12, lineHeight: 1.55 }}>
+      {typeof penaltyHours === "number"
+        ? `Aplica una penalización de ${penaltyHours} h al guía y registra el evento en su historial.`
+        : "Aplica una penalización al guía con la duración configurada operativamente."}
+    </p>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={3}
+      placeholder="Motivo del NO_SHOW (mínimo 3 caracteres)…"
+      maxLength={500}
+      style={{
+        width: "100%", resize: "none",
+        borderRadius: 14, padding: "12px 14px",
+        background: "var(--color-glass-soft)",
+        border: `1px solid ${C.dangerBorder}`,
+        color: "var(--color-fg-primary)",
+        fontSize: "0.875rem", lineHeight: 1.55,
+        outline: "none",
+        boxSizing: "border-box",
+      }}
+    />
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+      <ActionBtn
+        label="Confirmar"
+        color={C.danger}
+        bg={C.dangerFaint}
+        border={C.dangerBorder}
+        glow="var(--color-danger-glow)"
+        isLoading={isLoading}
+        onClick={onConfirm}
+        icon={Ico.noShow()}
       />
       <ActionBtn
         label="Volver"
