@@ -59,6 +59,17 @@ interface DisponibilidadGlobalPayload {
   userId?: string
 }
 
+interface OpNotifPayload {
+  notificationId: string
+  type: string
+  route: string
+  title: string
+  body: string
+  recaladaId?: number | null
+  atencionId?: number | null
+  turnoId?: number | null
+}
+
 export function useGlobalRealtime() {
   const queryClient = useQueryClient()
   const accessToken = useSessionStore((s) => s.accessToken)
@@ -255,6 +266,60 @@ export function useGlobalRealtime() {
     socket.on("catalog:buque:removed", invalidateBuque)
     socket.on("catalog:buque:bulkChanged", invalidateBuque)
 
+    // Epica 7 — Notificaciones operativas (in-app, equivalentes al push).
+    const opNotifToast = (payload: OpNotifPayload, color: "success" | "primary" | "warning") => {
+      void showToast(payload.body, color)
+    }
+    const handleOpNotifAtencionAvailable = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "success")
+      queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+      if (payload.atencionId) {
+        queryClient.invalidateQueries({ queryKey: atencionesKeys.detail(payload.atencionId) })
+      }
+    }
+    const handleOpNotifTurno = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "primary")
+      queryClient.invalidateQueries({ queryKey: turnosKeys.all })
+      queryClient.invalidateQueries({ queryKey: ["myTurnos"] })
+      queryClient.invalidateQueries({ queryKey: ["myNextTurno"] })
+      queryClient.invalidateQueries({ queryKey: ["myActiveTurno"] })
+      if (payload.turnoId) {
+        queryClient.invalidateQueries({ queryKey: turnosKeys.detail(payload.turnoId) })
+      }
+    }
+    const handleOpNotifCheckInPending = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "warning")
+      queryClient.invalidateQueries({ queryKey: ["turnos", "checkInsPending"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+    }
+    const handleOpNotifPenalty = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "warning")
+      queryClient.invalidateQueries({ queryKey: usersKeys.me() })
+      queryClient.invalidateQueries({ queryKey: usersKeys.guidesLookup() })
+    }
+    const handleOpNotifRecaladaOverdue = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "warning")
+      queryClient.invalidateQueries({ queryKey: recaladasKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+    }
+    const handleOpNotifAtencionNear = (payload: OpNotifPayload) => {
+      opNotifToast(payload, "warning")
+      queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
+    }
+
+    socket.on("notif:atencion:available", handleOpNotifAtencionAvailable)
+    socket.on("notif:turno:claimed", handleOpNotifTurno)
+    socket.on("notif:turno:assigned", handleOpNotifTurno)
+    socket.on("notif:turno:canceled", handleOpNotifTurno)
+    socket.on("notif:turno:changed", handleOpNotifTurno)
+    socket.on("notif:turno:checkInReminder", handleOpNotifTurno)
+    socket.on("notif:guide:penalized", handleOpNotifPenalty)
+    socket.on("notif:supervisor:checkInPending", handleOpNotifCheckInPending)
+    socket.on("notif:recalada:overdue", handleOpNotifRecaladaOverdue)
+    socket.on("notif:atencion:nearWithFreeTurnos", handleOpNotifAtencionNear)
+
     return () => {
       socket.off("auth:sessionRevoked", forceLogout)
       socket.off("auth:sessionsChanged", invalidateSessions)
@@ -301,6 +366,17 @@ export function useGlobalRealtime() {
       socket.off("catalog:buque:updated", invalidateBuque)
       socket.off("catalog:buque:removed", invalidateBuque)
       socket.off("catalog:buque:bulkChanged", invalidateBuque)
+
+      socket.off("notif:atencion:available", handleOpNotifAtencionAvailable)
+      socket.off("notif:turno:claimed", handleOpNotifTurno)
+      socket.off("notif:turno:assigned", handleOpNotifTurno)
+      socket.off("notif:turno:canceled", handleOpNotifTurno)
+      socket.off("notif:turno:changed", handleOpNotifTurno)
+      socket.off("notif:turno:checkInReminder", handleOpNotifTurno)
+      socket.off("notif:guide:penalized", handleOpNotifPenalty)
+      socket.off("notif:supervisor:checkInPending", handleOpNotifCheckInPending)
+      socket.off("notif:recalada:overdue", handleOpNotifRecaladaOverdue)
+      socket.off("notif:atencion:nearWithFreeTurnos", handleOpNotifAtencionNear)
     }
   }, [accessToken, currentUserId, queryClient])
 }

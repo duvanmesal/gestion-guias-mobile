@@ -17,6 +17,7 @@ type NotificationData = {
   route?: string
   recaladaId?: string | number
   atencionId?: string | number
+  turnoId?: string | number
   type?: string
 }
 
@@ -33,6 +34,7 @@ function routeFromData(data: NotificationData): string | null {
     return data.route
   }
 
+  if (data.turnoId) return `/turnos/${data.turnoId}`
   if (data.atencionId) return `/atenciones/${data.atencionId}`
   if (data.recaladaId) return `/recaladas/${data.recaladaId}`
   return null
