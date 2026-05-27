@@ -635,7 +635,33 @@ const TurnoRow: React.FC<{ turno: TurnoItem; onPress: () => void }> = ({ turno, 
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
         <StatusBadge status={turno.status} small />
-        <span style={{ color: "var(--color-fg-disabled)" }}>{Ico.chevron(12)}</span>
+        {turno.checkInRequestedAt && !turno.checkInConfirmedAt && !turno.checkInRejectedAt && (
+          <span
+            aria-label="Check-in pendiente de confirmación"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              fontSize: "var(--text-eyebrow)",
+              fontWeight: 700,
+              color: "var(--color-accent)",
+              background: "var(--color-accent-glow)",
+              border: "1px solid var(--color-accent-glow)",
+              borderRadius: 9999,
+              padding: "2px 7px",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="live-pulse-dot"
+              style={{ background: "var(--color-accent)", width: 5, height: 5 }}
+            />
+            Pendiente
+          </span>
+        )}
+        <span style={{ color: "var(--color-fg-disabled)" }} aria-hidden="true">{Ico.chevron(12)}</span>
       </div>
     </button>
   );

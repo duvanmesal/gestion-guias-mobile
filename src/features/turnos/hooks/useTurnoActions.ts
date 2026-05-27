@@ -48,10 +48,44 @@ export function useCheckInTurno() {
     mutationFn: async (id: number) => {
       const res = await turnosApi.checkInTurno(id);
       if (!res.ok)
-        throw new Error(getErrorMessage(res.error, "No pude hacer check-in"));
+        throw new Error(
+          getErrorMessage(res.error, "No pude solicitar el check-in")
+        );
       return res.data;
     },
     onSuccess: async (data, id) => invalidate(id, data?.atencionId),
+  });
+}
+
+export function useConfirmCheckInTurno() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await turnosApi.confirmCheckInTurno(id);
+      if (!res.ok)
+        throw new Error(
+          getErrorMessage(res.error, "No pude confirmar el check-in")
+        );
+      return res.data;
+    },
+    onSuccess: async (data, id) => invalidate(id, data?.atencionId),
+  });
+}
+
+export function useRejectCheckInTurno() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: async (args: { id: number; reason: string }) => {
+      const res = await turnosApi.rejectCheckInTurno(args.id, {
+        reason: args.reason,
+      });
+      if (!res.ok)
+        throw new Error(
+          getErrorMessage(res.error, "No pude rechazar el check-in")
+        );
+      return res.data;
+    },
+    onSuccess: async (data, args) => invalidate(args.id, data?.atencionId),
   });
 }
 

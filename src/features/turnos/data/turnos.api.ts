@@ -9,6 +9,8 @@ import type {
 import type {
   ListTurnosMeParams,
   ListTurnosParams,
+  PendingCheckInsParams,
+  RejectCheckInBody,
   TurnoItem,
   TurnoListMeta,
 } from "../types/turnos.types";
@@ -110,6 +112,44 @@ export function checkInTurno(id: number): Promise<ApiResult<TurnoItem>> {
     method: "PATCH",
     headers: { ...PLATFORM_HEADER },
   });
+}
+
+export function confirmCheckInTurno(
+  id: number
+): Promise<ApiResult<TurnoItem>> {
+  return authRequest<TurnoItem>(`/turnos/${id}/check-in/confirm`, {
+    method: "PATCH",
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function rejectCheckInTurno(
+  id: number,
+  body: RejectCheckInBody
+): Promise<ApiResult<TurnoItem>> {
+  return authRequest<TurnoItem>(`/turnos/${id}/check-in/reject`, {
+    method: "PATCH",
+    body,
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function getPendingCheckIns(
+  params: PendingCheckInsParams = {},
+  signal?: AbortSignal
+): Promise<ApiEnvelopeResult<TurnoItem[], TurnoListMeta>> {
+  const search = new URLSearchParams();
+  if (typeof params.atencionId === "number")
+    search.set("atencionId", String(params.atencionId));
+  if (typeof params.recaladaId === "number")
+    search.set("recaladaId", String(params.recaladaId));
+  search.set("page", String(params.page ?? 1));
+  search.set("pageSize", String(params.pageSize ?? 20));
+  const query = search.toString();
+  return authRequestEnvelope<TurnoItem[], TurnoListMeta>(
+    `/turnos/check-ins/pending${query ? `?${query}` : ""}`,
+    { method: "GET", headers: { ...PLATFORM_HEADER }, signal }
+  );
 }
 
 export function checkOutTurno(id: number): Promise<ApiResult<TurnoItem>> {

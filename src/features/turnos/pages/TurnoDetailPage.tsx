@@ -11,7 +11,9 @@ import {
   useCheckInTurno,
   useCheckOutTurno,
   useClaimTurno,
+  useConfirmCheckInTurno,
   useNoShowTurno,
+  useRejectCheckInTurno,
   useUnassignTurno,
 } from "../hooks/useTurnoActions";
 import { useTurnoSocket } from "../hooks/useTurnoSocket";
@@ -78,6 +80,7 @@ const Ico = {
   warning:  (s = 14) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
   info:     (s = 14) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>,
   hash:     (s = 14) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" /></svg>,
+  login:    (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>,
 };
 
 /* ─────────────────────────────────────────────
@@ -107,6 +110,8 @@ const TurnoDetailPage: React.FC = () => {
   const turnoQuery = useTurno(turnoId);
   const claim    = useClaimTurno();
   const checkIn  = useCheckInTurno();
+  const confirmCheckIn = useConfirmCheckInTurno();
+  const rejectCheckIn  = useRejectCheckInTurno();
   const checkOut = useCheckOutTurno();
   const cancel   = useCancelTurno();
   const unassign = useUnassignTurno();
@@ -116,6 +121,8 @@ const TurnoDetailPage: React.FC = () => {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [showCancel,    setShowCancel]    = useState(false);
   const [cancelReason,  setCancelReason]  = useState("");
+  const [showReject,    setShowReject]    = useState(false);
+  const [rejectReason,  setRejectReason]  = useState("");
 
   const turno = turnoQuery.data;
   const atencionTurnosQuery = useAtencionTurnos(turno?.atencionId);
@@ -182,14 +189,18 @@ const TurnoDetailPage: React.FC = () => {
     !turno.guiaId &&
     !isFirstAvailable &&
     atencionTurnosList.length > 0;
-  const canCheckIn  = isMine && turno.status === "ASSIGNED";
+  const hasPendingCheckIn = !!turno.checkInRequestedAt && !turno.checkInConfirmedAt && !turno.checkInRejectedAt;
+  const wasRejected = !!turno.checkInRejectedAt;
+  const canRequestCheckIn = isMine && turno.status === "ASSIGNED" && !hasPendingCheckIn && !wasRejected;
+  const canConfirmCheckIn = isSupervisor && turno.status === "ASSIGNED" && hasPendingCheckIn;
+  const canRejectCheckIn  = isSupervisor && turno.status === "ASSIGNED" && hasPendingCheckIn;
   const canCheckOut = isMine && turno.status === "IN_PROGRESS";
-  const canUnassign = isSupervisor && (turno.status === "ASSIGNED" || turno.status === "IN_PROGRESS");
+  const canUnassign = isSupervisor && (turno.status === "ASSIGNED" || turno.status === "IN_PROGRESS") && !hasPendingCheckIn;
   const canNoShow   = isSupervisor && (turno.status === "ASSIGNED" || turno.status === "IN_PROGRESS");
   const canCancel   = isSupervisor && !["CANCELED","COMPLETED","NO_SHOW"].includes(turno.status);
 
-  const isBusy = claim.isPending || checkIn.isPending || checkOut.isPending || cancel.isPending || unassign.isPending || noShow.isPending;
-  const hasActions = canClaim || canCheckIn || canCheckOut || canUnassign || canNoShow || canCancel;
+  const isBusy = claim.isPending || checkIn.isPending || confirmCheckIn.isPending || rejectCheckIn.isPending || checkOut.isPending || cancel.isPending || unassign.isPending || noShow.isPending;
+  const hasActions = canClaim || canRequestCheckIn || canConfirmCheckIn || canRejectCheckIn || canCheckOut || canUnassign || canNoShow || canCancel;
 
   const cfg = STATUS_CFG[turno.status];
   const isLive = turno.status === "IN_PROGRESS";
@@ -207,6 +218,20 @@ const TurnoDetailPage: React.FC = () => {
     return fn()
       .then(() => setActionSuccess(successMsg))
       .catch((err: unknown) => setActionError(err instanceof Error ? err.message : fallbackErr));
+  }
+
+  async function handleRejectCheckIn() {
+    if (rejectReason.trim().length < 3) {
+      setActionError("Debes indicar un motivo (mín. 3 caracteres).");
+      return;
+    }
+    await runAction(
+      () => rejectCheckIn.mutateAsync({ id: turnoId!, reason: rejectReason.trim() }),
+      "Check-in rechazado.",
+      "No pude rechazar el check-in"
+    );
+    setShowReject(false);
+    setRejectReason("");
   }
 
   async function handleCancel() {
@@ -309,6 +334,55 @@ const TurnoDetailPage: React.FC = () => {
               </div>
             )}
 
+            {/* ── Pending / rejected check-in banners (Epica 5) ── */}
+            {hasPendingCheckIn && (
+              <div className="animate-fade-up" style={{
+                marginTop: "1rem",
+                borderRadius: 14, padding: "12px 14px",
+                background: C.amberFaint, border: `1px solid ${C.amberBorder}`,
+                display: "flex", alignItems: "flex-start", gap: 8,
+              }}>
+                <span style={{ color: C.amber, flexShrink: 0, marginTop: 1 }}>{Ico.clock()}</span>
+                <div>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: C.amber }}>Check-in pendiente</p>
+                  <p style={{ fontSize: "0.75rem", color: C.fgSecondary, marginTop: 2 }}>
+                    {isMine
+                      ? "Esperando confirmación del supervisor."
+                      : "El guía solicitó su check-in. Confirma o rechaza para continuar."}
+                  </p>
+                </div>
+              </div>
+            )}
+            {wasRejected && (
+              <div className="animate-fade-up" style={{
+                marginTop: "1rem",
+                borderRadius: 14, padding: "12px 14px",
+                background: C.dangerFaint, border: `1px solid ${C.dangerBorder}`,
+                display: "flex", alignItems: "flex-start", gap: 8,
+              }}>
+                <span style={{ color: C.danger, flexShrink: 0, marginTop: 1 }}>{Ico.warning()}</span>
+                <div>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: C.danger }}>Check-in rechazado</p>
+                  <p style={{ fontSize: "0.75rem", color: C.fgSecondary, marginTop: 2 }}>
+                    Motivo: {turno.checkInRejectReason || "No registrado"}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Reject form inline ── */}
+            {showReject && (
+              <div className="animate-fade-up" style={{ animationFillMode: "backwards", marginTop: "1rem" }}>
+                <RejectForm
+                  value={rejectReason}
+                  onChange={setRejectReason}
+                  isLoading={rejectCheckIn.isPending}
+                  onConfirm={() => void handleRejectCheckIn()}
+                  onCancel={() => { setShowReject(false); setRejectReason(""); setActionError(null); }}
+                />
+              </div>
+            )}
+
             {/* ── Cancel form inline ── */}
             {showCancel && (
               <div className="animate-fade-up" style={{ animationDelay: "0ms", animationFillMode: "backwards", marginTop: "1rem" }}>
@@ -323,11 +397,13 @@ const TurnoDetailPage: React.FC = () => {
             )}
 
             {/* ── Acciones inline ── */}
-            {!showCancel && hasActions && (
+            {!showCancel && !showReject && hasActions && (
               <div className="animate-fade-up" style={{ marginTop: "1rem" }}>
                 <ActionBar
                   canClaim={canClaim}
-                  canCheckIn={canCheckIn}
+                  canRequestCheckIn={canRequestCheckIn}
+                  canConfirmCheckIn={canConfirmCheckIn}
+                  canRejectCheckIn={canRejectCheckIn}
                   canCheckOut={canCheckOut}
                   canUnassign={canUnassign}
                   canNoShow={canNoShow}
@@ -335,11 +411,14 @@ const TurnoDetailPage: React.FC = () => {
                   isBusy={isBusy}
                   isPendingClaim={claim.isPending}
                   isPendingCheckIn={checkIn.isPending}
+                  isPendingConfirm={confirmCheckIn.isPending}
                   isPendingCheckOut={checkOut.isPending}
                   isPendingUnassign={unassign.isPending}
                   isPendingNoShow={noShow.isPending}
                   onClaim={() => void runAction(() => claim.mutateAsync(turnoId!), "Turno tomado correctamente.", "No pude tomar el turno")}
-                  onCheckIn={() => void runAction(() => checkIn.mutateAsync(turnoId!), "Check-in registrado.", "No pude hacer check-in")}
+                  onRequestCheckIn={() => void runAction(() => checkIn.mutateAsync(turnoId!), "Solicitud de check-in enviada.", "No pude solicitar el check-in")}
+                  onConfirmCheckIn={() => void runAction(() => confirmCheckIn.mutateAsync(turnoId!), "Check-in confirmado.", "No pude confirmar el check-in")}
+                  onRejectCheckInOpen={() => setShowReject(true)}
                   onCheckOut={() => void runAction(() => checkOut.mutateAsync(turnoId!), "Check-out registrado.", "No pude hacer check-out")}
                   onUnassign={() => void runAction(() => unassign.mutateAsync({ id: turnoId! }), "Turno desasignado.", "No pude desasignar el turno")}
                   onNoShow={() => void runAction(() => noShow.mutateAsync({ id: turnoId! }), "Marcado como no-show.", "No pude marcar no-show")}
@@ -427,10 +506,11 @@ const TurnoHero: React.FC<{
 ───────────────────────────────────────────── */
 const TimelineCard: React.FC<{ turno: TurnoItem }> = ({ turno }) => {
   const steps: { label: string; time: string | null | undefined; color: string; done: boolean }[] = [
-    { label: "Inicio",    time: turno.fechaInicio,  color: C.violet, done: true },
-    { label: "Check-in",  time: turno.checkInAt,    color: C.amber,  done: !!turno.checkInAt },
-    { label: "Check-out", time: turno.checkOutAt,   color: C.teal,   done: !!turno.checkOutAt },
-    { label: "Fin",       time: turno.fechaFin,     color: C.cyan,   done: turno.status === "COMPLETED" },
+    { label: "Inicio",                time: turno.fechaInicio,         color: C.violet, done: true },
+    { label: "Check-in solicitado",   time: turno.checkInRequestedAt,  color: C.amber,  done: !!turno.checkInRequestedAt },
+    { label: "Check-in confirmado",   time: turno.checkInConfirmedAt,  color: C.teal,   done: !!turno.checkInConfirmedAt },
+    { label: "Check-out",             time: turno.checkOutAt,          color: C.teal,   done: !!turno.checkOutAt },
+    { label: "Fin",                   time: turno.fechaFin,            color: C.cyan,   done: turno.status === "COMPLETED" },
   ];
 
   return (
@@ -627,15 +707,79 @@ const CancelForm: React.FC<{
 );
 
 /* ─────────────────────────────────────────────
+   REJECT CHECK-IN FORM
+───────────────────────────────────────────── */
+const RejectForm: React.FC<{
+  value: string; onChange: (v: string) => void;
+  isLoading: boolean; onConfirm: () => void; onCancel: () => void;
+}> = ({ value, onChange, isLoading, onConfirm, onCancel }) => (
+  <div style={{
+    borderRadius: 20,
+    background: "var(--color-bg-elevated)",
+    border: `1px solid ${C.dangerBorder}`,
+    borderTop: `2px solid ${C.danger}`,
+    padding: "1.25rem",
+    boxShadow: `0 12px 32px var(--color-danger-soft)`,
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1rem" }}>
+      <span style={{ color: C.danger }}>{Ico.warning()}</span>
+      <p style={{ fontSize: "0.875rem", fontWeight: 800, color: C.danger }}>Rechazar check-in</p>
+    </div>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={3}
+      placeholder="Motivo del rechazo (mínimo 3 caracteres)…"
+      maxLength={500}
+      style={{
+        width: "100%", resize: "none",
+        borderRadius: 14, padding: "12px 14px",
+        background: "var(--color-glass-soft)",
+        border: `1px solid ${C.dangerBorder}`,
+        color: "var(--color-fg-primary)",
+        fontSize: "0.875rem", lineHeight: 1.55,
+        outline: "none",
+        boxSizing: "border-box",
+      }}
+    />
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+      <ActionBtn
+        label="Confirmar"
+        color={C.danger}
+        bg={C.dangerFaint}
+        border={C.dangerBorder}
+        glow="var(--color-danger-glow)"
+        isLoading={isLoading}
+        onClick={onConfirm}
+        icon={Ico.warning()}
+      />
+      <ActionBtn
+        label="Volver"
+        color="var(--color-fg-secondary)"
+        bg="var(--color-glass-soft)"
+        border="var(--color-glass-medium)"
+        glow="transparent"
+        disabled={isLoading}
+        onClick={onCancel}
+      />
+    </div>
+  </div>
+);
+
+/* ─────────────────────────────────────────────
    ACTION BAR (STICKY)
 ───────────────────────────────────────────── */
 const ActionBar: React.FC<{
-  canClaim: boolean; canCheckIn: boolean; canCheckOut: boolean;
+  canClaim: boolean;
+  canRequestCheckIn: boolean; canConfirmCheckIn: boolean; canRejectCheckIn: boolean;
+  canCheckOut: boolean;
   canUnassign: boolean; canNoShow: boolean; canCancel: boolean;
   isBusy: boolean;
-  isPendingClaim: boolean; isPendingCheckIn: boolean; isPendingCheckOut: boolean;
+  isPendingClaim: boolean; isPendingCheckIn: boolean; isPendingConfirm: boolean; isPendingCheckOut: boolean;
   isPendingUnassign: boolean; isPendingNoShow: boolean;
-  onClaim: () => void; onCheckIn: () => void; onCheckOut: () => void;
+  onClaim: () => void;
+  onRequestCheckIn: () => void; onConfirmCheckIn: () => void; onRejectCheckInOpen: () => void;
+  onCheckOut: () => void;
   onUnassign: () => void; onNoShow: () => void; onCancelOpen: () => void;
 }> = (p) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
@@ -653,18 +797,44 @@ const ActionBar: React.FC<{
           solid
         />
       )}
-      {p.canCheckIn && (
+      {p.canRequestCheckIn && (
         <ActionBtn
-          label="Registrar Check-in"
+          label="Solicitar Check-in"
           color="white"
           bg="var(--color-accent)"
           border="var(--color-accent)"
           glow={C.amberGlow}
           isLoading={p.isPendingCheckIn}
           disabled={p.isBusy}
-          onClick={p.onCheckIn}
+          onClick={p.onRequestCheckIn}
+          icon={Ico.login()}
+          solid
+        />
+      )}
+      {p.canConfirmCheckIn && (
+        <ActionBtn
+          label="Confirmar Check-in"
+          color="white"
+          bg="var(--color-success)"
+          border="var(--color-success)"
+          glow="var(--color-success-soft)"
+          isLoading={p.isPendingConfirm}
+          disabled={p.isBusy}
+          onClick={p.onConfirmCheckIn}
           icon={Ico.check()}
           solid
+        />
+      )}
+      {p.canRejectCheckIn && (
+        <ActionBtn
+          label="Rechazar Check-in"
+          color={C.danger}
+          bg={C.dangerFaint}
+          border={C.dangerBorder}
+          glow="transparent"
+          disabled={p.isBusy}
+          onClick={p.onRejectCheckInOpen}
+          icon={Ico.warning()}
         />
       )}
       {p.canCheckOut && (

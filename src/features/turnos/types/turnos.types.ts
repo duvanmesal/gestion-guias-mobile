@@ -46,6 +46,12 @@ export interface TurnoItem {
   observaciones?: string | null;
   checkInAt?: string | null;
   checkOutAt?: string | null;
+  checkInRequestedAt?: string | null;
+  checkInConfirmedAt?: string | null;
+  checkInConfirmedById?: string | null;
+  checkInRejectedAt?: string | null;
+  checkInRejectedById?: string | null;
+  checkInRejectReason?: string | null;
   canceledAt?: string | null;
   cancelReason?: string | null;
   canceledById?: string | null;
@@ -76,3 +82,14 @@ export interface ListTurnosParams {
 }
 
 export type ListTurnosMeParams = Omit<ListTurnosParams, "assigned" | "guiaId">;
+
+export interface PendingCheckInsParams {
+  atencionId?: number;
+  recaladaId?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface RejectCheckInBody {
+  reason: string;
+}
