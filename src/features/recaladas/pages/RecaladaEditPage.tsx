@@ -4,9 +4,13 @@ import { useHistory, useParams } from "react-router-dom";
 import ErrorState from "../../../ui/components/ErrorState";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
 import { useBuquesLookup } from "../../admin/catalogs/hooks/useBuquesLookup";
+import { useMuellesLookup } from "../../admin/catalogs/hooks/useMuellesLookup";
 import { usePaisesLookup } from "../../admin/catalogs/hooks/usePaisesLookup";
+import { usePuertosLookup } from "../../admin/catalogs/hooks/usePuertosLookup";
 import RecaladaForm, {
   type BuqueLookupOption,
+  type MuelleLookupOption,
+  type PuertoLookupOption,
   type RecaladaFormValues,
 } from "../components/RecaladaForm";
 import { useRecalada } from "../hooks/useRecalada";
@@ -37,9 +41,16 @@ const RecaladaEditPage: React.FC = () => {
   const recaladaQuery  = useRecalada(recaladaId);
   const buquesQuery    = useBuquesLookup();
   const paisesQuery    = usePaisesLookup();
+  const puertosQuery   = usePuertosLookup();
+  const muellesQuery   = useMuellesLookup();
   const updateRecalada = useUpdateRecalada();
 
-  const isLoadingInitial = (recaladaQuery.isLoading && !recaladaQuery.data) || buquesQuery.isLoading || paisesQuery.isLoading;
+  const isLoadingInitial =
+    (recaladaQuery.isLoading && !recaladaQuery.data) ||
+    buquesQuery.isLoading ||
+    paisesQuery.isLoading ||
+    puertosQuery.isLoading ||
+    muellesQuery.isLoading;
 
   if (!recaladaId) return <ErrorState title="ID inválido" message="El identificador de la recalada no es válido." onRetry={() => history.push("/recaladas")} retryLabel="Volver" />;
   if (isLoadingInitial) return <LoadingScreen message="Cargando recalada..." />;
@@ -63,6 +74,8 @@ const RecaladaEditPage: React.FC = () => {
 
   const buques: BuqueLookupOption[] = (buquesQuery.data ?? []).map((b) => ({ id: b.id, nombre: b.nombre }));
   const paises = (paisesQuery.data ?? []).map((p) => ({ id: p.id, codigo: p.codigo, nombre: p.nombre }));
+  const puertos: PuertoLookupOption[] = (puertosQuery.data ?? []).map((p) => ({ id: p.id, codigo: p.codigo, nombre: p.nombre, ciudad: p.ciudad }));
+  const muelles: MuelleLookupOption[] = (muellesQuery.data ?? []).map((m) => ({ id: m.id, codigo: m.codigo, nombre: m.nombre, puerto: m.puerto }));
 
   async function handleSubmit(values: RecaladaFormValues) {
     setSubmitError(null);
@@ -70,6 +83,8 @@ const RecaladaEditPage: React.FC = () => {
     const payload = isArrived
       ? {
           fechaSalida:         values.fechaSalida ? new Date(values.fechaSalida).toISOString() : undefined,
+          puertoId:            values.puertoId ? Number(values.puertoId) : null,
+          muelleId:            values.muelleId ? Number(values.muelleId) : null,
           terminal:            values.terminal?.trim() || undefined,
           muelle:              values.muelle?.trim() || undefined,
           pasajerosEstimados:  typeof values.pasajerosEstimados === "number" ? values.pasajerosEstimados : undefined,
@@ -81,6 +96,8 @@ const RecaladaEditPage: React.FC = () => {
           paisOrigenId:        Number(values.paisOrigenId),
           fechaLlegada:        new Date(values.fechaLlegada).toISOString(),
           fechaSalida:         values.fechaSalida ? new Date(values.fechaSalida).toISOString() : undefined,
+          puertoId:            values.puertoId ? Number(values.puertoId) : null,
+          muelleId:            values.muelleId ? Number(values.muelleId) : null,
           terminal:            values.terminal?.trim() || undefined,
           muelle:              values.muelle?.trim() || undefined,
           pasajerosEstimados:  typeof values.pasajerosEstimados === "number" ? values.pasajerosEstimados : undefined,
@@ -128,11 +145,15 @@ const RecaladaEditPage: React.FC = () => {
             <RecaladaForm
               buques={buques}
               paises={paises}
+              puertos={puertos}
+              muelles={muelles}
               initialValues={{
                 buqueId:             recalada.buque.id,
                 paisOrigenId:        recalada.paisOrigen.id,
                 fechaLlegada:        recalada.fechaLlegada,
                 fechaSalida:         recalada.fechaSalida,
+                puertoId:            recalada.puertoId,
+                muelleId:            recalada.muelleId,
                 terminal:            recalada.terminal,
                 muelle:              recalada.muelle,
                 pasajerosEstimados:  recalada.pasajerosEstimados,

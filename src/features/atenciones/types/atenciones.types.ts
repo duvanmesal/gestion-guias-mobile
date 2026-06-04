@@ -8,6 +8,11 @@ export type AtencionOperationalStatus =
   | "CANCELED"
   | "CLOSED";
 
+export type AtencionEvaluationEstadoFinal =
+  | "SATISFACTORIA"
+  | "CON_NOVEDADES"
+  | "NO_SATISFACTORIA";
+
 export type TurnoStatus =
   | "AVAILABLE"
   | "ASSIGNED"
@@ -79,6 +84,7 @@ export interface AtencionItem {
   supervisor?: AtencionSupervisorRef;
   recalada?: AtencionRecaladaRef;
   turnos?: AtencionTurno[];
+  evaluation?: AtencionEvaluation | null;
 }
 
 export interface AtencionListMeta {
@@ -133,4 +139,32 @@ export interface UpdateAtencionPayload {
   turnosTotal?: number;
   descripcion?: string | null;
   status?: AtencionStatus;
+}
+
+export interface AtencionEvaluation {
+  id: number;
+  atencionId: number;
+  calificacion: number;
+  estadoFinal: AtencionEvaluationEstadoFinal;
+  observaciones: string | null;
+  evaluatedById: string;
+  evaluatedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  evaluatedBy?: {
+    id: string;
+    email: string;
+    nombres: string;
+    apellidos: string;
+  } | null;
+}
+
+export interface AtencionEvaluationPayload {
+  calificacion: number;
+  estadoFinal: AtencionEvaluationEstadoFinal;
+  observaciones?: string | null;
+}
+
+export interface CloseAtencionPayload {
+  evaluation?: AtencionEvaluationPayload;
 }

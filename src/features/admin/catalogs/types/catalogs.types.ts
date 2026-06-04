@@ -83,3 +83,99 @@ export interface UpsertBuquePayload {
   naviera?: string | null;
   status?: CatalogStatus;
 }
+
+export interface PuertoPaisRef {
+  id: number;
+  codigo: string;
+  nombre?: string;
+}
+
+export interface PuertoListItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+  ciudad: string;
+  paisId: number;
+  status: CatalogStatus;
+  pais?: PuertoPaisRef | null;
+  _count?: {
+    muelles: number;
+    recaladas: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PuertoDetail extends PuertoListItem {}
+
+export interface PuertoLookupItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+  ciudad: string;
+  pais?: PuertoPaisRef | null;
+}
+
+export interface ListPuertosParams {
+  q?: string;
+  paisId?: number;
+  status?: CatalogStatus;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface UpsertPuertoPayload {
+  codigo: string;
+  nombre: string;
+  ciudad: string;
+  paisId: number;
+  status?: CatalogStatus;
+}
+
+export interface MuellePuertoRef {
+  id: number;
+  codigo: string;
+  nombre: string;
+  ciudad?: string;
+}
+
+export interface MuelleListItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+  puertoId: number;
+  capacidadCruceros: number | null;
+  status: CatalogStatus;
+  puerto?: MuellePuertoRef | null;
+  _count?: {
+    recaladas: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MuelleDetail extends MuelleListItem {}
+
+export interface MuelleLookupItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+  capacidadCruceros: number | null;
+  puerto?: MuellePuertoRef | null;
+}
+
+export interface ListMuellesParams {
+  q?: string;
+  puertoId?: number;
+  status?: CatalogStatus;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface UpsertMuellePayload {
+  codigo: string;
+  nombre: string;
+  puertoId: number;
+  capacidadCruceros?: number | null;
+  status?: CatalogStatus;
+}

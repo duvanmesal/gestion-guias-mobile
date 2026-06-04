@@ -18,6 +18,25 @@ const ShipIcon = () => (
   </svg>
 );
 
+const AnchorIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="3" />
+    <line x1="12" y1="22" x2="12" y2="8" />
+    <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+  </svg>
+);
+
+const DockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 20V8" />
+    <path d="M20 20V8" />
+    <path d="M4 12h16" />
+    <path d="M4 16h16" />
+    <path d="M7 8V4" />
+    <path d="M17 8V4" />
+  </svg>
+);
+
 const ChevronRight = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
@@ -127,8 +146,8 @@ const CatalogsPage: React.FC = () => {
                   lineHeight: "var(--leading-base)",
                 }}
               >
-                Desde aquí administras los datos maestros del producto. Países y
-                Buques son los submódulos disponibles dentro de Admin.
+                Desde aquí administras los datos maestros del producto:
+                países, buques, puertos y muelles.
               </p>
             </section>
 
@@ -147,6 +166,22 @@ const CatalogsPage: React.FC = () => {
               description="Cruceros con país de bandera, naviera, capacidad y estado operativo."
               icon={<ShipIcon />}
               onClick={() => history.push("/admin/catalogos/buques")}
+            />
+
+            <CatalogTile
+              eyebrow="Catálogo · Logística"
+              title="Puertos"
+              description="Puertos operativos asociados a país y ciudad para la programación de recaladas."
+              icon={<AnchorIcon />}
+              onClick={() => history.push("/admin/catalogos/puertos")}
+            />
+
+            <CatalogTile
+              eyebrow="Catálogo · Logística"
+              title="Muelles"
+              description="Muelles dependientes de un puerto con capacidad operativa para cruceros."
+              icon={<DockIcon />}
+              onClick={() => history.push("/admin/catalogos/muelles")}
             />
           </div>
         </div>

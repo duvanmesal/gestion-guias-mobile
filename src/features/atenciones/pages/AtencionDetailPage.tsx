@@ -18,10 +18,12 @@ import { useAtencionTurnos } from "../hooks/useAtencionTurnos";
 import { useCancelAtencion } from "../hooks/useCancelAtencion";
 import { useClaimAtencionTurno } from "../hooks/useClaimAtencionTurno";
 import { useCloseAtencion } from "../hooks/useCloseAtencion";
+import { useUpsertAtencionEvaluation } from "../hooks/useUpsertAtencionEvaluation";
 import { useTurnoSocket } from "../../turnos/hooks/useTurnoSocket";
 import { useAssignTurno } from "../../turnos/hooks/useTurnoActions";
 import { useGuidesLookup } from "../../users/hooks/useGuidesLookup";
 import type {
+  AtencionEvaluationEstadoFinal,
   AtencionOperationalStatus,
   TurnoStatus,
 } from "../types/atenciones.types";
@@ -106,6 +108,19 @@ function getTurnoLabel(status: TurnoStatus): string {
   }
 }
 
+function getEvaluationEstadoLabel(status: AtencionEvaluationEstadoFinal): string {
+  switch (status) {
+    case "SATISFACTORIA":
+      return "Satisfactoria";
+    case "CON_NOVEDADES":
+      return "Con novedades";
+    case "NO_SATISFACTORIA":
+      return "No satisfactoria";
+    default:
+      return status;
+  }
+}
+
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("es-CO", {
@@ -144,12 +159,18 @@ const AtencionDetailPage: React.FC = () => {
   const claim = useClaimAtencionTurno();
   const cancel = useCancelAtencion();
   const close = useCloseAtencion();
+  const upsertEvaluation = useUpsertAtencionEvaluation();
   const assign = useAssignTurno();
   const guidesQuery = useGuidesLookup();
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [showCancelForm, setShowCancelForm] = useState(false);
+  const [showEvaluationForm, setShowEvaluationForm] = useState(false);
+  const [evaluationRating, setEvaluationRating] = useState("5");
+  const [evaluationStatus, setEvaluationStatus] =
+    useState<AtencionEvaluationEstadoFinal>("SATISFACTORIA");
+  const [evaluationNotes, setEvaluationNotes] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [assigningTurnoId, setAssigningTurnoId] = useState<number | null>(null);
 
@@ -206,8 +227,14 @@ const AtencionDetailPage: React.FC = () => {
   const canEdit = isSupervisor && isActive;
   const canCancel = isSupervisor && opStatus !== "CANCELED" && opStatus !== "CLOSED";
   const canClose = isSupervisor && isActive;
+  const canEvaluate = isSupervisor && opStatus !== "CANCELED";
 
-  const isBusy = claim.isPending || cancel.isPending || close.isPending || assign.isPending;
+  const isBusy =
+    claim.isPending ||
+    cancel.isPending ||
+    close.isPending ||
+    assign.isPending ||
+    upsertEvaluation.isPending;
 
   async function handleAssign(turnoId: number, guiaId: string) {
     setActionError(null);
@@ -268,6 +295,52 @@ const AtencionDetailPage: React.FC = () => {
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "No pude cerrar la atención"
+      );
+    }
+  }
+
+  function openEvaluationForm() {
+    const evaluation = atencion?.evaluation;
+    setEvaluationRating(String(evaluation?.calificacion ?? 5));
+    setEvaluationStatus(evaluation?.estadoFinal ?? "SATISFACTORIA");
+    setEvaluationNotes(evaluation?.observaciones ?? "");
+    setShowEvaluationForm(true);
+    setActionError(null);
+    setActionMessage(null);
+  }
+
+  async function handleSaveEvaluation(closeAfterSave: boolean) {
+    const calificacion = Number(evaluationRating);
+    if (!Number.isInteger(calificacion) || calificacion < 1 || calificacion > 5) {
+      setActionError("La calificación debe estar entre 1 y 5.");
+      return;
+    }
+
+    const payload = {
+      calificacion,
+      estadoFinal: evaluationStatus,
+      observaciones: evaluationNotes.trim() || undefined,
+    };
+
+    setActionError(null);
+    try {
+      if (closeAfterSave) {
+        await close.mutateAsync({
+          id: atencionId!,
+          payload: { evaluation: payload },
+        });
+        setActionMessage("Atención evaluada y cerrada.");
+      } else {
+        await upsertEvaluation.mutateAsync({
+          id: atencionId!,
+          payload,
+        });
+        setActionMessage("Evaluación guardada.");
+      }
+      setShowEvaluationForm(false);
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "No pude guardar la evaluación"
       );
     }
   }
@@ -425,6 +498,31 @@ const AtencionDetailPage: React.FC = () => {
             </SurfaceCard>
 
             <SurfaceCard className="gap-4 p-4" radius="xl" variant="raised">
+              <PageSectionHeader title="Evaluación de cierre" />
+              {atencion.evaluation ? (
+                <KeyValueGrid
+                  columns={2}
+                  items={[
+                    { label: "Calificación", value: `${atencion.evaluation.calificacion}/5` },
+                    {
+                      label: "Estado final",
+                      value: getEvaluationEstadoLabel(atencion.evaluation.estadoFinal),
+                    },
+                    { label: "Evaluada", value: formatDate(atencion.evaluation.evaluatedAt) },
+                    {
+                      label: "Observaciones",
+                      value: atencion.evaluation.observaciones || "—",
+                    },
+                  ]}
+                />
+              ) : (
+                <p className="text-sm leading-6 text-[var(--color-fg-secondary)]">
+                  Esta atención aún no tiene evaluación de supervisor.
+                </p>
+              )}
+            </SurfaceCard>
+
+            <SurfaceCard className="gap-4 p-4" radius="xl" variant="raised">
               <PageSectionHeader
                 title="Turnos"
                 description={
@@ -533,7 +631,7 @@ const AtencionDetailPage: React.FC = () => {
                 </div>
               )}
             </SurfaceCard>
-            {(canClaim || canEdit || canCancel || canClose) && (
+            {(canClaim || canEdit || canCancel || canClose || canEvaluate) && (
               <div className="flex flex-col gap-2">
                 {canClaim && (
                   <Button
@@ -564,8 +662,124 @@ const AtencionDetailPage: React.FC = () => {
                     disabled={isBusy}
                     onClick={() => void handleClose()}
                   >
-                    Cerrar atención
+                    Cerrar sin evaluación
                   </Button>
+                )}
+                {canEvaluate && (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    disabled={isBusy}
+                    onClick={openEvaluationForm}
+                  >
+                    {atencion.evaluation ? "Editar evaluación" : "Evaluar atención"}
+                  </Button>
+                )}
+                {showEvaluationForm && (
+                  <SurfaceCard className="gap-3 p-4" radius="xl" variant="raised">
+                    <p className="text-sm font-semibold text-[var(--color-fg-primary)]">
+                      Evaluación de atención
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
+                        Calificación
+                        <select
+                          value={evaluationRating}
+                          disabled={isBusy}
+                          onChange={(e) => setEvaluationRating(e.target.value)}
+                          className="rounded-2xl border px-3 py-2 text-sm normal-case tracking-normal outline-none"
+                          style={{
+                            background: "var(--color-glass-subtle)",
+                            borderColor: "var(--color-border-glass)",
+                            color: "var(--color-fg-primary)",
+                          }}
+                        >
+                          {[1, 2, 3, 4, 5].map((value) => (
+                            <option key={value} value={String(value)}>
+                              {value}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
+                        Estado final
+                        <select
+                          value={evaluationStatus}
+                          disabled={isBusy}
+                          onChange={(e) =>
+                            setEvaluationStatus(
+                              e.target.value as AtencionEvaluationEstadoFinal
+                            )
+                          }
+                          className="rounded-2xl border px-3 py-2 text-sm normal-case tracking-normal outline-none"
+                          style={{
+                            background: "var(--color-glass-subtle)",
+                            borderColor: "var(--color-border-glass)",
+                            color: "var(--color-fg-primary)",
+                          }}
+                        >
+                          <option value="SATISFACTORIA">Satisfactoria</option>
+                          <option value="CON_NOVEDADES">Con novedades</option>
+                          <option value="NO_SATISFACTORIA">No satisfactoria</option>
+                        </select>
+                      </label>
+                    </div>
+                    <textarea
+                      value={evaluationNotes}
+                      onChange={(e) => setEvaluationNotes(e.target.value)}
+                      rows={3}
+                      placeholder="Observaciones operativas..."
+                      maxLength={2000}
+                      className="w-full resize-none rounded-2xl border px-4 py-3 text-sm outline-none"
+                      style={{
+                        background: "var(--color-glass-subtle)",
+                        borderColor: "var(--color-border-glass)",
+                        color: "var(--color-fg-primary)",
+                        boxShadow: "var(--shadow-neu-inset)",
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        isLoading={upsertEvaluation.isPending}
+                        disabled={isBusy}
+                        onClick={() => void handleSaveEvaluation(false)}
+                      >
+                        Guardar
+                      </Button>
+                      {canClose ? (
+                        <Button
+                          variant="primary"
+                          size="md"
+                          isLoading={close.isPending}
+                          disabled={isBusy}
+                          onClick={() => void handleSaveEvaluation(true)}
+                        >
+                          Cerrar
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          disabled={isBusy}
+                          onClick={() => setShowEvaluationForm(false)}
+                        >
+                          Volver
+                        </Button>
+                      )}
+                    </div>
+                    {canClose ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isBusy}
+                        onClick={() => setShowEvaluationForm(false)}
+                      >
+                        Cancelar
+                      </Button>
+                    ) : null}
+                  </SurfaceCard>
                 )}
                 {canCancel && !showCancelForm && (
                   <Button

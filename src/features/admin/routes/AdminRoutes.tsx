@@ -4,8 +4,12 @@ import { adminDebug } from "../../../core/debug/adminDebug";
 import BuquesPage from "../catalogs/pages/BuquesPage";
 import BuqueUpsertPage from "../catalogs/pages/BuqueUpsertPage";
 import CatalogsPage from "../catalogs/pages/CatalogsPage";
+import MuellesPage from "../catalogs/pages/MuellesPage";
+import MuelleUpsertPage from "../catalogs/pages/MuelleUpsertPage";
 import PaisesPage from "../catalogs/pages/PaisesPage";
 import PaisUpsertPage from "../catalogs/pages/PaisUpsertPage";
+import PuertosPage from "../catalogs/pages/PuertosPage";
+import PuertoUpsertPage from "../catalogs/pages/PuertoUpsertPage";
 import InvitationCreatePage from "../invitations/pages/InvitationCreatePage";
 import InvitationsPage from "../invitations/pages/InvitationsPage";
 import AdminPage from "../pages/AdminPage";
@@ -54,6 +58,42 @@ const AdminRoutes: React.FC = () => {
       <Route path="/admin/catalogos/buques" exact>
         <RoleGuard allowed={[...adminAllowedRoles]}>
           <BuquesPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/puertos/nuevo" exact>
+        <RoleGuard allowed={["SUPER_ADMIN"]}>
+          <PuertoUpsertPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/puertos/:id" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <PuertoUpsertPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/puertos" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <PuertosPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/muelles/nuevo" exact>
+        <RoleGuard allowed={["SUPER_ADMIN"]}>
+          <MuelleUpsertPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/muelles/:id" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <MuelleUpsertPage />
+        </RoleGuard>
+      </Route>
+
+      <Route path="/admin/catalogos/muelles" exact>
+        <RoleGuard allowed={[...adminAllowedRoles]}>
+          <MuellesPage />
         </RoleGuard>
       </Route>
 

@@ -1,6 +1,8 @@
 import type {
   ListBuquesParams,
+  ListMuellesParams,
   ListPaisesParams,
+  ListPuertosParams,
 } from "../types/catalogs.types";
 
 export const catalogsKeys = {
@@ -24,5 +26,26 @@ export const catalogsKeys = {
     detail: (id: number) =>
       ["admin", "catalogs", "buques", "detail", id] as const,
     lookup: () => ["admin", "catalogs", "buques", "lookup"] as const,
+  },
+  puertos: {
+    all: ["admin", "catalogs", "puertos"] as const,
+    lists: () => ["admin", "catalogs", "puertos", "list"] as const,
+    list: (params: ListPuertosParams) =>
+      ["admin", "catalogs", "puertos", "list", params] as const,
+    details: () => ["admin", "catalogs", "puertos", "detail"] as const,
+    detail: (id: number) =>
+      ["admin", "catalogs", "puertos", "detail", id] as const,
+    lookup: () => ["admin", "catalogs", "puertos", "lookup"] as const,
+  },
+  muelles: {
+    all: ["admin", "catalogs", "muelles"] as const,
+    lists: () => ["admin", "catalogs", "muelles", "list"] as const,
+    list: (params: ListMuellesParams) =>
+      ["admin", "catalogs", "muelles", "list", params] as const,
+    details: () => ["admin", "catalogs", "muelles", "detail"] as const,
+    detail: (id: number) =>
+      ["admin", "catalogs", "muelles", "detail", id] as const,
+    lookup: (puertoId?: number) =>
+      ["admin", "catalogs", "muelles", "lookup", puertoId ?? "all"] as const,
   },
 };

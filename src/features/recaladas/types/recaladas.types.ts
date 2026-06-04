@@ -17,6 +17,20 @@ export interface RecaladaPaisRef {
   nombre: string;
 }
 
+export interface RecaladaPuertoRef {
+  id: number;
+  codigo: string;
+  nombre: string;
+  ciudad?: string;
+}
+
+export interface RecaladaMuelleRef {
+  id: number;
+  codigo: string;
+  nombre: string;
+  capacidadCruceros?: number | null;
+}
+
 export interface RecaladaSupervisorUser {
   id: string;
   email: string;
@@ -40,6 +54,8 @@ export interface RecaladaItem {
   cancelReason: string | null;
   status: string;
   operationalStatus: RecaladaOperationalStatus;
+  puertoId: number | null;
+  muelleId: number | null;
   terminal: string | null;
   muelle: string | null;
   pasajerosEstimados: number | null;
@@ -50,6 +66,8 @@ export interface RecaladaItem {
   updatedAt: string;
   buque: RecaladaBuqueRef;
   paisOrigen: RecaladaPaisRef;
+  puerto?: RecaladaPuertoRef | null;
+  muelleCatalogo?: RecaladaMuelleRef | null;
   supervisor: RecaladaSupervisorRef;
 }
 
@@ -67,6 +85,8 @@ export interface RecaladaListMeta {
     operationalStatus?: RecaladaOperationalStatus;
     buqueId?: number;
     paisOrigenId?: number;
+    puertoId?: number;
+    muelleId?: number;
     overdueDeparture?: boolean;
   };
 }
@@ -77,6 +97,8 @@ export interface ListRecaladasParams {
   operationalStatus?: RecaladaOperationalStatus | "";
   buqueId?: number;
   paisOrigenId?: number;
+  puertoId?: number;
+  muelleId?: number;
   q?: string;
   // Filtro operativo: recaladas ARRIVED cuyo zarpe programado ya venció.
   overdueDeparture?: boolean;
@@ -89,6 +111,8 @@ export interface CreateRecaladaPayload {
   paisOrigenId: number;
   fechaLlegada: string;
   fechaSalida?: string;
+  puertoId?: number;
+  muelleId?: number;
   terminal?: string;
   muelle?: string;
   pasajerosEstimados?: number;
@@ -102,6 +126,8 @@ export interface UpdateRecaladaPayload {
   paisOrigenId?: number;
   fechaLlegada?: string;
   fechaSalida?: string;
+  puertoId?: number | null;
+  muelleId?: number | null;
   terminal?: string;
   muelle?: string;
   pasajerosEstimados?: number;

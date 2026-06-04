@@ -8,9 +8,11 @@ import type {
 } from "../../../core/http/types";
 import type {
   AtencionItem,
+  AtencionEvaluationPayload,
   AtencionListMeta,
   AtencionSummary,
   AtencionTurno,
+  CloseAtencionPayload,
   CreateAtencionPayload,
   ListAtencionesParams,
   UpdateAtencionPayload,
@@ -119,10 +121,23 @@ export function cancelAtencion(
 }
 
 export function closeAtencion(
-  id: number
+  id: number,
+  body?: CloseAtencionPayload
 ): Promise<ApiResult<AtencionItem>> {
   return authRequest<AtencionItem>(`/atenciones/${id}/close`, {
     method: "PATCH",
+    body,
+    headers: { ...PLATFORM_HEADER },
+  });
+}
+
+export function upsertAtencionEvaluation(
+  id: number,
+  body: AtencionEvaluationPayload
+): Promise<ApiResult<AtencionItem>> {
+  return authRequest<AtencionItem>(`/atenciones/${id}/evaluation`, {
+    method: "PATCH",
+    body,
     headers: { ...PLATFORM_HEADER },
   });
 }

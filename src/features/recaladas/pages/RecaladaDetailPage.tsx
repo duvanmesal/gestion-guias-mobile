@@ -402,10 +402,12 @@ const OperationalTimeline: React.FC<{ recalada: RecaladaItem }> = ({ recalada })
    INFO CARD
 ───────────────────────────────────────────── */
 const InfoCard: React.FC<{ recalada: RecaladaItem; supervisorName: string }> = ({ recalada, supervisorName }) => {
-  const rows = [
-    { icon: Ico.hash(),      label: "Código",         value: recalada.codigoRecalada,             mono: true },
-    { icon: Ico.terminal(),  label: "Terminal",        value: recalada.terminal ?? "—" },
-    { icon: Ico.anchor(),    label: "Muelle",          value: recalada.muelle ?? "—" },
+    const rows = [
+     { icon: Ico.hash(),      label: "Código",         value: recalada.codigoRecalada,             mono: true },
+     { icon: Ico.anchor(),    label: "Puerto cat.",    value: recalada.puerto ? `${recalada.puerto.codigo} · ${recalada.puerto.nombre}` : "—" },
+     { icon: Ico.anchor(),    label: "Muelle cat.",    value: recalada.muelleCatalogo ? `${recalada.muelleCatalogo.codigo} · ${recalada.muelleCatalogo.nombre}` : "—" },
+     { icon: Ico.terminal(),  label: "Terminal",        value: recalada.terminal ?? "—" },
+     { icon: Ico.anchor(),    label: "Muelle",          value: recalada.muelle ?? "—" },
     { icon: Ico.users(),     label: "Pasajeros est.",  value: recalada.pasajerosEstimados != null ? String(recalada.pasajerosEstimados) : "—" },
     { icon: Ico.users(),     label: "Tripulación est.",value: recalada.tripulacionEstimada != null ? String(recalada.tripulacionEstimada) : "—" },
     { icon: Ico.user(),      label: "Supervisor",      value: supervisorName },

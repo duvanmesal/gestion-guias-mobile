@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import type { RecaladaOperationalStatus, RecaladaSource } from "../types/recaladas.types";
 
@@ -13,6 +13,8 @@ const recaladaFormSchema = z
     paisOrigenId:        z.string().min(1, "Selecciona un país de origen"),
     fechaLlegada:        z.string().min(1, "La fecha de llegada es obligatoria"),
     fechaSalida:         z.string().optional(),
+    puertoId:            z.string().trim().optional(),
+    muelleId:            z.string().trim().optional(),
     terminal:            z.string().trim().max(80).optional().or(z.literal("")),
     muelle:              z.string().trim().max(80).optional().or(z.literal("")),
     pasajerosEstimados:  z.preprocess((v) => (v === "" || v == null ? undefined : Number(v)), z.number().int().min(1).max(300000).optional()),
@@ -29,13 +31,23 @@ export type RecaladaFormValues = z.infer<typeof recaladaFormSchema>;
 
 export interface BuqueLookupOption  { id: number; nombre: string; }
 export interface PaisLookupOption   { id: number; codigo: string; nombre: string; }
+export interface PuertoLookupOption { id: number; codigo: string; nombre: string; ciudad: string; }
+export interface MuelleLookupOption {
+  id: number;
+  codigo: string;
+  nombre: string;
+  puerto?: { id: number; codigo: string; nombre: string } | null;
+}
 
 interface RecaladaFormProps {
   buques:          BuqueLookupOption[];
   paises:          PaisLookupOption[];
+  puertos?:        PuertoLookupOption[];
+  muelles?:        MuelleLookupOption[];
   initialValues?: {
     buqueId?: number; paisOrigenId?: number;
     fechaLlegada?: string; fechaSalida?: string | null;
+    puertoId?: number | null; muelleId?: number | null;
     terminal?: string | null; muelle?: string | null;
     pasajerosEstimados?: number | null; tripulacionEstimada?: number | null;
     observaciones?: string | null; fuente?: RecaladaSource;
@@ -95,13 +107,13 @@ function toInputDatetime(iso: string | null | undefined): string {
    COMPONENT
 ───────────────────────────────────────────── */
 const RecaladaForm: React.FC<RecaladaFormProps> = ({
-  buques, paises, initialValues, isEdit = false,
+  buques, paises, puertos = [], muelles = [], initialValues, isEdit = false,
   operationalStatus, isLoading = false, error, onCancel, onSubmit,
 }) => {
   const isArrivedEdit = isEdit && operationalStatus === "ARRIVED";
 
   const {
-    register, handleSubmit, reset,
+    register, handleSubmit, reset, control,
     formState: { errors, isDirty },
   } = useForm<RecaladaFormValues>({
     resolver: zodResolver(recaladaFormSchema),
@@ -111,10 +123,16 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
   useEffect(() => { reset(buildDefaults(initialValues)); }, [
     initialValues?.buqueId, initialValues?.paisOrigenId,
     initialValues?.fechaLlegada, initialValues?.fechaSalida,
+    initialValues?.puertoId, initialValues?.muelleId,
     initialValues?.terminal, initialValues?.muelle,
     initialValues?.pasajerosEstimados, initialValues?.tripulacionEstimada,
     initialValues?.observaciones, initialValues?.fuente, reset,
   ]);
+
+  const selectedPuertoId = useWatch({ control, name: "puertoId" });
+  const filteredMuelles = selectedPuertoId
+    ? muelles.filter((m) => m.puerto?.id === Number(selectedPuertoId))
+    : muelles;
 
   const inputBase: React.CSSProperties = {
     width: "100%", boxSizing: "border-box",
@@ -185,6 +203,20 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
 
       {/* ── Section: Logística ── */}
       <FormSection title="Logística" color={C.amber}>
+        <Field label="Puerto catálogo" error={errors.puertoId?.message}>
+          <select {...register("puertoId")} disabled={isLoading} style={inputBase}>
+            <option value="">Sin puerto asociado</option>
+            {puertos.map((p) => <option key={p.id} value={String(p.id)}>{p.codigo} · {p.nombre}</option>)}
+          </select>
+        </Field>
+
+        <Field label="Muelle catálogo" error={errors.muelleId?.message}>
+          <select {...register("muelleId")} disabled={isLoading} style={inputBase}>
+            <option value="">Sin muelle asociado</option>
+            {filteredMuelles.map((m) => <option key={m.id} value={String(m.id)}>{m.codigo} · {m.nombre}</option>)}
+          </select>
+        </Field>
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Field label="Terminal" error={errors.terminal?.message}>
             <input {...register("terminal")} type="text" placeholder="Terminal Sur" maxLength={80} disabled={isLoading} style={inputBase} />
@@ -300,6 +332,8 @@ function buildDefaults(iv: RecaladaFormProps["initialValues"]) {
     paisOrigenId:        iv?.paisOrigenId ? String(iv.paisOrigenId) : "",
     fechaLlegada:        toInputDatetime(iv?.fechaLlegada),
     fechaSalida:         toInputDatetime(iv?.fechaSalida),
+    puertoId:            iv?.puertoId ? String(iv.puertoId) : "",
+    muelleId:            iv?.muelleId ? String(iv.muelleId) : "",
     terminal:            iv?.terminal ?? "",
     muelle:              iv?.muelle ?? "",
     pasajerosEstimados:  typeof iv?.pasajerosEstimados === "number" ? iv.pasajerosEstimados : undefined,

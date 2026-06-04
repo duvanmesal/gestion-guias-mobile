@@ -4,9 +4,13 @@ import { useHistory } from "react-router-dom";
 import ErrorState from "../../../ui/components/ErrorState";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
 import { useBuquesLookup } from "../../admin/catalogs/hooks/useBuquesLookup";
+import { useMuellesLookup } from "../../admin/catalogs/hooks/useMuellesLookup";
 import { usePaisesLookup } from "../../admin/catalogs/hooks/usePaisesLookup";
+import { usePuertosLookup } from "../../admin/catalogs/hooks/usePuertosLookup";
 import RecaladaForm, {
   type BuqueLookupOption,
+  type MuelleLookupOption,
+  type PuertoLookupOption,
   type RecaladaFormValues,
 } from "../components/RecaladaForm";
 import { useCreateRecalada } from "../hooks/useCreateRecalada";
@@ -30,23 +34,27 @@ const RecaladaCreatePage: React.FC = () => {
 
   const buquesQuery    = useBuquesLookup();
   const paisesQuery    = usePaisesLookup();
+  const puertosQuery   = usePuertosLookup();
+  const muellesQuery   = useMuellesLookup();
   const createRecalada = useCreateRecalada();
 
-  if (buquesQuery.isLoading || paisesQuery.isLoading) return <LoadingScreen message="Cargando catálogos..." />;
+  if (buquesQuery.isLoading || paisesQuery.isLoading || puertosQuery.isLoading || muellesQuery.isLoading) return <LoadingScreen message="Cargando catálogos..." />;
 
-  if (buquesQuery.error || paisesQuery.error) {
-    const err = buquesQuery.error ?? paisesQuery.error;
+  if (buquesQuery.error || paisesQuery.error || puertosQuery.error || muellesQuery.error) {
+    const err = buquesQuery.error ?? paisesQuery.error ?? puertosQuery.error ?? muellesQuery.error;
     return (
       <ErrorState
         title="No pude cargar los catálogos"
-        message={err instanceof Error ? err.message : "Ocurrió un problema al cargar buques o países."}
-        onRetry={() => { void buquesQuery.refetch(); void paisesQuery.refetch(); }}
+        message={err instanceof Error ? err.message : "Ocurrió un problema al cargar catálogos."}
+        onRetry={() => { void buquesQuery.refetch(); void paisesQuery.refetch(); void puertosQuery.refetch(); void muellesQuery.refetch(); }}
       />
     );
   }
 
   const buques: BuqueLookupOption[] = (buquesQuery.data ?? []).map((b) => ({ id: b.id, nombre: b.nombre }));
   const paises = (paisesQuery.data ?? []).map((p) => ({ id: p.id, codigo: p.codigo, nombre: p.nombre }));
+  const puertos: PuertoLookupOption[] = (puertosQuery.data ?? []).map((p) => ({ id: p.id, codigo: p.codigo, nombre: p.nombre, ciudad: p.ciudad }));
+  const muelles: MuelleLookupOption[] = (muellesQuery.data ?? []).map((m) => ({ id: m.id, codigo: m.codigo, nombre: m.nombre, puerto: m.puerto }));
 
   async function handleSubmit(values: RecaladaFormValues) {
     setSubmitError(null);
@@ -56,6 +64,8 @@ const RecaladaCreatePage: React.FC = () => {
         paisOrigenId:        Number(values.paisOrigenId),
         fechaLlegada:        new Date(values.fechaLlegada).toISOString(),
         fechaSalida:         values.fechaSalida ? new Date(values.fechaSalida).toISOString() : undefined,
+        puertoId:            values.puertoId ? Number(values.puertoId) : undefined,
+        muelleId:            values.muelleId ? Number(values.muelleId) : undefined,
         terminal:            values.terminal?.trim() || undefined,
         muelle:              values.muelle?.trim() || undefined,
         pasajerosEstimados:  typeof values.pasajerosEstimados === "number" ? values.pasajerosEstimados : undefined,
@@ -101,6 +111,8 @@ const RecaladaCreatePage: React.FC = () => {
             <RecaladaForm
               buques={buques}
               paises={paises}
+              puertos={puertos}
+              muelles={muelles}
               isLoading={createRecalada.isPending}
               error={submitError}
               onCancel={() => history.goBack()}
