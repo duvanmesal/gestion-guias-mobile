@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { toastController } from "@ionic/core"
 import { socketClient } from "../../../core/socket/socketClient"
 import { useSessionStore } from "../../../core/auth/sessionStore"
+import { turnosKeys } from "../data/turnos.keys"
 
 interface TurnoSocketPayload {
   turnoId: number
@@ -85,6 +86,28 @@ export function useTurnoSocket(atencionId?: number) {
       queryClient.invalidateQueries({ queryKey: ["atenciones"] })
     }
 
+    const invalidatePendingCheckIns = () => {
+      queryClient.invalidateQueries({ queryKey: turnosKeys.pendingCheckIns() })
+    }
+
+    const onCheckInRequested = (p: TurnoSocketPayload) => {
+      invalidateTurnos(p)
+      invalidatePendingCheckIns()
+      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in solicitado`, "primary")
+    }
+
+    const onCheckInConfirmed = (p: TurnoSocketPayload) => {
+      invalidateTurnos(p)
+      invalidatePendingCheckIns()
+      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in confirmado`, "success")
+    }
+
+    const onCheckInRejected = (p: TurnoSocketPayload) => {
+      invalidateTurnos(p)
+      invalidatePendingCheckIns()
+      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in rechazado`, "danger")
+    }
+
     socket.on("turno:assigned", onAssigned)
     socket.on("turno:claimed", invalidateTurnos)
     socket.on("turno:checkedIn", invalidateTurnos)
@@ -92,6 +115,9 @@ export function useTurnoSocket(atencionId?: number) {
     socket.on("turno:unassigned", invalidateTurnos)
     socket.on("turno:noShow", invalidateTurnos)
     socket.on("turno:canceled", invalidateTurnos)
+    socket.on("turno:checkInRequested", onCheckInRequested)
+    socket.on("turno:checkInConfirmed", onCheckInConfirmed)
+    socket.on("turno:checkInRejected", onCheckInRejected)
     socket.on("atencion:closed", invalidateAtencion)
     socket.on("atencion:canceled", onAtencionCanceled)
     socket.on("atencion:created", onAtencionCreated)
@@ -108,6 +134,9 @@ export function useTurnoSocket(atencionId?: number) {
       socket.off("turno:unassigned", invalidateTurnos)
       socket.off("turno:noShow", invalidateTurnos)
       socket.off("turno:canceled", invalidateTurnos)
+      socket.off("turno:checkInRequested", onCheckInRequested)
+      socket.off("turno:checkInConfirmed", onCheckInConfirmed)
+      socket.off("turno:checkInRejected", onCheckInRejected)
       socket.off("atencion:closed", invalidateAtencion)
       socket.off("atencion:canceled", onAtencionCanceled)
       socket.off("atencion:created", onAtencionCreated)

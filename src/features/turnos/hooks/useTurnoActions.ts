@@ -12,6 +12,7 @@ function useInvalidate() {
       queryClient.invalidateQueries({ queryKey: turnosKeys.meLists() }),
       queryClient.invalidateQueries({ queryKey: turnosKeys.meNext() }),
       queryClient.invalidateQueries({ queryKey: turnosKeys.meActive() }),
+      queryClient.invalidateQueries({ queryKey: turnosKeys.pendingCheckIns() }),
       queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       typeof id === "number"
         ? queryClient.invalidateQueries({ queryKey: turnosKeys.detail(id) })

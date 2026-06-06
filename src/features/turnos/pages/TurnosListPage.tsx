@@ -6,8 +6,10 @@ import ErrorState from "../../../ui/components/ErrorState";
 import { useMyActiveTurno } from "../hooks/useMyActiveTurno";
 import { useMyNextTurno } from "../hooks/useMyNextTurno";
 import { useMyTurnos } from "../hooks/useMyTurnos";
+import { usePendingCheckIns } from "../hooks/usePendingCheckIns";
 import { useTurnosList } from "../hooks/useTurnosList";
 import { useTurnoSocket } from "../hooks/useTurnoSocket";
+import { useConfirmCheckInTurno, useRejectCheckInTurno } from "../hooks/useTurnoActions";
 import {
   formatTurnoDate,
   getTurnoLabel,
@@ -97,6 +99,9 @@ const TurnosListPage: React.FC = () => {
 
   useTurnoSocket()
 
+  const pendingQuery = usePendingCheckIns({}, isSupervisor);
+  const pendingItems = isSupervisor ? pendingQuery.data?.items ?? [] : [];
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [page, setPage] = useState(1);
 
@@ -176,6 +181,13 @@ const TurnosListPage: React.FC = () => {
           </div>
 
           <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 1.25rem" }}>
+
+            {/* ── Supervisor: pending check-ins ── */}
+            {isSupervisor && pendingItems.length > 0 && (
+              <div className="animate-fade-up" style={{ animationDelay: "0ms", animationFillMode: "backwards", marginTop: "1.25rem" }}>
+                <PendingCheckInsSection items={pendingItems} onNavigate={(id) => history.push(`/turnos/${id}`)} />
+              </div>
+            )}
 
             {/* ── Guide: active turno card ── */}
             {isGuia && activeItem && (
@@ -796,6 +808,223 @@ const PaginationBtn: React.FC<{ label: string; icon: React.ReactElement; iconRig
     {iconRight && icon}
   </button>
 );
+
+/* ─────────────────────────────────────────────
+   PENDING CHECK-INS SECTION
+───────────────────────────────────────────── */
+const Ico2 = {
+  check: (s = 14) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+  x:     (s = 14) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>,
+  user:  (s = 12) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+  clock: (s = 12) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+};
+
+const PendingCheckInsSection: React.FC<{
+  items: TurnoItem[];
+  onNavigate: (id: number) => void;
+}> = ({ items, onNavigate }) => {
+  const confirm = useConfirmCheckInTurno();
+  const reject  = useRejectCheckInTurno();
+
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectError, setRejectError] = useState("");
+
+  function openReject(id: number) {
+    setRejectingId(id);
+    setRejectReason("");
+    setRejectError("");
+  }
+
+  function cancelReject() {
+    setRejectingId(null);
+    setRejectReason("");
+    setRejectError("");
+  }
+
+  async function handleReject(id: number) {
+    if (rejectReason.trim().length < 3) {
+      setRejectError("Mínimo 3 caracteres.");
+      return;
+    }
+    await reject.mutateAsync({ id, reason: rejectReason.trim() });
+    cancelReject();
+  }
+
+  return (
+    <div
+      style={{
+        borderRadius: 16,
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-accent-glow)",
+        overflow: "hidden",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <div style={{ padding: "0.875rem 1.125rem", borderBottom: "1px solid var(--color-border-hairline)", display: "flex", alignItems: "center", gap: 8 }}>
+        <span
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            borderRadius: 9999, padding: "2px 8px",
+            background: "var(--color-accent-glow)", border: "1px solid var(--color-accent-glow)",
+          }}
+        >
+          <span className="live-pulse-dot" style={{ background: "var(--color-accent)", width: 5, height: 5 }} />
+          <span style={{ fontSize: "var(--text-eyebrow)", fontWeight: 700, color: "var(--color-accent)", textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)" }}>
+            {items.length}
+          </span>
+        </span>
+        <span style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)", color: "var(--color-fg-muted)" }}>
+          Check-ins pendientes
+        </span>
+      </div>
+
+      <div style={{ padding: "0.75rem 1rem 1rem", display: "flex", flexDirection: "column", gap: 8 }}>
+        {items.map((t) => {
+          const isRejecting = rejectingId === t.id;
+          const guiaName = [t.guia?.usuario?.nombres, t.guia?.usuario?.apellidos].filter(Boolean).join(" ") || t.guia?.usuario?.email || "Guía";
+          const shipCode = t.atencion?.recalada?.codigoRecalada ?? `Atención #${t.atencionId}`;
+          const requestedAt = t.checkInRequestedAt ? new Date(t.checkInRequestedAt).toLocaleString("es-CO", { hour: "2-digit", minute: "2-digit" }) : "—";
+
+          return (
+            <div
+              key={t.id}
+              style={{
+                borderRadius: 12,
+                background: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-border-hairline)",
+                borderLeft: "3px solid var(--color-accent)",
+                padding: "10px 12px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                    <span
+                      className="t-mono"
+                      style={{ fontSize: "var(--text-body)", fontWeight: 700, color: "var(--color-fg-primary)", letterSpacing: "var(--tracking-tight)" }}
+                    >
+                      #{pad(t.numero)}
+                    </span>
+                    <span
+                      className="truncate"
+                      style={{ fontSize: "var(--text-caption)", color: "var(--color-fg-muted)", fontWeight: 500 }}
+                    >
+                      · {shipCode}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)" }}>
+                      {Ico2.user()} {guiaName}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "var(--text-eyebrow)", color: "var(--color-accent)" }}>
+                      {Ico2.clock()} {requestedAt}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate(t.id)}
+                  style={{
+                    flexShrink: 0, padding: "4px 8px", borderRadius: 8,
+                    border: "1px solid var(--color-border-hairline)",
+                    background: "var(--color-bg-base)",
+                    fontSize: "var(--text-eyebrow)", fontWeight: 600, color: "var(--color-fg-secondary)",
+                  }}
+                >
+                  Detalle
+                </button>
+              </div>
+
+              {!isRejecting ? (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 10 }}>
+                  <button
+                    type="button"
+                    disabled={confirm.isPending}
+                    onClick={() => confirm.mutate(t.id)}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                      padding: "7px 10px", borderRadius: 8,
+                      background: "var(--color-success)", border: "none",
+                      color: "#FFFFFF", fontSize: "var(--text-caption)", fontWeight: 600,
+                      cursor: confirm.isPending ? "not-allowed" : "pointer",
+                      opacity: confirm.isPending ? 0.6 : 1,
+                    }}
+                  >
+                    {Ico2.check()} Confirmar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openReject(t.id)}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                      padding: "7px 10px", borderRadius: 8,
+                      background: "var(--color-danger-soft)", border: "1px solid var(--color-danger-border)",
+                      color: "var(--color-danger)", fontSize: "var(--text-caption)", fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {Ico2.x()} Rechazar
+                  </button>
+                </div>
+              ) : (
+                <div style={{ marginTop: 10 }}>
+                  <textarea
+                    rows={2}
+                    value={rejectReason}
+                    onChange={(e) => { setRejectReason(e.target.value); setRejectError(""); }}
+                    placeholder="Motivo del rechazo (mín. 3 caracteres)"
+                    style={{
+                      width: "100%", borderRadius: 8, padding: "7px 10px",
+                      border: `1px solid ${rejectError ? "var(--color-danger)" : "var(--color-border-hairline)"}`,
+                      background: "var(--color-bg-base)",
+                      color: "var(--color-fg-primary)",
+                      fontSize: "var(--text-caption)", resize: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  {rejectError && (
+                    <p style={{ marginTop: 3, fontSize: "var(--text-eyebrow)", color: "var(--color-danger)", fontWeight: 500 }}>
+                      {rejectError}
+                    </p>
+                  )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 6 }}>
+                    <button
+                      type="button"
+                      onClick={cancelReject}
+                      style={{
+                        padding: "7px 10px", borderRadius: 8,
+                        border: "1px solid var(--color-border-hairline)",
+                        background: "var(--color-bg-base)",
+                        color: "var(--color-fg-secondary)", fontSize: "var(--text-caption)", fontWeight: 600, cursor: "pointer",
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={reject.isPending}
+                      onClick={() => void handleReject(t.id)}
+                      style={{
+                        padding: "7px 10px", borderRadius: 8,
+                        background: "var(--color-danger)", border: "none",
+                        color: "#FFFFFF", fontSize: "var(--text-caption)", fontWeight: 600,
+                        cursor: reject.isPending ? "not-allowed" : "pointer",
+                        opacity: reject.isPending ? 0.6 : 1,
+                      }}
+                    >
+                      Confirmar rechazo
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 /* ─────────────────────────────────────────────
    HELPERS

@@ -15,4 +15,5 @@ export const turnosKeys = {
   meActive: () => [...turnosKeys.all, "me", "active"] as const,
   details: () => [...turnosKeys.all, "detail"] as const,
   detail: (id: number) => [...turnosKeys.all, "detail", id] as const,
+  pendingCheckIns: () => [...turnosKeys.all, "check-ins", "pending"] as const,
 };
