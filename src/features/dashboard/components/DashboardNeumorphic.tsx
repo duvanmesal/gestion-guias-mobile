@@ -936,7 +936,7 @@ const SupervisorContent: React.FC<{
 
       {/* ── Tab: Hoy ── */}
       {(!analytics || activeTab === "hoy") && (
-        <>
+        <TabContent tabKey="hoy">
           {overdueRecaladas > 0 && (
             <FadeCard delay={0}>
               <button
@@ -1018,22 +1018,22 @@ const SupervisorContent: React.FC<{
             <Card className="p-5">
               <SectionDivider title="Operaciones del día" color={P.amber} />
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <CountTile tone="cyan"   label="Recaladas"  helper="Operación del día"   value={counts.recaladas} />
-                <CountTile tone="amber"  label="Atenciones" helper="Inicio y fin hoy"    value={counts.atenciones} />
-                <CountTile tone="teal"   label="Turnos"     helper="Cobertura operativa" value={counts.turnos} />
-                <CountTile tone="violet" label="En curso"   helper="Turnos activos"      value={counts.turnosInProgress ?? 0} />
+                <CountTile tone="cyan"   label="Recaladas"  helper="Operación del día"   value={counts.recaladas}             delay={0} />
+                <CountTile tone="amber"  label="Atenciones" helper="Inicio y fin hoy"    value={counts.atenciones}            delay={60} />
+                <CountTile tone="teal"   label="Turnos"     helper="Cobertura operativa" value={counts.turnos}                delay={120} />
+                <CountTile tone="violet" label="En curso"   helper="Turnos activos"      value={counts.turnosInProgress ?? 0} delay={180} />
               </div>
             </Card>
           </FadeCard>
 
-          <FadeCard delay={80}>
+          <FadeCard delay={120}>
             <Card className="p-5">
               <SectionDivider title="Capacidad del equipo" color={P.teal} />
               <TeamCapacity guides={overview.guides} />
             </Card>
           </FadeCard>
 
-          <FadeCard delay={160}>
+          <FadeCard delay={200}>
             <Card className="p-5">
               <SectionDivider title="Próximos hitos" color={P.violet} />
               <div className="mt-4">
@@ -1054,55 +1054,55 @@ const SupervisorContent: React.FC<{
               <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
             </Card>
           </FadeCard>
-        </>
+        </TabContent>
       )}
 
       {/* ── Tab: Actividad ── */}
       {analytics && activeTab === "actividad" && (
-        <FadeCard delay={0}>
+        <TabContent tabKey="actividad">
           <Card className="p-5">
-            <SectionDivider title="Actividad operativa" color={P.violet} />
+            <SectionDivider title="Tasas operativas" color={P.violet} />
             <AnalyticsKpiRow kpis={analytics.kpis} onNavigate={onNavigate} />
             <div style={{ marginTop: 20 }}>
-              <SectionDivider title="Tendencia de turnos" color={P.cyan} />
+              <SectionDivider title={`Tendencia ${analytics.range.days}d`} color={P.cyan} />
               <WorkloadTrendMini trend={analytics.workloadTrend} />
             </div>
             <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
           </Card>
-        </FadeCard>
+        </TabContent>
       )}
 
       {/* ── Tab: Guías ── */}
       {analytics && activeTab === "guias" && (
-        <FadeCard delay={0}>
+        <TabContent tabKey="guias">
           <Card className="p-5">
             <SectionDivider title="Capacidad de guías" color={P.teal} />
             <GuideCapacityMini capacity={analytics.guideCapacity} />
             <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
           </Card>
-        </FadeCard>
+        </TabContent>
       )}
 
       {/* ── Tab: Check-in ── */}
       {analytics && activeTab === "checkin" && (
-        <FadeCard delay={0}>
+        <TabContent tabKey="checkin">
           <Card className="p-5">
             <SectionDivider title="Flujo de check-in" color={P.amber} />
             <CheckInFlowMini flow={analytics.checkInFlow} onNavigate={onNavigate} />
             <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
           </Card>
-        </FadeCard>
+        </TabContent>
       )}
 
       {/* ── Tab: Evaluaciones ── */}
       {analytics && activeTab === "evaluaciones" && (
-        <FadeCard delay={0}>
+        <TabContent tabKey="evaluaciones">
           <Card className="p-5">
             <SectionDivider title="Evaluaciones" color={P.violet} />
             <EvaluationsMini evals={analytics.evaluations} onNavigate={onNavigate} />
             <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
           </Card>
-        </FadeCard>
+        </TabContent>
       )}
     </>
   );
@@ -1117,27 +1117,43 @@ const AnalyticsKpiRow: React.FC<{
 }> = ({ kpis, onNavigate }) => {
   const fmt = (v: number) => `${Math.round(v)}%`;
   const items = [
-    { label: "Asignación", value: fmt(kpis.assignmentRate), color: P.cyan },
-    { label: "Ejecución",  value: fmt(kpis.executionRate),  color: P.teal },
-    { label: "No-show",    value: fmt(kpis.noShowRate),     color: P.danger },
-    { label: "Disponibil.",value: fmt(kpis.guideAvailabilityRate), color: P.violet },
+    { label: "Asignación", value: fmt(kpis.assignmentRate), color: P.cyan,   border: P.cyanBorder,   bg: P.cyanFaint },
+    { label: "Ejecución",  value: fmt(kpis.executionRate),  color: P.teal,   border: P.tealBorder,   bg: P.tealFaint },
+    { label: "No-show",    value: fmt(kpis.noShowRate),     color: P.danger, border: "var(--color-danger-border)", bg: "var(--color-danger-soft)" },
+    { label: "Disponibil.",value: fmt(kpis.guideAvailabilityRate), color: P.violet, border: P.violetBorder, bg: P.violetFaint },
   ];
   return (
     <div className="mt-4 grid grid-cols-2 gap-2.5">
-      {items.map((item) => (
+      {items.map((item, i) => (
         <div
           key={item.label}
+          className="animate-fade-up"
           style={{
             borderRadius: 12,
-            padding: "12px 14px",
-            background: "var(--color-bg-subtle)",
-            border: "1px solid var(--color-border-hairline)",
+            padding: "14px 14px",
+            background: item.bg,
+            border: `1px solid ${item.border}`,
+            animationDelay: `${i * 60}ms`,
+            animationFillMode: "backwards",
+            animationTimingFunction: "cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, color: "var(--color-fg-muted)", textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)" }}>
+          <p style={{
+            fontSize: "var(--text-eyebrow)", fontWeight: 700,
+            color: item.color, textTransform: "uppercase",
+            letterSpacing: "var(--tracking-eyebrow)",
+          }}>
             {item.label}
           </p>
-          <p className="t-mono" style={{ fontSize: "1.5rem", fontWeight: 700, color: item.color, lineHeight: 1, marginTop: 6 }}>
+          <p
+            className="t-mono animate-num-pop"
+            style={{
+              fontSize: "1.625rem", fontWeight: 700, color: item.color,
+              lineHeight: 1, marginTop: 8,
+              animationDelay: `${60 + i * 60}ms`,
+              animationFillMode: "backwards",
+            }}
+          >
             {item.value}
           </p>
         </div>
@@ -1146,8 +1162,15 @@ const AnalyticsKpiRow: React.FC<{
         <button
           type="button"
           onClick={() => onNavigate?.("/turnos?checkInPending=1")}
-          className="col-span-2 text-left active:scale-[0.99] transition-transform"
-          style={{ borderRadius: 12, padding: "11px 14px", background: "var(--color-accent-soft)", border: "1px solid var(--color-accent-border)", display: "flex", alignItems: "center", gap: 10 }}
+          className="col-span-2 text-left card-tap animate-fade-up"
+          style={{
+            borderRadius: 12, padding: "12px 14px",
+            background: "var(--color-accent-soft)",
+            border: "1px solid var(--color-accent-border)",
+            display: "flex", alignItems: "center", gap: 10,
+            animationDelay: "260ms", animationFillMode: "backwards",
+            animationTimingFunction: "cubic-bezier(0.16,1,0.3,1)",
+          }}
         >
           <span style={{ color: P.amber }}>{Ico.zap()}</span>
           <span style={{ flex: 1, fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-primary)" }}>
@@ -1166,33 +1189,83 @@ const WorkloadTrendMini: React.FC<{ trend: WorkloadTrendDay[] }> = ({ trend }) =
   }
   const maxTurnos = Math.max(...trend.map((d) => d.turnos), 1);
   const showAll = trend.length <= 10;
-  const days = showAll ? trend : trend.filter((_, i) => i % 3 === 0 || i === trend.length - 1);
+  const TRACK_HEIGHT = 80;
+
+  const getBarColor = (d: WorkloadTrendDay) => {
+    if (d.noShows > 0) return "var(--color-danger)";
+    if (d.completed > d.turnos * 0.6) return "var(--color-success)";
+    return "var(--color-primary)";
+  };
 
   return (
-    <div style={{ marginTop: 12 }}>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72, overflowX: "auto", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"], scrollbarWidth: "none", paddingBottom: 2 }}>
+    <div style={{ marginTop: 16 }}>
+      {/* Chart track */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          gap: 3,
+          height: TRACK_HEIGHT,
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+          scrollbarWidth: "none",
+          paddingBottom: 0,
+        }}
+      >
         {trend.map((d, i) => {
-          const heightPct = Math.max(4, Math.round((d.turnos / maxTurnos) * 100));
-          const barDate = d.date.slice(5); // MM-DD
-          const showLabel = showAll || i % 3 === 0 || i === trend.length - 1;
+          const ratio = Math.max(0.04, d.turnos / maxTurnos);
+          const barDate = d.date.slice(5);
+          const showLabel = showAll || i % Math.ceil(trend.length / 7) === 0 || i === trend.length - 1;
           return (
-            <div key={d.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: showAll ? "1 1 0" : undefined, minWidth: showAll ? 0 : 18 }}>
-              <div
-                style={{
-                  width: "100%",
-                  minWidth: 6,
-                  height: `${heightPct}%`,
-                  borderRadius: "3px 3px 1px 1px",
-                  background: d.completed > 0
-                    ? "var(--color-success)"
-                    : d.noShows > 0
-                    ? "var(--color-danger)"
-                    : "var(--color-primary)",
-                  opacity: 0.85,
-                }}
-              />
+            <div
+              key={d.date}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 3,
+                flex: "1 1 0",
+                minWidth: 10,
+                height: "100%",
+              }}
+            >
+              {/* Bar track */}
+              <div style={{ width: "100%", height: `${TRACK_HEIGHT - 16}px`, display: "flex", alignItems: "flex-end" }}>
+                {/* Animated bar using scaleY — performant transform-only */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div
+                    className="animate-bar-grow"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "3px 3px 1px 1px",
+                      background: getBarColor(d),
+                      opacity: 0.82,
+                      transform: `scaleY(${ratio})`,
+                      transformOrigin: "bottom center",
+                      animationDelay: `${i * 18}ms`,
+                      animationFillMode: "backwards",
+                    }}
+                  />
+                </div>
+              </div>
               {showLabel && (
-                <span style={{ fontSize: "0.5rem", color: "var(--color-fg-muted)", fontWeight: 600, letterSpacing: 0, whiteSpace: "nowrap", lineHeight: 1 }}>
+                <span style={{
+                  fontSize: "0.48rem",
+                  color: "var(--color-fg-muted)",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  lineHeight: 1,
+                  fontFamily: "var(--font-family-mono)",
+                }}>
                   {barDate}
                 </span>
               )}
@@ -1200,14 +1273,19 @@ const WorkloadTrendMini: React.FC<{ trend: WorkloadTrendDay[] }> = ({ trend }) =
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
+
+      {/* Gridline baseline */}
+      <div style={{ height: 1, background: "var(--color-border-hairline)", marginTop: 2, marginBottom: 10 }} />
+
+      {/* Legend */}
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
         {[
           { color: "var(--color-primary)", label: "Turnos" },
-          { color: "var(--color-success)", label: "Completados" },
-          { color: "var(--color-danger)",  label: "No-show" },
+          { color: "var(--color-success)", label: "Alta ejecución" },
+          { color: "var(--color-danger)",  label: "Con no-shows" },
         ].map((l) => (
-          <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 8, height: 8, borderRadius: 2, background: l.color }} />
+          <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: l.color, flexShrink: 0 }} />
             <span style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600 }}>{l.label}</span>
           </div>
         ))}
@@ -1227,8 +1305,8 @@ const GuideCapacityMini: React.FC<{ capacity: GuideCapacityStats }> = ({ capacit
   ];
   return (
     <div className="mt-4 flex flex-col gap-4">
-      {rows.map((r) => (
-        <CapacityRow key={r.label} label={r.label} value={r.value} total={total} pct={r.pct} color={r.color} />
+      {rows.map((r, i) => (
+        <CapacityRow key={r.label} label={r.label} value={r.value} total={total} pct={r.pct} color={r.color} delay={i * 80} />
       ))}
       <div className="grid grid-cols-3 gap-2 mt-1">
         {[
@@ -1259,14 +1337,33 @@ const CheckInFlowMini: React.FC<{
   ];
   return (
     <div className="mt-4 flex flex-col gap-3">
-      {steps.map((s) => (
-        <div key={s.label}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+      {steps.map((s, i) => (
+        <div
+          key={s.label}
+          className="animate-fade-up"
+          style={{ animationDelay: `${i * 60}ms`, animationFillMode: "backwards", animationTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-secondary)" }}>{s.label}</span>
-            <span className="t-mono" style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>{s.value}</span>
+            <span
+              className="t-mono animate-num-pop"
+              style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: s.color, animationDelay: `${40 + i * 60}ms`, animationFillMode: "backwards" }}
+            >
+              {s.value}
+            </span>
           </div>
           <div style={{ height: 5, borderRadius: 3, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${Math.min(100, (s.value / max) * 100)}%`, background: s.color, borderRadius: 3, transition: "width 360ms ease" }} />
+            <div
+              className="animate-bar-fill"
+              style={{
+                height: "100%",
+                width: `${Math.min(100, (s.value / max) * 100)}%`,
+                background: s.color,
+                borderRadius: 3,
+                animationDelay: `${20 + i * 60}ms`,
+                animationFillMode: "backwards",
+              }}
+            />
           </div>
         </div>
       ))}
@@ -1333,14 +1430,33 @@ const EvaluationsMini: React.FC<{
         </div>
       )}
       <div className="flex flex-col gap-3 mt-1">
-        {dist.map((d) => (
-          <div key={d.label}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+        {dist.map((d, i) => (
+          <div
+            key={d.label}
+            className="animate-fade-up"
+            style={{ animationDelay: `${i * 70}ms`, animationFillMode: "backwards", animationTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
               <span style={{ fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-secondary)" }}>{d.label}</span>
-              <span className="t-mono" style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>{d.value}</span>
+              <span
+                className="t-mono animate-num-pop"
+                style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: d.color, animationDelay: `${40 + i * 70}ms`, animationFillMode: "backwards" }}
+              >
+                {d.value}
+              </span>
             </div>
             <div style={{ height: 5, borderRadius: 3, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${Math.min(100, (d.value / total) * 100)}%`, background: d.color, borderRadius: 3, transition: "width 360ms ease" }} />
+              <div
+                className="animate-bar-fill"
+                style={{
+                  height: "100%",
+                  width: `${Math.min(100, (d.value / total) * 100)}%`,
+                  background: d.color,
+                  borderRadius: 3,
+                  animationDelay: `${20 + i * 70}ms`,
+                  animationFillMode: "backwards",
+                }}
+              />
             </div>
           </div>
         ))}
@@ -1367,25 +1483,49 @@ const EvaluationsMini: React.FC<{
    ATOMS
 ══════════════════════════════════════════════ */
 const FadeCard: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => (
-  <div className="animate-fade-up" style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}>
-    {children}
-  </div>
-);
-
-const Card: React.FC<{ children: React.ReactNode; className?: string; style?: React.CSSProperties }> = ({ children, className = "", style }) => (
   <div
-    className={className}
+    className="animate-fade-up"
     style={{
-      background: "var(--color-bg-elevated)",
-      border: "1px solid var(--color-border-hairline)",
-      borderRadius: 16,
-      boxShadow: "var(--shadow-card)",
-      ...style,
+      animationDelay: `${delay}ms`,
+      animationFillMode: "backwards",
+      animationDuration: "380ms",
+      animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
     }}
   >
     {children}
   </div>
 );
+
+const TabContent: React.FC<{ tabKey: string; children: React.ReactNode }> = ({ tabKey, children }) => (
+  <div key={tabKey} className="animate-tab-enter" style={{ animationFillMode: "backwards" }}>
+    {children}
+  </div>
+);
+
+const Card: React.FC<{ children: React.ReactNode; className?: string; style?: React.CSSProperties; tap?: boolean; onPress?: () => void }> = ({
+  children, className = "", style, tap = false, onPress,
+}) => {
+  const Tag = onPress ? "button" : "div";
+  return (
+    <Tag
+      type={onPress ? "button" : undefined}
+      onClick={onPress}
+      className={`${className} ${tap || onPress ? "card-tap" : ""}`}
+      style={{
+        background: "var(--color-bg-elevated)",
+        border: "1px solid var(--color-border-hairline)",
+        borderRadius: 16,
+        boxShadow: "var(--shadow-card)",
+        width: onPress ? "100%" : undefined,
+        textAlign: onPress ? "left" : undefined,
+        transition: "box-shadow 200ms ease, transform 140ms ease",
+        ...style,
+      }}
+    >
+      {children}
+    </Tag>
+  );
+};
 
 const SectionDivider: React.FC<{ title: string; color?: string }> = ({ title, color = "var(--color-fg-secondary)" }) => (
   <div className="flex items-center gap-2">
@@ -1440,42 +1580,53 @@ const InfoPill: React.FC<{ label: string; value?: string; accent?: string }> = (
 
 const CountTile: React.FC<{
   tone: "cyan" | "amber" | "teal" | "violet";
-  label: string; helper: string; value: number;
-}> = ({ tone, label, helper, value }) => {
+  label: string; helper: string; value: number; delay?: number;
+}> = ({ tone, label, helper, value, delay = 0 }) => {
   const color  = TILE_COLOR[tone];
   const iconBg = TILE_ICON_BG[tone];
+  const border = TILE_BORDER[tone];
 
   return (
     <div
+      className="animate-fade-up"
       style={{
         borderRadius: 14,
         padding: "14px 14px",
         background: "var(--color-bg-elevated)",
-        border: "1px solid var(--color-border-hairline)",
+        border: `1px solid ${border}`,
+        boxShadow: "var(--shadow-card)",
+        transition: "transform 140ms ease, box-shadow 180ms ease",
+        WebkitTapHighlightColor: "transparent",
+        animationDelay: `${delay}ms`,
+        animationFillMode: "backwards",
+        animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       <div
         style={{
-          width: 28,
-          height: 28,
-          borderRadius: 8,
-          marginBottom: 10,
+          width: 30,
+          height: 30,
+          borderRadius: 9,
+          marginBottom: 12,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           background: iconBg,
+          border: `1px solid ${border}`,
           color,
         }}
       >
         {TILE_ICONS_SM[tone]}
       </div>
       <p
-        className="t-mono leading-none"
+        className="t-mono animate-num-pop leading-none"
         style={{
           fontSize: "1.875rem",
           fontWeight: 700,
-          color: "var(--color-fg-primary)",
+          color,
           letterSpacing: "var(--tracking-tight)",
+          animationDelay: `${delay + 80}ms`,
+          animationFillMode: "backwards",
         }}
       >
         {value}
@@ -1514,60 +1665,57 @@ const TeamCapacity: React.FC<{ guides?: SupervisorOverview["guides"] }> = ({ gui
 
   return (
     <div className="mt-4 flex flex-col gap-4">
-      <CapacityRow label="Activos"     value={activos}   total={total} pct={100}                       color={P.cyan} />
-      <CapacityRow label="Asignados"   value={asignados} total={total} pct={(asignados / total) * 100} color={P.amber} />
-      <CapacityRow label="Disponibles" value={disponibles} total={total} pct={(disponibles / total) * 100} color={P.teal} />
+      <CapacityRow label="Activos"     value={activos}   total={total} pct={100}                          color={P.cyan}  delay={0} />
+      <CapacityRow label="Asignados"   value={asignados} total={total} pct={(asignados / total) * 100}    color={P.amber} delay={80} />
+      <CapacityRow label="Disponibles" value={disponibles} total={total} pct={(disponibles / total) * 100} color={P.teal}  delay={160} />
       {penalizados > 0 && (
-        <CapacityRow label="Penalizados" value={penalizados} total={total} pct={(penalizados / total) * 100} color={P.danger} />
+        <CapacityRow label="Penalizados" value={penalizados} total={total} pct={(penalizados / total) * 100} color={P.danger} delay={240} />
       )}
     </div>
   );
 };
 
-const CapacityRow: React.FC<{ label: string; value: number; total: number; pct: number; color: string }> = ({ label, value, total, pct, color }) => {
+const CapacityRow: React.FC<{
+  label: string; value: number; total: number; pct: number; color: string; delay?: number;
+}> = ({ label, value, total, pct, color, delay = 0 }) => {
   const pctDisplay = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
-    <div>
+    <div
+      className="animate-fade-up"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards", animationTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+    >
       <div className="flex items-center justify-between mb-2">
-        <span
-          style={{
-            fontSize: "var(--text-caption)",
-            fontWeight: 600,
-            color: "var(--color-fg-secondary)",
-          }}
-        >
+        <span style={{ fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-secondary)" }}>
           {label}
         </span>
         <div className="flex items-center gap-2">
           <span
-            style={{
-              fontSize: "var(--text-eyebrow)",
-              color: "var(--color-fg-muted)",
-              fontWeight: 600,
-            }}
-          >
-            {pctDisplay}%
-          </span>
-          <span
-            className="t-mono"
+            className="t-mono animate-num-pop"
             style={{
               fontSize: "var(--text-caption)",
               fontWeight: 700,
-              color: "var(--color-fg-primary)",
+              color,
+              animationDelay: `${delay + 100}ms`,
+              animationFillMode: "backwards",
             }}
           >
             {value}
           </span>
+          <span style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600 }}>
+            {pctDisplay}%
+          </span>
         </div>
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
+      <div style={{ height: 5, borderRadius: 3, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
         <div
+          className="animate-bar-fill"
           style={{
             height: "100%",
             width: `${Math.min(100, pct)}%`,
             background: color,
-            borderRadius: 2,
-            transition: "width 360ms ease",
+            borderRadius: 3,
+            animationDelay: `${delay + 60}ms`,
+            animationFillMode: "backwards",
           }}
         />
       </div>
@@ -1673,17 +1821,25 @@ const VioletBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; ico
   <button
     type="button"
     onClick={onClick}
-    className="w-full flex items-center justify-center gap-2 transition-colors active:translate-y-px"
+    className="w-full flex items-center justify-center gap-2"
     style={{
-      padding: "11px 18px",
+      padding: "12px 18px",
       borderRadius: 12,
       background: "var(--color-primary)",
-      border: "1px solid var(--color-primary)",
+      border: "1px solid var(--color-primary-active)",
       color: "white",
       fontSize: "var(--text-body)",
       fontWeight: 600,
       letterSpacing: "var(--tracking-base)",
+      boxShadow: "0 1px 2px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.08)",
+      transition: "background 140ms ease, transform 120ms ease, box-shadow 120ms ease",
+      WebkitTapHighlightColor: "transparent",
+      transform: "translateZ(0)",
     }}
+    onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+    onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+    onTouchStart={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+    onTouchEnd={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
   >
     {icon && <span style={{ display: "flex" }}>{icon}</span>}
     <span>{children}</span>
@@ -1694,9 +1850,9 @@ const AmberBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; icon
   <button
     type="button"
     onClick={onClick}
-    className="w-full flex items-center justify-center gap-2 transition-colors active:translate-y-px"
+    className="w-full flex items-center justify-center gap-2"
     style={{
-      padding: "11px 18px",
+      padding: "12px 18px",
       borderRadius: 12,
       background: "var(--color-bg-elevated)",
       border: "1px solid var(--color-border-hairline)",
@@ -1704,7 +1860,15 @@ const AmberBtn: React.FC<{ children: React.ReactNode; onClick?: () => void; icon
       fontSize: "var(--text-body)",
       fontWeight: 600,
       letterSpacing: "var(--tracking-base)",
+      boxShadow: "var(--shadow-card)",
+      transition: "background 140ms ease, transform 120ms ease",
+      WebkitTapHighlightColor: "transparent",
+      transform: "translateZ(0)",
     }}
+    onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+    onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+    onTouchStart={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
+    onTouchEnd={(e) => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
   >
     {icon && <span style={{ display: "flex", color: "var(--color-fg-muted)" }}>{icon}</span>}
     <span>{children}</span>
