@@ -5,6 +5,7 @@ import {
   IonRefresher,
   IonRefresherContent,
 } from "@ionic/react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
@@ -16,10 +17,11 @@ import { useRecaladaSocket } from "../../recaladas/hooks/useRecaladaSocket";
 const HomePage: React.FC = () => {
   const history = useHistory();
   const user = useSessionStore((state) => state.user);
+  const [rangeDays, setRangeDays] = useState<7 | 30>(30);
   useTurnoSocket();
   useRecaladaSocket();
   const { data, isLoading, isFetching, error, refetch } =
-    useDashboardOverview();
+    useDashboardOverview({ rangeDays });
 
   if (isLoading && !data) {
     return <LoadingScreen message="Cargando tu centro de operaciones..." />;
@@ -47,6 +49,8 @@ const HomePage: React.FC = () => {
           data={data}
           user={user}
           isRefreshing={isFetching}
+          rangeDays={rangeDays}
+          onRangeChange={setRangeDays}
           errorMessage={
             error instanceof Error
               ? error.message

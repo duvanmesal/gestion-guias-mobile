@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { SessionUser } from "../../../core/auth/types";
 import {
   EmptyStateCard,
@@ -7,10 +8,15 @@ import {
 } from "../../../ui/components";
 import type {
   AtencionDisponibleLite,
+  CheckInFlowStats,
   DashboardMilestone,
   DashboardOverviewResponse,
+  EvaluationStats,
+  GuideCapacityStats,
+  SupervisorAnalytics,
   SupervisorOverview,
   TurnoLite,
+  WorkloadTrendDay,
 } from "../types/dashboard.types";
 import {
   formatMilestoneKind,
@@ -27,6 +33,8 @@ export interface DashboardNeumorphicProps {
   user?: SessionUser | null;
   isRefreshing?: boolean;
   errorMessage?: string | null;
+  rangeDays?: 7 | 30;
+  onRangeChange?: (days: 7 | 30) => void;
   onRetry?: () => void;
   onNavigate?: (path: string) => void;
 }
@@ -148,7 +156,7 @@ function getMilestoneIcon(kind: string): React.ReactElement {
    ROOT
 ══════════════════════════════════════════════ */
 const DashboardNeumorphic: React.FC<DashboardNeumorphicProps> = ({
-  data, user, isRefreshing = false, errorMessage, onRetry, onNavigate,
+  data, user, isRefreshing = false, errorMessage, rangeDays = 30, onRangeChange, onRetry, onNavigate,
 }) => {
   const role         = data?.role ?? user?.role ?? "GUIA";
   const isSupervisor = role === "SUPERVISOR" || role === "SUPER_ADMIN";
@@ -170,6 +178,8 @@ const DashboardNeumorphic: React.FC<DashboardNeumorphicProps> = ({
           isRefreshing={isRefreshing}
           lastUpdatedAt={lastUpdatedAt}
           onNavigate={onNavigate}
+          onRangeChange={onRangeChange}
+          rangeDays={rangeDays}
           role={role}
           summary="Centro de comando operativo"
         />
@@ -202,7 +212,12 @@ const DashboardNeumorphic: React.FC<DashboardNeumorphicProps> = ({
         )}
 
         {isSupervisor ? (
-          <SupervisorContent lastUpdatedAt={lastUpdatedAt} onNavigate={onNavigate} overview={data?.supervisor} />
+          <SupervisorContent
+            analytics={data?.supervisor?.analytics}
+            lastUpdatedAt={lastUpdatedAt}
+            onNavigate={onNavigate}
+            overview={data?.supervisor}
+          />
         ) : (
           <GuideContent guia={data?.guia} lastUpdatedAt={lastUpdatedAt} onNavigate={onNavigate} />
         )}
@@ -466,8 +481,10 @@ const SupervisorHero: React.FC<{
   counts?: { recaladas: number; atenciones: number; turnos: number; turnosInProgress?: number | null };
   dateLabel: string; displayName: string; isRefreshing: boolean;
   lastUpdatedAt: string | null; onNavigate?: (path: string) => void;
+  onRangeChange?: (days: 7 | 30) => void;
+  rangeDays?: 7 | 30;
   role: SessionUser["role"]; summary: string;
-}> = ({ counts, dateLabel, displayName, isRefreshing, lastUpdatedAt, onNavigate, role, summary }) => (
+}> = ({ counts, dateLabel, displayName, isRefreshing, lastUpdatedAt, onNavigate, onRangeChange, rangeDays = 30, role, summary }) => (
   <div className="relative" style={{
     background: "var(--color-bg-elevated)",
     borderBottom: "1px solid var(--color-border-hairline)",
@@ -535,10 +552,45 @@ const SupervisorHero: React.FC<{
         </div>
       </div>
 
-      {/* Info pills */}
-      <div className="flex flex-wrap gap-2 mt-4">
-        <InfoPill label="Fecha" value={dateLabel} />
-        <InfoPill label="Servidor" value={formatTime(lastUpdatedAt)} />
+      {/* Info pills + range selector */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
+        <div className="flex flex-wrap gap-2">
+          <InfoPill label="Fecha" value={dateLabel} />
+          <InfoPill label="Servidor" value={formatTime(lastUpdatedAt)} />
+        </div>
+        {onRangeChange && (
+          <div
+            className="flex items-center gap-1"
+            style={{
+              borderRadius: 8,
+              padding: "3px 4px",
+              background: "var(--color-bg-subtle)",
+              border: "1px solid var(--color-border-hairline)",
+            }}
+          >
+            {([7, 30] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => onRangeChange(d)}
+                style={{
+                  borderRadius: 6,
+                  padding: "4px 10px",
+                  fontSize: "var(--text-eyebrow)",
+                  fontWeight: 700,
+                  letterSpacing: "var(--tracking-eyebrow)",
+                  background: rangeDays === d ? "var(--color-primary)" : "transparent",
+                  color: rangeDays === d ? "white" : "var(--color-fg-muted)",
+                  border: "none",
+                  transition: "background 180ms",
+                  cursor: "pointer",
+                }}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Mini stat strip */}
@@ -800,9 +852,23 @@ const GuideAtencionesCard: React.FC<{
 /* ══════════════════════════════════════════════
    SUPERVISOR CONTENT
 ══════════════════════════════════════════════ */
+type SupTab = "hoy" | "actividad" | "guias" | "checkin" | "evaluaciones";
+const SUP_TABS: { id: SupTab; label: string }[] = [
+  { id: "hoy",          label: "Hoy" },
+  { id: "actividad",    label: "Actividad" },
+  { id: "guias",        label: "Guías" },
+  { id: "checkin",      label: "Check-in" },
+  { id: "evaluaciones", label: "Evaluaciones" },
+];
+
 const SupervisorContent: React.FC<{
-  lastUpdatedAt: string | null; onNavigate?: (path: string) => void; overview?: SupervisorOverview;
-}> = ({ lastUpdatedAt, onNavigate, overview }) => {
+  analytics?: SupervisorAnalytics;
+  lastUpdatedAt: string | null;
+  onNavigate?: (path: string) => void;
+  overview?: SupervisorOverview;
+}> = ({ analytics, lastUpdatedAt, onNavigate, overview }) => {
+  const [activeTab, setActiveTab] = useState<SupTab>("hoy");
+
   if (!overview) {
     return (
       <FadeCard delay={0}>
@@ -824,210 +890,476 @@ const SupervisorContent: React.FC<{
 
   return (
     <>
-      {overdueRecaladas > 0 && (
+      {/* ── Tab bar ── */}
+      {analytics && (
         <FadeCard delay={0}>
-          <button
-            type="button"
-            onClick={() => onNavigate?.("/recaladas?overdueDeparture=true")}
-            className="w-full text-left active:scale-[0.99] transition-transform"
+          <div
             style={{
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 18,
-              padding: "15px 16px 14px",
-              background:
-                "linear-gradient(135deg, var(--color-danger-soft) 0%, var(--color-bg-elevated) 65%, var(--color-danger-soft) 100%)",
-              border: "1px solid var(--color-danger-border)",
-              boxShadow: "var(--shadow-card)",
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              display: "flex",
+              gap: 6,
+              padding: "2px 0",
             }}
           >
-            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: P.danger }} />
-            <div
-              aria-hidden
-              style={{
-                position: "absolute",
-                right: -32,
-                top: -32,
-                width: 110,
-                height: 110,
-                borderRadius: "50%",
-                background: "var(--color-danger-soft)",
-                opacity: 0.55,
-                filter: "blur(28px)",
-                pointerEvents: "none",
-              }}
-            />
-
-            <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div
+            {SUP_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
                 style={{
-                  position: "relative",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 13,
-                  background: "var(--color-danger-soft)",
-                  border: "1px solid var(--color-danger-border)",
-                  color: P.danger,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                   flexShrink: 0,
+                  borderRadius: 10,
+                  padding: "7px 14px",
+                  fontSize: "var(--text-caption)",
+                  fontWeight: 700,
+                  letterSpacing: "var(--tracking-tight)",
+                  border: activeTab === tab.id
+                    ? "1px solid var(--color-primary)"
+                    : "1px solid var(--color-border-hairline)",
+                  background: activeTab === tab.id
+                    ? "var(--color-primary)"
+                    : "var(--color-bg-elevated)",
+                  color: activeTab === tab.id ? "white" : "var(--color-fg-secondary)",
+                  transition: "background 180ms, color 180ms",
+                  cursor: "pointer",
                 }}
               >
-                <span className="live-pulse-dot" style={{ position: "absolute", top: 4, right: 4, width: 6, height: 6, background: P.danger }} />
-                {Ico.warning()}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <span
-                    style={{
-                      fontSize: "0.6rem",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.14em",
-                      color: P.danger,
-                    }}
-                  >
-                    Atención operativa
-                  </span>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                      borderRadius: 9999,
-                      padding: "2px 7px",
-                      background: "var(--color-danger-soft)",
-                      border: "1px solid var(--color-danger-border)",
-                      color: P.danger,
-                      fontSize: "0.6rem",
-                      fontWeight: 700,
-                    }}
-                  >
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: P.danger }} />
-                    ARRIVED
-                  </span>
-                </div>
-                <p style={{ margin: "6px 0 0", fontSize: "0.92rem", fontWeight: 800, color: P.fgPrimary, letterSpacing: "-0.01em" }}>
-                  Recaladas pendientes de zarpe
-                </p>
-                <p
-                  style={{
-                    margin: "3px 0 0",
-                    fontSize: "0.745rem",
-                    color: P.fgSecondary,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {overdueRecaladas === 1
-                    ? "1 buque arribado ya superó su salida programada."
-                    : `${overdueRecaladas} buques arribados ya superaron su salida programada.`}{" "}
-                  Abre la lista filtrada para cerrarlos.
-                </p>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0 }}>
-                <span
-                  className="t-mono"
-                  style={{
-                    minWidth: 36,
-                    borderRadius: 11,
-                    padding: "7px 9px",
-                    background: P.danger,
-                    color: "white",
-                    fontSize: "1.05rem",
-                    fontWeight: 900,
-                    lineHeight: 1,
-                    textAlign: "center",
-                    boxShadow: "0 6px 14px -6px var(--color-danger-soft)",
-                  }}
-                >
-                  {overdueRecaladas}
-                </span>
-                <span
-                  style={{
-                    fontSize: "0.54rem",
-                    fontWeight: 800,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: P.danger,
-                  }}
-                >
-                  vencidas
-                </span>
-              </div>
-            </div>
-
-            <div
-              style={{
-                position: "relative",
-                marginTop: 12,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 8,
-                paddingTop: 10,
-                borderTop: "1px dashed var(--color-danger-border)",
-              }}
-            >
-              <span style={{ fontSize: "0.66rem", fontWeight: 600, color: P.fgMuted }}>
-                Toca para revisar el listado filtrado
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: P.danger, fontSize: "0.72rem", fontWeight: 800 }}>
-                Revisar
-                {Ico.arrowRight(12)}
-              </span>
-            </div>
-          </button>
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </FadeCard>
       )}
 
-      <FadeCard delay={overdueRecaladas > 0 ? 60 : 0}>
-        <Card className="p-5">
-          <SectionDivider title="Operaciones del día" color={P.amber} />
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <CountTile tone="cyan"   label="Recaladas"  helper="Operación del día"   value={counts.recaladas} />
-            <CountTile tone="amber"  label="Atenciones" helper="Inicio y fin hoy"    value={counts.atenciones} />
-            <CountTile tone="teal"   label="Turnos"     helper="Cobertura operativa" value={counts.turnos} />
-            <CountTile tone="violet" label="En curso"   helper="Turnos activos"      value={counts.turnosInProgress ?? 0} />
-          </div>
-        </Card>
-      </FadeCard>
+      {/* ── Tab: Hoy ── */}
+      {(!analytics || activeTab === "hoy") && (
+        <>
+          {overdueRecaladas > 0 && (
+            <FadeCard delay={0}>
+              <button
+                type="button"
+                onClick={() => onNavigate?.("/recaladas?overdueDeparture=true")}
+                className="w-full text-left active:scale-[0.99] transition-transform"
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: 18,
+                  padding: "15px 16px 14px",
+                  background:
+                    "linear-gradient(135deg, var(--color-danger-soft) 0%, var(--color-bg-elevated) 65%, var(--color-danger-soft) 100%)",
+                  border: "1px solid var(--color-danger-border)",
+                  boxShadow: "var(--shadow-card)",
+                }}
+              >
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: P.danger }} />
+                <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 13,
+                      background: "var(--color-danger-soft)",
+                      border: "1px solid var(--color-danger-border)",
+                      color: P.danger,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span className="live-pulse-dot" style={{ position: "absolute", top: 4, right: 4, width: 6, height: 6, background: P.danger }} />
+                    {Ico.warning()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.14em", color: P.danger }}>
+                      Atención operativa
+                    </span>
+                    <p style={{ margin: "6px 0 0", fontSize: "0.92rem", fontWeight: 800, color: P.fgPrimary, letterSpacing: "-0.01em" }}>
+                      Recaladas pendientes de zarpe
+                    </p>
+                    <p style={{ margin: "3px 0 0", fontSize: "0.745rem", color: P.fgSecondary, lineHeight: 1.4 }}>
+                      {overdueRecaladas === 1
+                        ? "1 buque arribado ya superó su salida programada."
+                        : `${overdueRecaladas} buques arribados ya superaron su salida programada.`}{" "}
+                      Abre la lista filtrada para cerrarlos.
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                    <span
+                      className="t-mono"
+                      style={{
+                        minWidth: 36, borderRadius: 11, padding: "7px 9px",
+                        background: P.danger, color: "white",
+                        fontSize: "1.05rem", fontWeight: 900, lineHeight: 1, textAlign: "center",
+                      }}
+                    >
+                      {overdueRecaladas}
+                    </span>
+                    <span style={{ fontSize: "0.54rem", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: P.danger }}>
+                      vencidas
+                    </span>
+                  </div>
+                </div>
+                <div style={{ position: "relative", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: 10, borderTop: "1px dashed var(--color-danger-border)" }}>
+                  <span style={{ fontSize: "0.66rem", fontWeight: 600, color: P.fgMuted }}>Toca para revisar el listado filtrado</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: P.danger, fontSize: "0.72rem", fontWeight: 800 }}>
+                    Revisar{Ico.arrowRight(12)}
+                  </span>
+                </div>
+              </button>
+            </FadeCard>
+          )}
 
-      <FadeCard delay={80}>
-        <Card className="p-5">
-          <SectionDivider title="Capacidad del equipo" color={P.teal} />
-          <TeamCapacity guides={overview.guides} />
-        </Card>
-      </FadeCard>
+          <FadeCard delay={overdueRecaladas > 0 ? 60 : 0}>
+            <Card className="p-5">
+              <SectionDivider title="Operaciones del día" color={P.amber} />
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <CountTile tone="cyan"   label="Recaladas"  helper="Operación del día"   value={counts.recaladas} />
+                <CountTile tone="amber"  label="Atenciones" helper="Inicio y fin hoy"    value={counts.atenciones} />
+                <CountTile tone="teal"   label="Turnos"     helper="Cobertura operativa" value={counts.turnos} />
+                <CountTile tone="violet" label="En curso"   helper="Turnos activos"      value={counts.turnosInProgress ?? 0} />
+              </div>
+            </Card>
+          </FadeCard>
 
-      <FadeCard delay={160}>
-        <Card className="p-5">
-          <SectionDivider title="Próximos hitos" color={P.violet} />
-          <div className="mt-4">
-            {overview.upcoming.length ? (
-              <MilestoneTimeline items={overview.upcoming.slice(0, 5)} />
-            ) : (
-              <EmptyStateCard
-                icon={<>{Ico.clock(24)}</>}
-                description="La agenda inmediata no tiene hitos pendientes."
-                title="Sin próximos hitos"
-              />
-            )}
-          </div>
+          <FadeCard delay={80}>
+            <Card className="p-5">
+              <SectionDivider title="Capacidad del equipo" color={P.teal} />
+              <TeamCapacity guides={overview.guides} />
+            </Card>
+          </FadeCard>
 
-          <div className="mt-5 flex flex-col gap-2.5">
-            <VioletBtn onClick={() => onNavigate?.("/turnos")} icon={<>{Ico.ticket()}</>}>
-              Abrir turnero
-            </VioletBtn>
-            <AmberBtn onClick={() => onNavigate?.("/recaladas")} icon={<>{Ico.ship()}</>}>
-              Recaladas
-            </AmberBtn>
-          </div>
+          <FadeCard delay={160}>
+            <Card className="p-5">
+              <SectionDivider title="Próximos hitos" color={P.violet} />
+              <div className="mt-4">
+                {overview.upcoming.length ? (
+                  <MilestoneTimeline items={overview.upcoming.slice(0, 5)} />
+                ) : (
+                  <EmptyStateCard
+                    icon={<>{Ico.clock(24)}</>}
+                    description="La agenda inmediata no tiene hitos pendientes."
+                    title="Sin próximos hitos"
+                  />
+                )}
+              </div>
+              <div className="mt-5 flex flex-col gap-2.5">
+                <VioletBtn onClick={() => onNavigate?.("/turnos")} icon={<>{Ico.ticket()}</>}>Abrir turnero</VioletBtn>
+                <AmberBtn onClick={() => onNavigate?.("/recaladas")} icon={<>{Ico.ship()}</>}>Recaladas</AmberBtn>
+              </div>
+              <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
+            </Card>
+          </FadeCard>
+        </>
+      )}
 
-          <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
-        </Card>
-      </FadeCard>
+      {/* ── Tab: Actividad ── */}
+      {analytics && activeTab === "actividad" && (
+        <FadeCard delay={0}>
+          <Card className="p-5">
+            <SectionDivider title="Actividad operativa" color={P.violet} />
+            <AnalyticsKpiRow kpis={analytics.kpis} onNavigate={onNavigate} />
+            <div style={{ marginTop: 20 }}>
+              <SectionDivider title="Tendencia de turnos" color={P.cyan} />
+              <WorkloadTrendMini trend={analytics.workloadTrend} />
+            </div>
+            <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
+          </Card>
+        </FadeCard>
+      )}
+
+      {/* ── Tab: Guías ── */}
+      {analytics && activeTab === "guias" && (
+        <FadeCard delay={0}>
+          <Card className="p-5">
+            <SectionDivider title="Capacidad de guías" color={P.teal} />
+            <GuideCapacityMini capacity={analytics.guideCapacity} />
+            <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
+          </Card>
+        </FadeCard>
+      )}
+
+      {/* ── Tab: Check-in ── */}
+      {analytics && activeTab === "checkin" && (
+        <FadeCard delay={0}>
+          <Card className="p-5">
+            <SectionDivider title="Flujo de check-in" color={P.amber} />
+            <CheckInFlowMini flow={analytics.checkInFlow} onNavigate={onNavigate} />
+            <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
+          </Card>
+        </FadeCard>
+      )}
+
+      {/* ── Tab: Evaluaciones ── */}
+      {analytics && activeTab === "evaluaciones" && (
+        <FadeCard delay={0}>
+          <Card className="p-5">
+            <SectionDivider title="Evaluaciones" color={P.violet} />
+            <EvaluationsMini evals={analytics.evaluations} onNavigate={onNavigate} />
+            <div className="mt-4"><FooterUpdated lastUpdatedAt={lastUpdatedAt} /></div>
+          </Card>
+        </FadeCard>
+      )}
     </>
+  );
+};
+
+/* ══════════════════════════════════════════════
+   ANALYTICS SUB-COMPONENTS
+══════════════════════════════════════════════ */
+const AnalyticsKpiRow: React.FC<{
+  kpis: SupervisorAnalytics["kpis"];
+  onNavigate?: (path: string) => void;
+}> = ({ kpis, onNavigate }) => {
+  const fmt = (v: number) => `${Math.round(v)}%`;
+  const items = [
+    { label: "Asignación", value: fmt(kpis.assignmentRate), color: P.cyan },
+    { label: "Ejecución",  value: fmt(kpis.executionRate),  color: P.teal },
+    { label: "No-show",    value: fmt(kpis.noShowRate),     color: P.danger },
+    { label: "Disponibil.",value: fmt(kpis.guideAvailabilityRate), color: P.violet },
+  ];
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-2.5">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          style={{
+            borderRadius: 12,
+            padding: "12px 14px",
+            background: "var(--color-bg-subtle)",
+            border: "1px solid var(--color-border-hairline)",
+          }}
+        >
+          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, color: "var(--color-fg-muted)", textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)" }}>
+            {item.label}
+          </p>
+          <p className="t-mono" style={{ fontSize: "1.5rem", fontWeight: 700, color: item.color, lineHeight: 1, marginTop: 6 }}>
+            {item.value}
+          </p>
+        </div>
+      ))}
+      {kpis.pendingCheckIns > 0 && (
+        <button
+          type="button"
+          onClick={() => onNavigate?.("/turnos?checkInPending=1")}
+          className="col-span-2 text-left active:scale-[0.99] transition-transform"
+          style={{ borderRadius: 12, padding: "11px 14px", background: "var(--color-accent-soft)", border: "1px solid var(--color-accent-border)", display: "flex", alignItems: "center", gap: 10 }}
+        >
+          <span style={{ color: P.amber }}>{Ico.zap()}</span>
+          <span style={{ flex: 1, fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-primary)" }}>
+            {kpis.pendingCheckIns} check-in{kpis.pendingCheckIns > 1 ? "s" : ""} pendiente{kpis.pendingCheckIns > 1 ? "s" : ""}
+          </span>
+          <span style={{ color: P.amber }}>{Ico.arrowRight(13)}</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
+const WorkloadTrendMini: React.FC<{ trend: WorkloadTrendDay[] }> = ({ trend }) => {
+  if (!trend.length) {
+    return <p style={{ fontSize: "var(--text-caption)", color: "var(--color-fg-muted)", marginTop: 12 }}>Sin datos de tendencia.</p>;
+  }
+  const maxTurnos = Math.max(...trend.map((d) => d.turnos), 1);
+  const showAll = trend.length <= 10;
+  const days = showAll ? trend : trend.filter((_, i) => i % 3 === 0 || i === trend.length - 1);
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72, overflowX: "auto", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"], scrollbarWidth: "none", paddingBottom: 2 }}>
+        {trend.map((d, i) => {
+          const heightPct = Math.max(4, Math.round((d.turnos / maxTurnos) * 100));
+          const barDate = d.date.slice(5); // MM-DD
+          const showLabel = showAll || i % 3 === 0 || i === trend.length - 1;
+          return (
+            <div key={d.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: showAll ? "1 1 0" : undefined, minWidth: showAll ? 0 : 18 }}>
+              <div
+                style={{
+                  width: "100%",
+                  minWidth: 6,
+                  height: `${heightPct}%`,
+                  borderRadius: "3px 3px 1px 1px",
+                  background: d.completed > 0
+                    ? "var(--color-success)"
+                    : d.noShows > 0
+                    ? "var(--color-danger)"
+                    : "var(--color-primary)",
+                  opacity: 0.85,
+                }}
+              />
+              {showLabel && (
+                <span style={{ fontSize: "0.5rem", color: "var(--color-fg-muted)", fontWeight: 600, letterSpacing: 0, whiteSpace: "nowrap", lineHeight: 1 }}>
+                  {barDate}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
+        {[
+          { color: "var(--color-primary)", label: "Turnos" },
+          { color: "var(--color-success)", label: "Completados" },
+          { color: "var(--color-danger)",  label: "No-show" },
+        ].map((l) => (
+          <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: l.color }} />
+            <span style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600 }}>{l.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const GuideCapacityMini: React.FC<{ capacity: GuideCapacityStats }> = ({ capacity }) => {
+  const total = Math.max(capacity.activos, 1);
+  const rows = [
+    { label: "Activos",     value: capacity.activos,     pct: 100,                                  color: P.cyan  },
+    { label: "Asignados",   value: capacity.asignados,   pct: (capacity.asignados / total) * 100,   color: P.amber },
+    { label: "Disponibles", value: capacity.disponibles, pct: (capacity.disponibles / total) * 100, color: P.teal  },
+    { label: "No disponib.",value: capacity.noDisponibles,pct: (capacity.noDisponibles/total)*100,   color: P.fgMuted },
+    ...(capacity.penalizados > 0 ? [{ label: "Penalizados", value: capacity.penalizados, pct: (capacity.penalizados / total) * 100, color: P.danger }] : []),
+  ];
+  return (
+    <div className="mt-4 flex flex-col gap-4">
+      {rows.map((r) => (
+        <CapacityRow key={r.label} label={r.label} value={r.value} total={total} pct={r.pct} color={r.color} />
+      ))}
+      <div className="grid grid-cols-3 gap-2 mt-1">
+        {[
+          { label: "Disponibil.", value: `${Math.round(capacity.disponibilidadRate)}%`, color: P.teal },
+          { label: "Utilización", value: `${Math.round(capacity.utilizacionRate)}%`,   color: P.amber },
+          { label: "Penaliz.",    value: `${Math.round(capacity.penalizacionRate)}%`,  color: P.danger },
+        ].map((k) => (
+          <div key={k.label} style={{ borderRadius: 10, padding: "10px 8px", background: "var(--color-bg-subtle)", border: "1px solid var(--color-border-hairline)", textAlign: "center" }}>
+            <p className="t-mono" style={{ fontSize: "1.1rem", fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</p>
+            <p style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600, marginTop: 4 }}>{k.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CheckInFlowMini: React.FC<{
+  flow: CheckInFlowStats;
+  onNavigate?: (path: string) => void;
+}> = ({ flow, onNavigate }) => {
+  const max = Math.max(flow.solicitados, 1);
+  const steps = [
+    { label: "Solicitados", value: flow.solicitados, color: P.cyan },
+    { label: "Confirmados", value: flow.confirmados, color: P.teal },
+    { label: "Pendientes",  value: flow.pendientes,  color: P.amber },
+    { label: "Rechazados",  value: flow.rechazados,  color: P.danger },
+  ];
+  return (
+    <div className="mt-4 flex flex-col gap-3">
+      {steps.map((s) => (
+        <div key={s.label}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+            <span style={{ fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-secondary)" }}>{s.label}</span>
+            <span className="t-mono" style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>{s.value}</span>
+          </div>
+          <div style={{ height: 5, borderRadius: 3, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${Math.min(100, (s.value / max) * 100)}%`, background: s.color, borderRadius: 3, transition: "width 360ms ease" }} />
+          </div>
+        </div>
+      ))}
+      {flow.avgResponseTimeMin !== null && (
+        <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 10, background: "var(--color-bg-subtle)", border: "1px solid var(--color-border-hairline)" }}>
+          <span style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)" }}>
+            Tiempo promedio de respuesta
+          </span>
+          <p className="t-mono" style={{ fontSize: "1.25rem", fontWeight: 700, color: P.violet, marginTop: 4, lineHeight: 1 }}>
+            {flow.avgResponseTimeMin.toFixed(1)} min
+          </p>
+        </div>
+      )}
+      {flow.pendientesAntiguos > 0 && (
+        <button
+          type="button"
+          onClick={() => onNavigate?.("/turnos?checkInPending=1")}
+          className="w-full text-left active:scale-[0.99] transition-transform"
+          style={{ borderRadius: 10, padding: "10px 12px", background: "var(--color-danger-soft)", border: "1px solid var(--color-danger-border)", display: "flex", alignItems: "center", gap: 8 }}
+        >
+          <span style={{ color: P.danger }}>{Ico.warning(14)}</span>
+          <span style={{ flex: 1, fontSize: "var(--text-caption)", fontWeight: 600, color: P.fgPrimary }}>
+            {flow.pendientesAntiguos} check-in{flow.pendientesAntiguos > 1 ? "s" : ""} antiguo{flow.pendientesAntiguos > 1 ? "s" : ""} sin resolver
+          </span>
+          <span style={{ color: P.danger }}>{Ico.arrowRight(12)}</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
+const EvaluationsMini: React.FC<{
+  evals: EvaluationStats;
+  onNavigate?: (path: string) => void;
+}> = ({ evals, onNavigate }) => {
+  const total = Math.max(evals.evaluadas, 1);
+  const dist = [
+    { label: "Satisfactorias",  value: evals.distribucion.SATISFACTORIA,   color: P.teal  },
+    { label: "Con novedades",   value: evals.distribucion.CON_NOVEDADES,   color: P.amber },
+    { label: "No satisfact.",   value: evals.distribucion.NO_SATISFACTORIA, color: P.danger },
+  ];
+  return (
+    <div className="mt-4 flex flex-col gap-3">
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { label: "Atenciones", value: evals.atencionesEnRango, color: P.cyan },
+          { label: "Evaluadas",  value: evals.evaluadas,         color: P.teal },
+          { label: "Pendientes", value: evals.pendientesEval,    color: P.amber },
+        ].map((k) => (
+          <div key={k.label} style={{ borderRadius: 10, padding: "10px 8px", background: "var(--color-bg-subtle)", border: "1px solid var(--color-border-hairline)", textAlign: "center" }}>
+            <p className="t-mono" style={{ fontSize: "1.25rem", fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</p>
+            <p style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600, marginTop: 4 }}>{k.label}</p>
+          </div>
+        ))}
+      </div>
+      {evals.avgCalificacion !== null && (
+        <div style={{ padding: "10px 12px", borderRadius: 10, background: "var(--color-bg-subtle)", border: "1px solid var(--color-border-hairline)" }}>
+          <span style={{ fontSize: "var(--text-eyebrow)", color: "var(--color-fg-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "var(--tracking-eyebrow)" }}>
+            Calificación promedio
+          </span>
+          <p className="t-mono" style={{ fontSize: "1.5rem", fontWeight: 700, color: P.teal, marginTop: 4, lineHeight: 1 }}>
+            {evals.avgCalificacion.toFixed(1)}
+          </p>
+        </div>
+      )}
+      <div className="flex flex-col gap-3 mt-1">
+        {dist.map((d) => (
+          <div key={d.label}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+              <span style={{ fontSize: "var(--text-caption)", fontWeight: 600, color: "var(--color-fg-secondary)" }}>{d.label}</span>
+              <span className="t-mono" style={{ fontSize: "var(--text-caption)", fontWeight: 700, color: "var(--color-fg-primary)" }}>{d.value}</span>
+            </div>
+            <div style={{ height: 5, borderRadius: 3, background: "var(--color-bg-subtle)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${Math.min(100, (d.value / total) * 100)}%`, background: d.color, borderRadius: 3, transition: "width 360ms ease" }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      {evals.pendientesEval > 0 && (
+        <button
+          type="button"
+          onClick={() => onNavigate?.("/atenciones?pendingEval=true")}
+          className="w-full text-left active:scale-[0.99] transition-transform"
+          style={{ marginTop: 4, borderRadius: 10, padding: "10px 12px", background: "var(--color-accent-soft)", border: "1px solid var(--color-accent-border)", display: "flex", alignItems: "center", gap: 8 }}
+        >
+          <span style={{ color: P.amber }}>{Ico.list()}</span>
+          <span style={{ flex: 1, fontSize: "var(--text-caption)", fontWeight: 600, color: P.fgPrimary }}>
+            {evals.pendientesEval} atención{evals.pendientesEval > 1 ? "es" : ""} sin evaluar
+          </span>
+          <span style={{ color: P.amber }}>{Ico.arrowRight(12)}</span>
+        </button>
+      )}
+    </div>
   );
 };
 

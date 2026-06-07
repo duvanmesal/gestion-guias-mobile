@@ -104,6 +104,78 @@ export interface SupervisorAlert {
   count: number;
 }
 
+export interface WorkloadTrendDay {
+  date: string;
+  atenciones: number;
+  turnos: number;
+  completed: number;
+  noShows: number;
+  canceled: number;
+  checkInsConfirmed: number;
+}
+
+export interface CheckInFlowStats {
+  solicitados: number;
+  pendientes: number;
+  confirmados: number;
+  rechazados: number;
+  avgResponseTimeMin: number | null;
+  pendientesAntiguos: number;
+}
+
+export interface GuideCapacityStats {
+  activos: number;
+  disponibles: number;
+  asignados: number;
+  libres: number;
+  noDisponibles: number;
+  penalizados: number;
+  disponibilidadRate: number;
+  utilizacionRate: number;
+  penalizacionRate: number;
+}
+
+export interface EvaluationStats {
+  atencionesEnRango: number;
+  evaluadas: number;
+  pendientesEval: number;
+  avgCalificacion: number | null;
+  distribucion: {
+    SATISFACTORIA: number;
+    CON_NOVEDADES: number;
+    NO_SATISFACTORIA: number;
+  };
+}
+
+export interface PriorityAction {
+  type: string;
+  count: number;
+  label: string;
+  to: string;
+}
+
+export interface SupervisorAnalytics {
+  range: { startDate: string; endDate: string; days: number; tz: string };
+  kpis: {
+    assignmentRate: number;
+    executionRate: number;
+    noShowRate: number;
+    guideAvailabilityRate: number;
+    utilizacionRate: number;
+    penalizacionRate: number;
+    pendingCheckIns: number;
+    overdueRecaladas: number;
+    unresolvedTurnos: number;
+    pendientesEval: number;
+  };
+  workloadTrend: WorkloadTrendDay[];
+  turnoStatus: Record<string, number>;
+  checkInFlow: CheckInFlowStats;
+  guideCapacity: GuideCapacityStats;
+  evaluations: EvaluationStats;
+  priorityActions: PriorityAction[];
+}
+
 export interface SupervisorOverview {
   counts: {
     recaladas: number;
@@ -127,6 +199,7 @@ export interface SupervisorOverview {
   turnosBreakdown?: Record<string, number>;
   alerts?: SupervisorAlert[];
   upcoming: DashboardMilestone[];
+  analytics?: SupervisorAnalytics;
 }
 
 export interface DashboardOverviewResponse {

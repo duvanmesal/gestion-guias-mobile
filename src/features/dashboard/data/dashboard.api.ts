@@ -6,6 +6,7 @@ interface GetDashboardOverviewParams {
   tzOffsetMinutes?: number;
   upcomingLimit?: number;
   availableAtencionesLimit?: number;
+  rangeDays?: 7 | 30;
   signal?: AbortSignal;
 }
 
@@ -16,6 +17,7 @@ export function getDashboardOverview(
     tzOffsetMinutes = -new Date().getTimezoneOffset(),
     upcomingLimit = 6,
     availableAtencionesLimit = 6,
+    rangeDays,
     signal,
   } = params;
 
@@ -24,6 +26,7 @@ export function getDashboardOverview(
     upcomingLimit: String(upcomingLimit),
     availableAtencionesLimit: String(availableAtencionesLimit),
   });
+  if (rangeDays !== undefined) search.set("rangeDays", String(rangeDays));
 
   return authRequest<DashboardOverviewResponse>(
     `/dashboard/overview?${search.toString()}`,

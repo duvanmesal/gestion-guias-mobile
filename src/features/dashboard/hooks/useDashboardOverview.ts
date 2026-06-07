@@ -2,14 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getErrorMessage } from "../../../core/http/getErrorMessage";
 import * as dashboardApi from "../data/dashboard.api";
 
-export function useDashboardOverview() {
+export function useDashboardOverview(options?: { rangeDays?: 7 | 30 }) {
   const tzOffsetMinutes = -new Date().getTimezoneOffset();
+  const rangeDays = options?.rangeDays ?? 30;
 
   return useQuery({
-    queryKey: ["dashboard", "overview", tzOffsetMinutes],
+    queryKey: ["dashboard", "overview", tzOffsetMinutes, rangeDays],
     queryFn: async ({ signal }) => {
       const res = await dashboardApi.getDashboardOverview({
         tzOffsetMinutes,
+        rangeDays,
         signal,
       });
 
