@@ -4,7 +4,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Role } from "../../../../core/auth/types";
 import Button from "../../../../ui/components/Button";
+import SearchSelect from "../../../../ui/components/SearchSelect";
 import SurfaceCard from "../../../../ui/components/SurfaceCard";
+
+const ACTIVE_OPTIONS = [
+  { value: "true", label: "Activo" },
+  { value: "false", label: "Inactivo" },
+];
 
 const createSchema = z.object({
   email: z
@@ -309,24 +315,18 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({
           <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
             Rol
           </label>
-          <select
+          <SearchSelect
             value={roleValue}
+            onChange={(v) =>
+              setValue("rol", v as Role, { shouldDirty: true, shouldValidate: true })
+            }
+            options={ROLE_OPTIONS}
+            getOptionValue={(o) => o.value}
+            getOptionLabel={(o) => o.label}
+            label="Rol"
+            searchable={false}
             disabled={isLoading}
-            onChange={(event) => {
-              setValue("rol", event.target.value as Role, {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-            }}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
           <p className="text-xs text-[var(--color-fg-muted)]">
             {ROLE_OPTIONS.find((option) => option.value === roleValue)?.help}
           </p>
@@ -337,21 +337,18 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({
             <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
               Estado activo
             </label>
-            <select
+            <SearchSelect
               value={String(activeValue)}
+              onChange={(v) =>
+                setValue("activo", v === "true", { shouldDirty: true, shouldValidate: true })
+              }
+              options={ACTIVE_OPTIONS}
+              getOptionValue={(o) => o.value}
+              getOptionLabel={(o) => o.label}
+              label="Estado activo"
+              searchable={false}
               disabled={isLoading}
-              onChange={(event) => {
-                setValue("activo", event.target.value === "true", {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
-              }}
-              className={inputClassName}
-              style={inputStyle}
-            >
-              <option value="true">Activo</option>
-              <option value="false">Inactivo</option>
-            </select>
+            />
             {errors.activo?.message ? (
               <p className="text-xs text-[var(--color-danger)]">
                 {String(errors.activo.message)}

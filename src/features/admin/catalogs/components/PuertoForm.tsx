@@ -1,10 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "../../../../ui/components/Button";
+import SearchSelect from "../../../../ui/components/SearchSelect";
 import SurfaceCard from "../../../../ui/components/SurfaceCard";
 import type { CatalogStatus, PaisLookupItem } from "../types/catalogs.types";
+
+const STATUS_OPTIONS = [
+  { value: "ACTIVO", label: "Activo" },
+  { value: "INACTIVO", label: "Inactivo" },
+];
 
 const puertoFormSchema = z.object({
   codigo: z.string().trim().min(2).max(20),
@@ -61,6 +67,7 @@ const PuertoForm: React.FC<PuertoFormProps> = ({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<PuertoFormValues>({
     resolver: zodResolver(puertoFormSchema),
@@ -161,31 +168,43 @@ const PuertoForm: React.FC<PuertoFormProps> = ({
         </Field>
 
         <Field label="País" error={errors.paisId?.message}>
-          <select
-            {...register("paisId")}
-            disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            <option value="">Selecciona un país</option>
-            {countries.map((country) => (
-              <option key={country.id} value={String(country.id)}>
-                {country.codigo} · {country.nombre}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="paisId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                options={countries}
+                getOptionValue={(c) => String(c.id)}
+                getOptionLabel={(c) => `${c.codigo} · ${c.nombre}`}
+                placeholder="Selecciona un país"
+                searchPlaceholder="Buscar país…"
+                label="País"
+                disabled={isLoading}
+                error={errors.paisId?.message}
+              />
+            )}
+          />
         </Field>
 
         <Field label="Estado" error={errors.status?.message}>
-          <select
-            {...register("status")}
-            disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            <option value="ACTIVO">Activo</option>
-            <option value="INACTIVO">Inactivo</option>
-          </select>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? "ACTIVO"}
+                onChange={field.onChange}
+                options={STATUS_OPTIONS}
+                getOptionValue={(o) => o.value}
+                getOptionLabel={(o) => o.label}
+                label="Estado"
+                searchable={false}
+                disabled={isLoading}
+              />
+            )}
+          />
         </Field>
       </SurfaceCard>
 

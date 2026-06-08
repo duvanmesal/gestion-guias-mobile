@@ -43,7 +43,12 @@ export function useRecaladaSocket(recaladaId?: number) {
 
     const onArrived = (p: RecaladaSocketPayload) => {
       invalidate(p)
-      showToast(`Recalada #${p.recaladaId} marcada como llegada`, "primary")
+      showToast(`Llegada registrada en recalada #${p.recaladaId}`, "primary")
+    }
+
+    const onDeparted = (p: RecaladaSocketPayload) => {
+      invalidate(p)
+      showToast(`Zarpe registrado en recalada #${p.recaladaId}`, "primary")
     }
 
     const onCanceled = (p: RecaladaSocketPayload) => {
@@ -55,7 +60,7 @@ export function useRecaladaSocket(recaladaId?: number) {
     socket.on("recalada:created", onCreated)
     socket.on("recalada:updated", invalidate)
     socket.on("recalada:arrived", onArrived)
-    socket.on("recalada:departed", invalidate)
+    socket.on("recalada:departed", onDeparted)
     socket.on("recalada:canceled", onCanceled)
 
     return () => {
@@ -65,7 +70,7 @@ export function useRecaladaSocket(recaladaId?: number) {
       socket.off("recalada:created", onCreated)
       socket.off("recalada:updated", invalidate)
       socket.off("recalada:arrived", onArrived)
-      socket.off("recalada:departed", invalidate)
+      socket.off("recalada:departed", onDeparted)
       socket.off("recalada:canceled", onCanceled)
     }
   }, [queryClient, recaladaId])

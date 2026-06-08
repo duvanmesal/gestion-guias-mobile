@@ -10,6 +10,7 @@ import KeyValueGrid from "../../../ui/components/KeyValueGrid";
 import LoadingScreen from "../../../ui/components/LoadingScreen";
 import OperationalAlertBanner from "../../../ui/components/OperationalAlertBanner";
 import PageSectionHeader from "../../../ui/components/PageSectionHeader";
+import SearchSelect from "../../../ui/components/SearchSelect";
 import StatusChip from "../../../ui/components/StatusChip";
 import SurfaceCard from "../../../ui/components/SurfaceCard";
 import { useAtencion } from "../hooks/useAtencion";
@@ -681,48 +682,42 @@ const AtencionDetailPage: React.FC = () => {
                       Evaluación de atención
                     </p>
                     <div className="grid grid-cols-2 gap-3">
-                      <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
-                        Calificación
-                        <select
-                          value={evaluationRating}
-                          disabled={isBusy}
-                          onChange={(e) => setEvaluationRating(e.target.value)}
-                          className="rounded-2xl border px-3 py-2 text-sm normal-case tracking-normal outline-none"
-                          style={{
-                            background: "var(--color-glass-subtle)",
-                            borderColor: "var(--color-border-glass)",
-                            color: "var(--color-fg-primary)",
-                          }}
-                        >
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <option key={value} value={String(value)}>
-                              {value}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
-                        Estado final
-                        <select
-                          value={evaluationStatus}
-                          disabled={isBusy}
-                          onChange={(e) =>
-                            setEvaluationStatus(
-                              e.target.value as AtencionEvaluationEstadoFinal
-                            )
-                          }
-                          className="rounded-2xl border px-3 py-2 text-sm normal-case tracking-normal outline-none"
-                          style={{
-                            background: "var(--color-glass-subtle)",
-                            borderColor: "var(--color-border-glass)",
-                            color: "var(--color-fg-primary)",
-                          }}
-                        >
-                          <option value="SATISFACTORIA">Satisfactoria</option>
-                          <option value="CON_NOVEDADES">Con novedades</option>
-                          <option value="NO_SATISFACTORIA">No satisfactoria</option>
-                        </select>
-                      </label>
+                      <div className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
+                        <span>Calificación</span>
+                        <div className="normal-case tracking-normal">
+                          <SearchSelect
+                            value={evaluationRating}
+                            onChange={setEvaluationRating}
+                            options={[1, 2, 3, 4, 5]}
+                            getOptionValue={(n) => String(n)}
+                            getOptionLabel={(n) => String(n)}
+                            label="Calificación"
+                            searchable={false}
+                            disabled={isBusy}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-fg-muted)]">
+                        <span>Estado final</span>
+                        <div className="normal-case tracking-normal">
+                          <SearchSelect
+                            value={evaluationStatus}
+                            onChange={(v) =>
+                              setEvaluationStatus(v as AtencionEvaluationEstadoFinal)
+                            }
+                            options={[
+                              { value: "SATISFACTORIA", label: "Satisfactoria" },
+                              { value: "CON_NOVEDADES", label: "Con novedades" },
+                              { value: "NO_SATISFACTORIA", label: "No satisfactoria" },
+                            ]}
+                            getOptionValue={(o) => o.value}
+                            getOptionLabel={(o) => o.label}
+                            label="Estado final"
+                            searchable={false}
+                            disabled={isBusy}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <textarea
                       value={evaluationNotes}

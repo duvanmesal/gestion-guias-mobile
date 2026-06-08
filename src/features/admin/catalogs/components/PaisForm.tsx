@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "../../../../ui/components/Button";
+import SearchSelect from "../../../../ui/components/SearchSelect";
 import SurfaceCard from "../../../../ui/components/SurfaceCard";
 import type { CatalogStatus } from "../types/catalogs.types";
 
@@ -167,24 +168,21 @@ const PaisForm: React.FC<PaisFormProps> = ({
           <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
             Estado
           </label>
-          <select
+          <SearchSelect
             value={statusValue}
-            onChange={(event) => {
-              setValue("status", event.target.value as CatalogStatus, {
+            onChange={(v) =>
+              setValue("status", v as CatalogStatus, {
                 shouldDirty: true,
                 shouldValidate: true,
-              });
-            }}
+              })
+            }
+            options={STATUS_OPTIONS}
+            getOptionValue={(o) => o.value}
+            getOptionLabel={(o) => o.label}
+            label="Estado"
+            searchable={false}
             disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
           {errors.status?.message ? (
             <p className="text-xs text-[var(--color-danger)]">
               {errors.status.message}

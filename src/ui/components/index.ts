@@ -25,6 +25,8 @@ export { default as StickyBottomActions } from "./StickyBottomActions";
 export type { StickyBottomActionsProps } from "./StickyBottomActions";
 export { default as StatusChip } from "./StatusChip";
 export type { StatusChipProps, StatusChipTone } from "./StatusChip";
+export { default as SearchSelect } from "./SearchSelect";
+export type { SearchSelectProps } from "./SearchSelect";
 export { default as SuccessBanner } from "./SuccessBanner";
 export type { SuccessBannerProps } from "./SuccessBanner";
 export { default as SurfaceCard } from "./SurfaceCard";

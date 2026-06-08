@@ -10,6 +10,7 @@ import type {
   RecaladaItem,
   RecaladaOperationalStatus,
 } from "../types/recaladas.types";
+import { RECALADA_STATUS_COPY } from "../recalada-status-copy";
 
 /* ─────────────────────────────────────────────
    PALETTE
@@ -40,10 +41,10 @@ const C = {
 
 type StatusCfg = { color: string; faint: string; border: string; label: string };
 const STATUS_CFG: Record<RecaladaOperationalStatus, StatusCfg> = {
-  SCHEDULED: { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   label: "Programada" },
-  ARRIVED:   { color: C.amber,  faint: C.amberFaint,  border: C.amberBorder,  label: "Llegada" },
-  DEPARTED:  { color: C.teal,   faint: C.tealFaint,   border: C.tealBorder,   label: "Partida" },
-  CANCELED:  { color: C.danger, faint: C.dangerFaint, border: C.dangerBorder, label: "Cancelada" },
+  SCHEDULED: { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   label: RECALADA_STATUS_COPY.SCHEDULED.singular },
+  ARRIVED:   { color: C.amber,  faint: C.amberFaint,  border: C.amberBorder,  label: RECALADA_STATUS_COPY.ARRIVED.singular },
+  DEPARTED:  { color: C.teal,   faint: C.tealFaint,   border: C.tealBorder,   label: RECALADA_STATUS_COPY.DEPARTED.singular },
+  CANCELED:  { color: C.danger, faint: C.dangerFaint, border: C.dangerBorder, label: RECALADA_STATUS_COPY.CANCELED.singular },
 };
 
 /* ─────────────────────────────────────────────
@@ -67,10 +68,10 @@ type StatusFilter = RecaladaOperationalStatus | "";
 
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: "",          label: "Todas" },
-  { value: "SCHEDULED", label: "Programadas" },
-  { value: "ARRIVED",   label: "Llegadas" },
-  { value: "DEPARTED",  label: "Partidas" },
-  { value: "CANCELED",  label: "Canceladas" },
+  { value: "SCHEDULED", label: RECALADA_STATUS_COPY.SCHEDULED.plural },
+  { value: "ARRIVED",   label: RECALADA_STATUS_COPY.ARRIVED.plural },
+  { value: "DEPARTED",  label: RECALADA_STATUS_COPY.DEPARTED.plural },
+  { value: "CANCELED",  label: RECALADA_STATUS_COPY.CANCELED.plural },
 ];
 
 /* ─────────────────────────────────────────────
@@ -229,14 +230,14 @@ const RecaladasListPage: React.FC = () => {
                       </span>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 4, borderRadius: 9999, padding: "2px 7px", background: "var(--color-danger-soft)", border: `1px solid ${C.dangerBorder}`, color: C.danger, fontSize: "0.6rem", fontWeight: 700 }}>
                         <span style={{ width: 5, height: 5, borderRadius: "50%", background: C.danger }} />
-                        ARRIVED
+                        {RECALADA_STATUS_COPY.ARRIVED.singular}
                       </span>
                     </div>
                     <p style={{ margin: "5px 0 0", fontSize: "0.875rem", fontWeight: 800, color: C.fg, letterSpacing: "-0.01em" }}>
                       Vencidas pendientes de zarpe
                     </p>
                     <p style={{ margin: "3px 0 0", fontSize: "0.72rem", color: C.fgMuted, lineHeight: 1.4 }}>
-                      Solo buques arribados con salida programada ya vencida.
+                      Solo buques con llegada registrada y zarpe programado ya vencido.
                     </p>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -485,7 +486,7 @@ const RecaladaRow: React.FC<{ recalada: RecaladaItem; overdueMode?: boolean; onP
         >
           <span style={{ display: "flex" }}>{Ico.anchor()}</span>
           {isOverdue && recalada.fechaSalida
-            ? <>Salida venció: {shortDt(recalada.fechaSalida)}</>
+            ? <>Zarpe venció: {shortDt(recalada.fechaSalida)}</>
             : <>Llegada: {shortDt(recalada.fechaLlegada)}</>
           }
         </p>
@@ -543,7 +544,7 @@ const EmptyRecaladas: React.FC<{
       </p>
       <p style={{ fontSize: "0.75rem", color: C.fgMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.45 }}>
         {isOverdueEmpty
-          ? "No hay recaladas arribadas con salida vencida en este momento."
+          ? "No hay recaladas con llegada registrada y zarpe vencido en este momento."
           : hasFilters
             ? "Prueba con otros filtros."
             : "Cuando registres recaladas aparecerán aquí."}

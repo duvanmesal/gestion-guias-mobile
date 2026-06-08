@@ -1,10 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "../../../../ui/components/Button";
+import SearchSelect from "../../../../ui/components/SearchSelect";
 import SurfaceCard from "../../../../ui/components/SurfaceCard";
 import type { CatalogStatus, PuertoLookupItem } from "../types/catalogs.types";
+
+const STATUS_OPTIONS = [
+  { value: "ACTIVO", label: "Activo" },
+  { value: "INACTIVO", label: "Inactivo" },
+];
 
 const muelleFormSchema = z.object({
   codigo: z.string().trim().min(2).max(20),
@@ -67,6 +73,7 @@ const MuelleForm: React.FC<MuelleFormProps> = ({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<MuelleFormValues>({
     resolver: zodResolver(muelleFormSchema),
@@ -165,19 +172,24 @@ const MuelleForm: React.FC<MuelleFormProps> = ({
         </Field>
 
         <Field label="Puerto" error={errors.puertoId?.message}>
-          <select
-            {...register("puertoId")}
-            disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            <option value="">Selecciona un puerto</option>
-            {puertos.map((puerto) => (
-              <option key={puerto.id} value={String(puerto.id)}>
-                {puerto.codigo} · {puerto.nombre}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="puertoId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                options={puertos}
+                getOptionValue={(p) => String(p.id)}
+                getOptionLabel={(p) => `${p.codigo} · ${p.nombre}`}
+                placeholder="Selecciona un puerto"
+                searchPlaceholder="Buscar puerto…"
+                label="Puerto"
+                disabled={isLoading}
+                error={errors.puertoId?.message}
+              />
+            )}
+          />
         </Field>
 
         <Field label="Capacidad cruceros" error={errors.capacidadCruceros?.message}>
@@ -195,15 +207,22 @@ const MuelleForm: React.FC<MuelleFormProps> = ({
         </Field>
 
         <Field label="Estado" error={errors.status?.message}>
-          <select
-            {...register("status")}
-            disabled={isLoading}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            <option value="ACTIVO">Activo</option>
-            <option value="INACTIVO">Inactivo</option>
-          </select>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? "ACTIVO"}
+                onChange={field.onChange}
+                options={STATUS_OPTIONS}
+                getOptionValue={(o) => o.value}
+                getOptionLabel={(o) => o.label}
+                label="Estado"
+                searchable={false}
+                disabled={isLoading}
+              />
+            )}
+          />
         </Field>
       </SurfaceCard>
 

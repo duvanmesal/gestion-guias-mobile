@@ -6,6 +6,7 @@ import type { DocumentType } from "../types/users.types";
 import Button from "../../../ui/components/Button";
 import FormMessage from "../../../ui/components/FormMessage";
 import PasswordRulesCard from "../../../ui/components/passwordRulesCard";
+import SearchSelect from "../../../ui/components/SearchSelect";
 
 const passwordRule = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,72}$/;
 
@@ -201,20 +202,18 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({
             </FormField>
 
             <FormField label="Tipo de documento" error={errors.documentType?.message}>
-              <select
-                className="premium-select"
+              <SearchSelect
                 value={watchedValues.documentType}
-                disabled={isLoading}
-                onChange={(e) =>
-                  setValue("documentType", e.target.value as DocumentType, { shouldValidate: true })
+                onChange={(v) =>
+                  setValue("documentType", v as DocumentType, { shouldValidate: true })
                 }
-              >
-                {DOCUMENT_TYPES.map((doc) => (
-                  <option key={doc.value} value={doc.value}>
-                    {doc.label}
-                  </option>
-                ))}
-              </select>
+                options={DOCUMENT_TYPES}
+                getOptionValue={(d) => d.value}
+                getOptionLabel={(d) => d.label}
+                label="Tipo de documento"
+                searchable={false}
+                disabled={isLoading}
+              />
             </FormField>
 
             <FormField 

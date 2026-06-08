@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "../../../../ui/components/Button";
+import SearchSelect from "../../../../ui/components/SearchSelect";
 import SurfaceCard from "../../../../ui/components/SurfaceCard";
 import type { Role } from "../../../../core/auth/types";
 
@@ -161,24 +162,18 @@ const InvitationForm: React.FC<InvitationFormProps> = ({
           <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-fg-muted)]">
             Rol inicial
           </label>
-          <select
+          <SearchSelect
             value={roleValue}
+            onChange={(v) =>
+              setValue("role", v as Role, { shouldDirty: true, shouldValidate: true })
+            }
+            options={ROLE_OPTIONS}
+            getOptionValue={(o) => o.value}
+            getOptionLabel={(o) => o.label}
+            label="Rol inicial"
+            searchable={false}
             disabled={isLoading}
-            onChange={(event) => {
-              setValue("role", event.target.value as Role, {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-            }}
-            className={inputClassName}
-            style={inputStyle}
-          >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
           {errors.role?.message ? (
             <p className="text-xs text-[var(--color-danger)]">
               {errors.role.message}

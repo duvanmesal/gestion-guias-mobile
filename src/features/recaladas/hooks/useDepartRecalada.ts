@@ -17,7 +17,7 @@ export function useDepartRecalada() {
       const res = await recaladasApi.departRecalada(id, { departedAt });
       if (!res.ok) {
         throw new Error(
-          getErrorMessage(res.error, "No pude registrar la salida")
+          getErrorMessage(res.error, "No pude registrar el zarpe")
         );
       }
       return res.data;

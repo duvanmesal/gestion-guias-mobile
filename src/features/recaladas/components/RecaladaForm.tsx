@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import type { RecaladaOperationalStatus, RecaladaSource } from "../types/recaladas.types";
+import RecaladaDateTimeSheet from "./RecaladaDateTimeSheet";
+import SearchSelect from "../../../ui/components/SearchSelect";
 
 /* ─────────────────────────────────────────────
    SCHEMA
@@ -24,7 +26,7 @@ const recaladaFormSchema = z
   })
   .refine(
     (d) => !d.fechaSalida || !d.fechaLlegada || new Date(d.fechaSalida) >= new Date(d.fechaLlegada),
-    { message: "La fecha de salida debe ser ≥ la de llegada", path: ["fechaSalida"] }
+    { message: "La fecha de zarpe debe ser ≥ la de llegada", path: ["fechaSalida"] }
   );
 
 export type RecaladaFormValues = z.infer<typeof recaladaFormSchema>;
@@ -113,7 +115,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
   const isArrivedEdit = isEdit && operationalStatus === "ARRIVED";
 
   const {
-    register, handleSubmit, reset, control,
+    register, handleSubmit, reset, control, setValue,
     formState: { errors, isDirty },
   } = useForm<RecaladaFormValues>({
     resolver: zodResolver(recaladaFormSchema),
@@ -130,6 +132,7 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
   ]);
 
   const selectedPuertoId = useWatch({ control, name: "puertoId" });
+  const watchedLlegada = useWatch({ control, name: "fechaLlegada" });
   const filteredMuelles = selectedPuertoId
     ? muelles.filter((m) => m.puerto?.id === Number(selectedPuertoId))
     : muelles;
@@ -142,8 +145,6 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
     color: C.fg, fontSize: "0.875rem", outline: "none",
     transition: "border-color 150ms ease, box-shadow 150ms ease",
   };
-
-  const disabledBase: React.CSSProperties = { ...inputBase, opacity: 0.4, cursor: "not-allowed" };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -169,52 +170,152 @@ const RecaladaForm: React.FC<RecaladaFormProps> = ({
       {/* ── Section: Identificación ── */}
       <FormSection title="Identificación" color={C.cyan}>
         <Field label="Buque" error={errors.buqueId?.message}>
-          <select {...register("buqueId")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
-            <option value="">Selecciona un buque</option>
-            {buques.map((b) => <option key={b.id} value={String(b.id)}>{b.nombre}</option>)}
-          </select>
+          <Controller
+            control={control}
+            name="buqueId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                options={buques}
+                getOptionValue={(b) => String(b.id)}
+                getOptionLabel={(b) => b.nombre}
+                placeholder="Selecciona un buque"
+                searchPlaceholder="Buscar buque…"
+                label="Buque"
+                disabled={isLoading || isArrivedEdit}
+                error={errors.buqueId?.message}
+              />
+            )}
+          />
         </Field>
 
         <Field label="País de origen" error={errors.paisOrigenId?.message}>
-          <select {...register("paisOrigenId")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
-            <option value="">Selecciona un país</option>
-            {paises.map((p) => <option key={p.id} value={String(p.id)}>{p.codigo} · {p.nombre}</option>)}
-          </select>
+          <Controller
+            control={control}
+            name="paisOrigenId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                options={paises}
+                getOptionValue={(p) => String(p.id)}
+                getOptionLabel={(p) => `${p.codigo} · ${p.nombre}`}
+                placeholder="Selecciona un país"
+                searchPlaceholder="Buscar país…"
+                label="País de origen"
+                disabled={isLoading || isArrivedEdit}
+                error={errors.paisOrigenId?.message}
+              />
+            )}
+          />
         </Field>
 
         <Field label="Fuente" error={undefined}>
-          <select {...register("fuente")} disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase}>
-            <option value="MANUAL">Manual</option>
-            <option value="IMPORT">Importación</option>
-          </select>
+          <Controller
+            control={control}
+            name="fuente"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? "MANUAL"}
+                onChange={field.onChange}
+                options={[
+                  { value: "MANUAL", label: "Manual" },
+                  { value: "IMPORT", label: "Importación" },
+                ]}
+                getOptionValue={(o) => o.value}
+                getOptionLabel={(o) => o.label}
+                placeholder="Selecciona la fuente"
+                label="Fuente"
+                searchable={false}
+                disabled={isLoading || isArrivedEdit}
+              />
+            )}
+          />
         </Field>
       </FormSection>
 
       {/* ── Section: Fechas ── */}
       <FormSection title="Fechas" color={C.violet}>
         <Field label="Fecha de llegada" error={errors.fechaLlegada?.message}>
-          <input {...register("fechaLlegada")} type="datetime-local" disabled={isLoading || isArrivedEdit} style={isArrivedEdit ? disabledBase : inputBase} />
+          <Controller
+            control={control}
+            name="fechaLlegada"
+            render={({ field }) => (
+              <RecaladaDateTimeSheet
+                label="Fecha de llegada"
+                variant="arrival"
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                disabled={isLoading || isArrivedEdit}
+              />
+            )}
+          />
         </Field>
 
-        <Field label="Fecha de salida (opcional)" error={errors.fechaSalida?.message}>
-          <input {...register("fechaSalida")} type="datetime-local" disabled={isLoading} style={inputBase} />
+        <Field label="Fecha de zarpe (opcional)" error={errors.fechaSalida?.message}>
+          <Controller
+            control={control}
+            name="fechaSalida"
+            render={({ field }) => (
+              <RecaladaDateTimeSheet
+                label="Fecha de zarpe"
+                variant="departure"
+                optional
+                minValue={watchedLlegada || undefined}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                disabled={isLoading}
+              />
+            )}
+          />
         </Field>
       </FormSection>
 
       {/* ── Section: Logística ── */}
       <FormSection title="Logística" color={C.amber}>
         <Field label="Puerto catálogo" error={errors.puertoId?.message}>
-          <select {...register("puertoId")} disabled={isLoading} style={inputBase}>
-            <option value="">Sin puerto asociado</option>
-            {puertos.map((p) => <option key={p.id} value={String(p.id)}>{p.codigo} · {p.nombre}</option>)}
-          </select>
+          <Controller
+            control={control}
+            name="puertoId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={(v) => { field.onChange(v); setValue("muelleId", ""); }}
+                options={puertos}
+                getOptionValue={(p) => String(p.id)}
+                getOptionLabel={(p) => `${p.codigo} · ${p.nombre}`}
+                placeholder="Sin puerto asociado"
+                searchPlaceholder="Buscar puerto…"
+                label="Puerto catálogo"
+                clearable
+                disabled={isLoading}
+                error={errors.puertoId?.message}
+              />
+            )}
+          />
         </Field>
 
         <Field label="Muelle catálogo" error={errors.muelleId?.message}>
-          <select {...register("muelleId")} disabled={isLoading} style={inputBase}>
-            <option value="">Sin muelle asociado</option>
-            {filteredMuelles.map((m) => <option key={m.id} value={String(m.id)}>{m.codigo} · {m.nombre}</option>)}
-          </select>
+          <Controller
+            control={control}
+            name="muelleId"
+            render={({ field }) => (
+              <SearchSelect
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                options={filteredMuelles}
+                getOptionValue={(m) => String(m.id)}
+                getOptionLabel={(m) => `${m.codigo} · ${m.nombre}`}
+                placeholder={selectedPuertoId ? "Sin muelle asociado" : "Selecciona un puerto primero"}
+                searchPlaceholder="Buscar muelle…"
+                label="Muelle catálogo"
+                clearable
+                disabled={isLoading}
+                error={errors.muelleId?.message}
+              />
+            )}
+          />
         </Field>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>

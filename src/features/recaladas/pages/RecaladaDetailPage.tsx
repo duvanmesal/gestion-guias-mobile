@@ -11,6 +11,7 @@ import { useDepartRecalada } from "../hooks/useDepartRecalada";
 import { useRecalada } from "../hooks/useRecalada";
 import { useRecaladaAtenciones } from "../hooks/useRecaladaAtenciones";
 import { useRecaladaSocket } from "../hooks/useRecaladaSocket";
+import { RECALADA_STATUS_COPY } from "../recalada-status-copy";
 import type { RecaladaAtencionItem, RecaladaItem, RecaladaOperationalStatus } from "../types/recaladas.types";
 
 /* ─────────────────────────────────────────────
@@ -46,10 +47,10 @@ const C = {
 
 type StatusCfg = { color: string; faint: string; border: string; glow: string; label: string };
 const STATUS_CFG: Record<RecaladaOperationalStatus, StatusCfg> = {
-  SCHEDULED: { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   glow: C.cyanGlow,   label: "Programada" },
-  ARRIVED:   { color: C.amber,  faint: C.amberFaint,  border: C.amberBorder,  glow: C.amberGlow,  label: "Llegada" },
-  DEPARTED:  { color: C.teal,   faint: C.tealFaint,   border: C.tealBorder,   glow: C.tealGlow,   label: "Partida" },
-  CANCELED:  { color: C.danger, faint: C.dangerFaint, border: C.dangerBorder, glow: C.dangerGlow, label: "Cancelada" },
+  SCHEDULED: { color: C.cyan,   faint: C.cyanFaint,   border: C.cyanBorder,   glow: C.cyanGlow,   label: RECALADA_STATUS_COPY.SCHEDULED.singular },
+  ARRIVED:   { color: C.amber,  faint: C.amberFaint,  border: C.amberBorder,  glow: C.amberGlow,  label: RECALADA_STATUS_COPY.ARRIVED.singular },
+  DEPARTED:  { color: C.teal,   faint: C.tealFaint,   border: C.tealBorder,   glow: C.tealGlow,   label: RECALADA_STATUS_COPY.DEPARTED.singular },
+  CANCELED:  { color: C.danger, faint: C.dangerFaint, border: C.dangerBorder, glow: C.dangerGlow, label: RECALADA_STATUS_COPY.CANCELED.singular },
 };
 
 /* ─────────────────────────────────────────────
@@ -148,8 +149,8 @@ const RecaladaDetailPage: React.FC = () => {
   }
 
   async function handleDepart() {
-    if (!confirm(`¿Confirmas la salida de ${recalada!.buque.nombre}?`)) return;
-    await runAction(() => depart.mutateAsync({ id: recaladaId! }), "Salida registrada.", "No pude registrar la salida");
+    if (!confirm(`¿Confirmas el zarpe de ${recalada!.buque.nombre}?`)) return;
+    await runAction(() => depart.mutateAsync({ id: recaladaId! }), "Zarpe registrado.", "No pude registrar el zarpe");
   }
 
   async function handleCancel() {
@@ -281,10 +282,10 @@ const RecaladaDetailPage: React.FC = () => {
                 }}
               >
                 <p style={{ fontSize: "0.8rem", fontWeight: 700, marginBottom: 4 }}>
-                  No se puede marcar la salida todavía
+                  No se puede marcar el zarpe todavía
                 </p>
                 <p style={{ fontSize: "0.75rem", lineHeight: 1.5, color: C.fgSec }}>
-                  Hay {openAtencionesCount} atención(es) abiertas. Cierra o cancela esas atenciones primero y luego podrás registrar la salida.
+                  Hay {openAtencionesCount} atención(es) abiertas. Cierra o cancela esas atenciones primero y luego podrás registrar el zarpe.
                 </p>
               </div>
             )}
@@ -319,7 +320,7 @@ const RecaladaDetailPage: React.FC = () => {
                   <ActionBtn label="Marcar llegada" color="white" bg="var(--color-accent)" border="var(--color-accent)" glow={C.amberGlow} isLoading={arrive.isPending} disabled={isBusy} onClick={() => void handleArrive()} icon={Ico.arrive()} solid />
                 )}
                 {canDepart && (
-                  <ActionBtn label="Marcar salida" color="white" bg="var(--color-success)" border="var(--color-success)" glow={C.tealGlow} isLoading={depart.isPending} disabled={isBusy} onClick={() => void handleDepart()} icon={Ico.depart()} solid />
+                  <ActionBtn label="Marcar zarpe" color="white" bg="var(--color-success)" border="var(--color-success)" glow={C.tealGlow} isLoading={depart.isPending} disabled={isBusy} onClick={() => void handleDepart()} icon={Ico.depart()} solid />
                 )}
                 {(canEdit || canCancel || canDelete) && (
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${[canEdit, canCancel, canDelete].filter(Boolean).length}, 1fr)`, gap: 9 }}>
@@ -352,8 +353,8 @@ const OperationalTimeline: React.FC<{ recalada: RecaladaItem }> = ({ recalada })
 
   const steps = [
     { label: "Programada",  time: recalada.fechaLlegada, color: C.cyan,  done: true,                                   sub: "Fecha estimada llegada" },
-    { label: "Llegada",     time: recalada.arrivedAt,    color: C.amber, done: !!recalada.arrivedAt && !isCanceled,    sub: "Arribo confirmado" },
-    { label: "Partida",     time: recalada.departedAt,   color: C.teal,  done: !!recalada.departedAt && !isCanceled,   sub: "Salida confirmada" },
+    { label: RECALADA_STATUS_COPY.ARRIVED.singular, time: recalada.arrivedAt, color: C.amber, done: !!recalada.arrivedAt && !isCanceled, sub: "Llegada confirmada" },
+    { label: RECALADA_STATUS_COPY.DEPARTED.singular, time: recalada.departedAt, color: C.teal, done: !!recalada.departedAt && !isCanceled, sub: "Zarpe confirmado" },
   ];
 
   return (
@@ -412,7 +413,7 @@ const InfoCard: React.FC<{ recalada: RecaladaItem; supervisorName: string }> = (
     { icon: Ico.users(),     label: "Tripulación est.",value: recalada.tripulacionEstimada != null ? String(recalada.tripulacionEstimada) : "—" },
     { icon: Ico.user(),      label: "Supervisor",      value: supervisorName },
     { icon: Ico.hash(),      label: "Fuente",          value: recalada.fuente },
-    { icon: Ico.clock(),     label: "Salida prog.",    value: shortDt(recalada.fechaSalida) },
+    { icon: Ico.clock(),     label: "Zarpe prog.",     value: shortDt(recalada.fechaSalida) },
   ];
 
   return (
