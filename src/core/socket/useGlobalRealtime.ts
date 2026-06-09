@@ -1,9 +1,12 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toastController } from "@ionic/core"
+import { useHistory } from "react-router-dom"
 import { socketClient } from "./socketClient"
 import { useSessionStore } from "../auth/sessionStore"
 import { finalizeClientLogout } from "../auth/sessionLifecycle"
+import { useAlertStore } from "../../app/stores/alertStore"
+import type { OperationalAlertSeverity } from "../../app/stores/alertStore"
 import { recaladasKeys } from "../../features/recaladas/data/recaladas.keys"
 import { atencionesKeys } from "../../features/atenciones/data/atenciones.keys"
 import { turnosKeys } from "../../features/turnos/data/turnos.keys"
@@ -72,10 +75,67 @@ interface OpNotifPayload {
   turnoId?: number | null
 }
 
+const DETAIL_ROUTE = /^\/(recaladas|atenciones|turnos)\/\d+(\?.*)?$/
+
+/**
+ * Normaliza la ruta de una notificación a una ruta válida en mobile.
+ * - `GUIDE_PENALIZED` / rutas `/perfil*` → `/profile` (no existe `/perfil`).
+ * - Rutas de detalle conocidas pasan tal cual.
+ * - En último caso se reconstruye desde los ids del payload.
+ */
+function normalizeAlertRoute(payload: OpNotifPayload): string | null {
+  const raw = payload.route ?? ""
+
+  if (payload.type === "GUIDE_PENALIZED" || raw.startsWith("/perfil")) {
+    return "/profile"
+  }
+
+  if (DETAIL_ROUTE.test(raw)) return raw
+
+  if (payload.turnoId) return `/turnos/${payload.turnoId}`
+  if (payload.atencionId) return `/atenciones/${payload.atencionId}`
+  if (payload.recaladaId) return `/recaladas/${payload.recaladaId}`
+
+  if (
+    raw.startsWith("/recaladas") ||
+    raw.startsWith("/atenciones") ||
+    raw.startsWith("/turnos")
+  ) {
+    return raw
+  }
+
+  return null
+}
+
+// Cooldown de toast por notificationId. Las alertas job-driven repiten cada
+// minuto en el server (limitadas a 30 min por socket); aquí mantenemos un único
+// toast visible por ventana. Las dirigidas al usuario llevan id único.
+const JOB_ALERT_TOAST_COOLDOWN_MS = 5 * 60 * 1000
+const USER_ALERT_TOAST_COOLDOWN_MS = 15 * 1000
+const lastToastAtByNotificationId = new Map<string, number>()
+
+function shouldShowToast(notificationId: string, cooldownMs: number): boolean {
+  const now = Date.now()
+  const last = lastToastAtByNotificationId.get(notificationId)
+  if (last !== undefined && now - last < cooldownMs) return false
+  lastToastAtByNotificationId.set(notificationId, now)
+  return true
+}
+
+const SEVERITY_COLOR: Record<OperationalAlertSeverity, "success" | "primary" | "warning"> = {
+  success: "success",
+  info: "primary",
+  warning: "warning",
+}
+
 export function useGlobalRealtime() {
   const queryClient = useQueryClient()
   const accessToken = useSessionStore((s) => s.accessToken)
   const currentUserId = useSessionStore((s) => s.user?.id)
+  const history = useHistory()
+  // Ref para navegar desde el handler imperativo del toast sin recapturar.
+  const navigateRef = useRef(history)
+  navigateRef.current = history
 
   useEffect(() => {
     if (!accessToken) return
@@ -293,12 +353,55 @@ export function useGlobalRealtime() {
     socket.on("catalog:muelle:updated", invalidateMuelle)
     socket.on("catalog:muelle:removed", invalidateMuelle)
 
-    // Epica 7 — Notificaciones operativas (in-app, equivalentes al push).
-    const opNotifToast = (payload: OpNotifPayload, color: "success" | "primary" | "warning") => {
-      void showToast(payload.body, color)
+    // Epica 7 — Notificaciones operativas accionables (in-app).
+    // Cada notif:* registra una alerta en la bandeja (campana global) y dispara
+    // un toast con botón "Ver" que navega a su contexto. El toast se silencia
+    // por notificationId dentro de la ventana de cooldown; la entrada en la
+    // bandeja sí se conserva.
+    const emitAlert = (
+      payload: OpNotifPayload,
+      severity: OperationalAlertSeverity,
+      cooldownMs: number,
+    ) => {
+      const route = normalizeAlertRoute(payload)
+
+      useAlertStore.getState().pushAlert({
+        notificationId: payload.notificationId,
+        type: payload.type,
+        severity,
+        title: payload.title,
+        body: payload.body,
+        route,
+      })
+
+      if (!shouldShowToast(payload.notificationId, cooldownMs)) return
+
+      void (async () => {
+        const buttons: Parameters<typeof toastController.create>[0]["buttons"] = []
+        if (route) {
+          buttons.push({
+            text: "Ver",
+            handler: () => {
+              navigateRef.current.push(route)
+            },
+          })
+        }
+        buttons.push({ text: "Cerrar", role: "cancel" })
+
+        const toast = await toastController.create({
+          header: payload.title,
+          message: payload.body,
+          duration: severity === "warning" ? 7000 : 5000,
+          position: "top",
+          color: SEVERITY_COLOR[severity],
+          buttons,
+        })
+        await toast.present()
+      })()
     }
+
     const handleOpNotifAtencionAvailable = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "success")
+      emitAlert(payload, "success", USER_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
       if (payload.atencionId) {
@@ -306,7 +409,7 @@ export function useGlobalRealtime() {
       }
     }
     const handleOpNotifTurno = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "primary")
+      emitAlert(payload, "info", USER_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: turnosKeys.all })
       queryClient.invalidateQueries({ queryKey: ["myTurnos"] })
       queryClient.invalidateQueries({ queryKey: ["myNextTurno"] })
@@ -316,22 +419,22 @@ export function useGlobalRealtime() {
       }
     }
     const handleOpNotifCheckInPending = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "warning")
+      emitAlert(payload, "warning", USER_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: ["turnos", "check-ins", "pending"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
     }
     const handleOpNotifPenalty = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "warning")
+      emitAlert(payload, "warning", USER_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: usersKeys.me() })
       queryClient.invalidateQueries({ queryKey: usersKeys.guidesLookup() })
     }
     const handleOpNotifRecaladaOverdue = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "warning")
+      emitAlert(payload, "warning", JOB_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: recaladasKeys.lists() })
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
     }
     const handleOpNotifAtencionNear = (payload: OpNotifPayload) => {
-      opNotifToast(payload, "warning")
+      emitAlert(payload, "warning", JOB_ALERT_TOAST_COOLDOWN_MS)
       queryClient.invalidateQueries({ queryKey: atencionesKeys.lists() })
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
     }

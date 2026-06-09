@@ -30,6 +30,7 @@ function buildListSearch(params: ListAtencionesParams): string {
   if (params.status) search.set("status", params.status);
   if (params.operationalStatus)
     search.set("operationalStatus", params.operationalStatus);
+  if (params.pendingEval) search.set("pendingEval", "true");
   search.set("page", String(params.page ?? 1));
   search.set("pageSize", String(params.pageSize ?? 20));
   return search.toString();

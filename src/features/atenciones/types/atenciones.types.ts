@@ -111,6 +111,8 @@ export interface ListAtencionesParams {
   supervisorId?: string;
   status?: AtencionStatus;
   operationalStatus?: AtencionOperationalStatus | "";
+  /** Atenciones cerradas sin evaluación registrada (pendientes de evaluar). */
+  pendingEval?: boolean;
   page?: number;
   pageSize?: number;
 }

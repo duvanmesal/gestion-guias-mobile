@@ -20,6 +20,7 @@ import ProfilePage from "../../features/users/pages/ProfilePage";
 import RoleGuard from "../routes/guards/RoleGuard";
 import { filterNavigationItems } from "../routes/access";
 import BottomNavBar from "./BottomNavBar";
+import AlertCenter from "./AlertCenter";
 import { APP_NAVIGATION_ITEMS } from "./navigation.config";
 
 const AppTabsShell: React.FC = () => {
@@ -109,6 +110,8 @@ const AppTabsShell: React.FC = () => {
           <Redirect to={defaultTab} />
         </Route>
       </IonRouterOutlet>
+
+      <AlertCenter />
 
       <BottomNavBar items={items} />
     </div>

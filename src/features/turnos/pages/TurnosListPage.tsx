@@ -1,6 +1,6 @@
 import { IonContent, IonPage } from "@ionic/react";
-import { useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import ErrorState from "../../../ui/components/ErrorState";
 import { useMyActiveTurno } from "../hooks/useMyActiveTurno";
@@ -93,6 +93,7 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
 ───────────────────────────────────────────── */
 const TurnosListPage: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const user = useSessionStore((state) => state.user);
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   const isGuia = user?.role === "GUIA";
@@ -102,8 +103,23 @@ const TurnosListPage: React.FC = () => {
   const pendingQuery = usePendingCheckIns({}, isSupervisor);
   const pendingItems = isSupervisor ? pendingQuery.data?.items ?? [] : [];
 
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    () => (new URLSearchParams(location.search).get("status") ?? "") as StatusFilter
+  );
   const [page, setPage] = useState(1);
+
+  // Alerta accionable: al llegar con ?checkInPending=1 enfocamos la sección de
+  // check-ins pendientes para que el supervisor actúe de inmediato.
+  const pendingSectionRef = useRef<HTMLDivElement>(null);
+  const checkInPending = ["1", "true"].includes(
+    (new URLSearchParams(location.search).get("checkInPending") ?? "").toLowerCase()
+  );
+
+  useEffect(() => {
+    if (checkInPending && pendingItems.length > 0) {
+      pendingSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [checkInPending, pendingItems.length]);
 
   const queryParams = useMemo(
     () => ({ status: statusFilter || undefined, page, pageSize: PAGE_SIZE }),
@@ -184,7 +200,20 @@ const TurnosListPage: React.FC = () => {
 
             {/* ── Supervisor: pending check-ins ── */}
             {isSupervisor && pendingItems.length > 0 && (
-              <div className="animate-fade-up" style={{ animationDelay: "0ms", animationFillMode: "backwards", marginTop: "1.25rem" }}>
+              <div
+                ref={pendingSectionRef}
+                className="animate-fade-up"
+                style={{
+                  animationDelay: "0ms",
+                  animationFillMode: "backwards",
+                  marginTop: "1.25rem",
+                  scrollMarginTop: "1.25rem",
+                  borderRadius: 18,
+                  outline: checkInPending ? "2px solid var(--color-accent)" : "none",
+                  outlineOffset: 3,
+                  transition: "outline-color 200ms ease",
+                }}
+              >
                 <PendingCheckInsSection items={pendingItems} onNavigate={(id) => history.push(`/turnos/${id}`)} />
               </div>
             )}

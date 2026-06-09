@@ -28,14 +28,29 @@ async function showToast(message: string, color: "success" | "danger" | "warning
   await toast.present()
 }
 
-export function useTurnoSocket(atencionId?: number) {
+interface UseTurnoSocketOptions {
+  /**
+   * Si es `false`, el hook sólo invalida cache y no dispara toasts, para evitar
+   * duplicados cuando las alertas accionables `notif:*` (useGlobalRealtime) ya
+   * cubren el aviso visible.
+   */
+  notify?: boolean
+}
+
+export function useTurnoSocket(
+  atencionId?: number,
+  options?: UseTurnoSocketOptions,
+) {
   const queryClient = useQueryClient()
   const user = useSessionStore((s) => s.user)
   const isSupervisor = user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN"
+  const notify = options?.notify ?? true
 
   useEffect(() => {
     const socket = socketClient.getSocket()
     if (!socket) return
+
+    const notifyToast = notify ? showToast : async () => {}
 
     if (atencionId) {
       socket.emit("join:atencion", { atencionId })
@@ -69,17 +84,17 @@ export function useTurnoSocket(atencionId?: number) {
 
     const onAssigned = (p: TurnoSocketPayload) => {
       invalidateTurnos(p)
-      if (!isSupervisor) showToast(`Se te asignó el turno #${p.turnoId}`, "primary")
+      if (!isSupervisor) notifyToast(`Se te asignó el turno #${p.turnoId}`, "primary")
     }
 
     const onCheckedOut = (p: TurnoSocketPayload) => {
       invalidateTurnos(p)
-      if (!isSupervisor) showToast(`Turno #${p.turnoId} completado`, "success")
+      if (!isSupervisor) notifyToast(`Turno #${p.turnoId} completado`, "success")
     }
 
     const onAtencionCanceled = (p: AtencionSocketPayload) => {
       invalidateAtencion(p)
-      showToast(`Atención #${p.atencionId} cancelada`, "danger")
+      notifyToast(`Atención #${p.atencionId} cancelada`, "danger")
     }
 
     const onAtencionCreated = (_p: AtencionSocketPayload) => {
@@ -93,19 +108,19 @@ export function useTurnoSocket(atencionId?: number) {
     const onCheckInRequested = (p: TurnoSocketPayload) => {
       invalidateTurnos(p)
       invalidatePendingCheckIns()
-      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in solicitado`, "primary")
+      if (isSupervisor) notifyToast(`Turno #${p.turnoId}: check-in solicitado`, "primary")
     }
 
     const onCheckInConfirmed = (p: TurnoSocketPayload) => {
       invalidateTurnos(p)
       invalidatePendingCheckIns()
-      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in confirmado`, "success")
+      if (isSupervisor) notifyToast(`Turno #${p.turnoId}: check-in confirmado`, "success")
     }
 
     const onCheckInRejected = (p: TurnoSocketPayload) => {
       invalidateTurnos(p)
       invalidatePendingCheckIns()
-      if (isSupervisor) showToast(`Turno #${p.turnoId}: check-in rechazado`, "danger")
+      if (isSupervisor) notifyToast(`Turno #${p.turnoId}: check-in rechazado`, "danger")
     }
 
     socket.on("turno:assigned", onAssigned)
@@ -142,5 +157,5 @@ export function useTurnoSocket(atencionId?: number) {
       socket.off("atencion:created", onAtencionCreated)
       socket.off("atencion:updated", invalidateAtencion)
     }
-  }, [queryClient, isSupervisor, atencionId])
+  }, [queryClient, isSupervisor, atencionId, notify])
 }

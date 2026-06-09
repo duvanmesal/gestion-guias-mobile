@@ -1,6 +1,6 @@
 import { IonContent, IonPage } from "@ionic/react";
-import { useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { useSessionStore } from "../../../core/auth/sessionStore";
 import Button from "../../../ui/components/Button";
 import EmptyStateCard from "../../../ui/components/EmptyStateCard";
@@ -79,24 +79,54 @@ const inputStyle = {
   boxShadow: "var(--shadow-neu-inset)",
 } as const;
 
+function isTruthyParam(value: string | null): boolean {
+  return ["1", "true"].includes((value ?? "").toLowerCase());
+}
+
 const AtencionesListPage: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const user = useSessionStore((state) => state.user);
   const isSupervisor =
     user?.role === "SUPERVISOR" || user?.role === "SUPER_ADMIN";
   useTurnoSocket();
 
   const [statusFilter, setStatusFilter] = useState<OpStatusFilter>("");
+  const [recaladaId, setRecaladaId] = useState<number | undefined>(undefined);
+  const [pendingEval, setPendingEval] = useState(false);
   const [page, setPage] = useState(1);
+
+  // Filtros provenientes de alertas accionables (deep-link con query params).
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const nextStatus = (params.get("operationalStatus") ?? "") as OpStatusFilter;
+    const rawRecalada = Number(params.get("recaladaId"));
+    setStatusFilter(nextStatus);
+    setRecaladaId(
+      Number.isFinite(rawRecalada) && rawRecalada > 0 ? rawRecalada : undefined
+    );
+    setPendingEval(isTruthyParam(params.get("pendingEval")));
+    setPage(1);
+  }, [location.search]);
 
   const queryParams = useMemo<ListAtencionesParams>(
     () => ({
       operationalStatus: statusFilter || undefined,
+      recaladaId,
+      pendingEval: pendingEval || undefined,
       page,
       pageSize: PAGE_SIZE,
     }),
-    [page, statusFilter]
+    [page, statusFilter, recaladaId, pendingEval]
   );
+
+  const clearAlertFilters = () => {
+    setStatusFilter("");
+    setRecaladaId(undefined);
+    setPendingEval(false);
+    setPage(1);
+    history.replace("/atenciones");
+  };
 
   const { data, isLoading, isFetching, error, refetch } =
     useAtencionesList(queryParams);
@@ -122,6 +152,34 @@ const AtencionesListPage: React.FC = () => {
                 </h1>
               </div>
             </div>
+
+            {(pendingEval || recaladaId) && (
+              <SurfaceCard
+                className="gap-3 p-4"
+                radius="xl"
+                variant="raised"
+                style={{ borderColor: "var(--color-warning-border)" }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-[var(--color-fg-primary)]">
+                    {pendingEval
+                      ? "Mostrando atenciones cerradas pendientes de evaluación."
+                      : `Mostrando atenciones de la recalada #${recaladaId}.`}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={clearAlertFilters}
+                    className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold"
+                    style={{
+                      color: "var(--color-warning)",
+                      background: "var(--color-warning-soft)",
+                    }}
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </SurfaceCard>
+            )}
 
             <SurfaceCard className="gap-4 p-4" radius="xl" variant="raised">
               <PageSectionHeader
