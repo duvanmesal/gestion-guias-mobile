@@ -31,6 +31,12 @@ export interface RecaladaMuelleRef {
   capacidadCruceros?: number | null;
 }
 
+export interface RecaladaSlotRef {
+  id: number;
+  numero: number;
+  status: string;
+}
+
 export interface RecaladaSupervisorUser {
   id: string;
   email: string;
@@ -56,6 +62,8 @@ export interface RecaladaItem {
   operationalStatus: RecaladaOperationalStatus;
   puertoId: number | null;
   muelleId: number | null;
+  slotId: number | null;
+  slot?: RecaladaSlotRef | null;
   terminal: string | null;
   muelle: string | null;
   pasajerosEstimados: number | null;
@@ -113,6 +121,8 @@ export interface CreateRecaladaPayload {
   fechaSalida?: string;
   puertoId?: number;
   muelleId?: number;
+  slotId?: number | null;
+  slotNumero?: number | null;
   terminal?: string;
   muelle?: string;
   pasajerosEstimados?: number;
@@ -128,6 +138,8 @@ export interface UpdateRecaladaPayload {
   fechaSalida?: string;
   puertoId?: number | null;
   muelleId?: number | null;
+  slotId?: number | null;
+  slotNumero?: number | null;
   terminal?: string;
   muelle?: string;
   pasajerosEstimados?: number;

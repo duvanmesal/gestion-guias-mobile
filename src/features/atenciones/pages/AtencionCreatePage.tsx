@@ -112,6 +112,10 @@ const AtencionCreatePage: React.FC = () => {
       setSubmitError("El cupo de turnos debe ser al menos 1.");
       return;
     }
+    if (turnosTotalNum > 7) {
+      setSubmitError("El cupo máximo de turnos por atención es 7.");
+      return;
+    }
 
     try {
       const created = await createAtencion.mutateAsync({
@@ -206,12 +210,12 @@ const AtencionCreatePage: React.FC = () => {
 
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-fg-muted)]">
-                    Cupo de turnos
+                    Cupo de turnos (máx. 7)
                   </span>
                   <input
                     type="number"
                     min={1}
-                    max={5000}
+                    max={7}
                     value={turnosTotal}
                     onChange={(e) => setTurnosTotal(e.target.value)}
                     className={inputClassName}
