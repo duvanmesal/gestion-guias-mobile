@@ -27,7 +27,7 @@ interface AtencionSocketPayload {
 }
 
 interface RecaladaSocketPayload {
-  recaladaId: number
+  recaladaId?: number
 }
 
 interface UserSocketPayload {
@@ -204,6 +204,7 @@ export function useGlobalRealtime() {
     const invalidateUsers = (payload: UserSocketPayload) => {
       queryClient.invalidateQueries({ queryKey: adminUsersKeys.lists() })
       queryClient.invalidateQueries({ queryKey: usersKeys.guidesLookup() })
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
       if (payload.userId) {
         queryClient.invalidateQueries({ queryKey: adminUsersKeys.detail(payload.userId) })
       }
@@ -327,6 +328,7 @@ export function useGlobalRealtime() {
     socket.on("recalada:arrived", invalidateRecaladas)
     socket.on("recalada:departed", invalidateRecaladas)
     socket.on("recalada:canceled", invalidateRecaladas)
+    socket.on("recalada:bulkChanged", invalidateRecaladas)
 
     socket.on("user:created", invalidateUsers)
     socket.on("user:updated", invalidateUsers)
@@ -478,6 +480,7 @@ export function useGlobalRealtime() {
       socket.off("recalada:arrived", invalidateRecaladas)
       socket.off("recalada:departed", invalidateRecaladas)
       socket.off("recalada:canceled", invalidateRecaladas)
+      socket.off("recalada:bulkChanged", invalidateRecaladas)
 
       socket.off("user:created", invalidateUsers)
       socket.off("user:updated", invalidateUsers)

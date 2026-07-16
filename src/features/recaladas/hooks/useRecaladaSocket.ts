@@ -5,7 +5,7 @@ import { socketClient } from "../../../core/socket/socketClient"
 import { recaladasKeys } from "../data/recaladas.keys"
 
 interface RecaladaSocketPayload {
-  recaladaId: number
+  recaladaId?: number
 }
 
 async function showToast(message: string, color: "success" | "danger" | "warning" | "primary") {
@@ -31,8 +31,10 @@ export function useRecaladaSocket(recaladaId?: number) {
 
     const invalidate = (payload: RecaladaSocketPayload) => {
       queryClient.invalidateQueries({ queryKey: recaladasKeys.all })
-      queryClient.invalidateQueries({ queryKey: recaladasKeys.detail(payload.recaladaId) })
-      queryClient.invalidateQueries({ queryKey: recaladasKeys.atenciones(payload.recaladaId) })
+      if (payload.recaladaId) {
+        queryClient.invalidateQueries({ queryKey: recaladasKeys.detail(payload.recaladaId) })
+        queryClient.invalidateQueries({ queryKey: recaladasKeys.atenciones(payload.recaladaId) })
+      }
       queryClient.invalidateQueries({ queryKey: ["dashboard", "overview"] })
     }
 
@@ -62,6 +64,7 @@ export function useRecaladaSocket(recaladaId?: number) {
     socket.on("recalada:arrived", onArrived)
     socket.on("recalada:departed", onDeparted)
     socket.on("recalada:canceled", onCanceled)
+    socket.on("recalada:bulkChanged", onCreated)
 
     return () => {
       if (recaladaId) {
@@ -72,6 +75,7 @@ export function useRecaladaSocket(recaladaId?: number) {
       socket.off("recalada:arrived", onArrived)
       socket.off("recalada:departed", onDeparted)
       socket.off("recalada:canceled", onCanceled)
+      socket.off("recalada:bulkChanged", onCreated)
     }
   }, [queryClient, recaladaId])
 }
